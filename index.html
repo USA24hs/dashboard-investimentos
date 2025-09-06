@@ -2,55 +2,346 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Dashboard de Investimentos</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Incluindo a biblioteca de gráficos Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Check-list Diário - LEFE</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 5px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #d90000;
+            border-bottom: 2px solid #d90000;
+            padding-bottom: 5px;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+        }
+        h2 {
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            padding: 5px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        .status {
+            text-align: center;
+            font-weight: bold;
+        }
+        .ok { color: green; }
+        .atencao { color: orange; }
+        .erro { color: red; }
+        .signature {
+            margin-top: 15px;
+        }
+        .footer {
+            margin-top: 15px;
+            font-size: 12px;
+            text-align: center;
+            color: #666;
+        }
+        /* Toolbar e botão de impressão */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: transparent;
+            max-width: 900px;
+            margin: 0 auto 5px;
+            text-align: right;
+        }
+        .btn-print, .btn-email {
+            background: #d90000;
+            color: #fff;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.10);
+            margin-left: 5px;
+        }
+        .btn-print:hover, .btn-email:hover {
+            background: #b80000;
+        }
+        .file-input-container {
+            display: inline-block;
+            margin-left: 5px;
+            position: relative;
+            overflow: hidden;
+            background: #d90000;
+            color: #fff;
+            padding: 5px 14px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.10);
+        }
+        .file-input-container:hover {
+            background: #b80000;
+        }
+        .file-input-container input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
+        @media print {
+            .no-print, .no-print * {
+                display: none !important;
+            }
+            body, .container {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Dashboard de Investimentos - Sr. Anderson</h1>
-    </header>
-    <main>
-        <div class="container summary">
-            <h2>Resumo da Carteira</h2>
-            <p><strong>Valor Total Investido:</strong> <span id="total-investido">R$ 0,00</span></p>
-            <p><strong>Patrimônio Atual:</strong> <span id="patrimonio-atual">R$ 0,00</span></p>
-            <p><strong>Lucro/Prejuízo:</strong> <span id="lucro-prejuizo">R$ 0,00</span></p>
+    <!-- Botão de impressão e email -->
+    <div class="toolbar no-print">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
+        <div class="file-input-container">
+            📎 Carregar Arquivos
+            <input type="file" id="fileInput" multiple>
         </div>
-
-        <div class="container">
-            <h2>Distribuição de Ativos (Ações vs FIIs)</h2>
-            <canvas id="distribuicaoChart"></canvas>
+        <button class="btn-email" onclick="enviarPorEmail()">✉️ Enviar por E-mail</button>
+    </div>
+    
+    <div class="container">
+        <h1>🚑 LEFE - SERVIÇO DE EMERGÊNCIAS MÉDICAS</h1>
+        <h2> 📋 CHECK-LIST DIÁRIO DE INSPEÇÃO VEICULAR E EQUIPAMENTOS</h2>
+        <p><strong>Hospital:</strong> <input type="text" value="Hospital HRL" style="width: 300px;"> &nbsp;
+        <strong>Data:</strong> <input type="date" id="data"style="width: 110px;"> <br>
+        <strong>Horário de Entrada:</strong> <input type="time" value="07:00"style="width: 80px;"> &nbsp;
+        <strong>Horário de Saída:</strong> <input type="time" value="07:00"style="width: 80px;"> <br>
+        <strong>Condutor de Plantão:</strong> <input type="text" placeholder="Nome completo"style="width: 285px;"> &nbsp; 
+        <strong>Recebendo de:</strong> <input type="text" placeholder="Nome do condutor anterior"style="width: 285px;"></p>
+        <h2>🚑 DADOS DA VIATURA (USA)</h2>
+        <table>
+            <tr><th>Item</th><th>Informação</th></tr>
+            <tr><td><strong>Placa</strong></td><td><input type="text" placeholder="Ex: RKU1F52" style="width: 100px;"></td></tr>
+            <tr><td><strong>Km Atual</strong></td><td><input type="number" placeholder="Ex: 337847" style="width: 100px;"> </td></tr>
+            <tr><td><strong>Nível de Combustível</strong></td><td><input type="text" placeholder="Ex: 5/10 traços" style="width: 100px;"></td></tr>
+            <tr><td><strong>CRV Válido até</strong></td><td><input type="number" placeholder="Ano"style="width: 100px;"></td></tr>
+            <tr><td><strong>Próxima Troca de Óleo km</strong></td><td><input type="number" placeholder="Km" style="width: 100px;"> </td></tr>
+                        <tr><td><strong>Cartão de Abastecimento</strong></td><td><input type="checkbox"> Disponível <input type="checkbox"> Não Disponível</td></tr>
+        </table>
+        <h2>🛠️ STATUS DE INSPEÇÃO</h2>
+        <p><em>Marque o status com: ✅ OK | ⚠️ Cuidado | 🛠️ Quebrado | ❌ Faltando | 🛑 Parar veículo</em></p>
+        <table>
+            <tr><th>#</th><th>Item</th><th>Status</th><th>Observação</th></tr>
+            <tr><td>01</td><td>Óleo do motor</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>02</td><td>Óleo hidráulico (caixa de direção)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>03</td><td>Fluido do radiador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>04</td><td>Água do limpador de para-brisa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>05</td><td>Correia do alternador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>06</td><td>Correia dentada do motor</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>07</td><td>Retrovisores</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>08</td><td>Para-brisa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>09</td><td>Caixa de marchas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>10</td><td>Pisca dos retrovisores</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>11</td><td>Faróis dianteiros</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>12</td><td>Lanternas traseiras</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>13</td><td>Buzina e pisca de alerta</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>14</td><td>Botões dos vidros elétricos</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>15</td><td>Travamento das portas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>16</td><td>Sinalizadores de emergência</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>17</td><td>Sirene</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>18</td><td>Luzes internas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>19</td><td>Farol de embarque</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>20</td><td>Freio de estacionamento</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>21</td><td>Pastilhas de freio (dianteira/traseira)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>22</td><td>Pneus</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>23</td><td>Macaco, chave de roda, triângulo</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>24</td><td>Limpadores/palhetas do para-brisa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>25</td><td>Limpeza interna</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>26</td><td>Limpeza externa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>27</td><td>Ar condicionado (dianteiro)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>28</td><td>Ar condicionado (traseiro)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>29</td><td>Extintor de incêndio</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>30</td><td>Alarme de estacionamento</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>31</td><td>Alinhamento/Balanceamento</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>32</td><td>Cilindro de oxigênio fixo (01)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>33</td><td>Cintos de segurança</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>34</td><td>Maca e cinto de segurança</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>35</td><td>Cadeira de rodas (se aplicável)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>36</td><td>Prancha/Escada</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>37</td><td>Bateria, inversor, transformador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>38</td><td>Bancos e capas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>39</td><td>Pintura/Plotagem</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>40</td><td>Câmera de ré (se aplicável)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>41</td><td>Chave de troca de oxigênio</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>42</td><td>Bala de oxigênio portátil</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>43</td><td>Desfibrilador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>44</td><td>Monitor</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>45</td><td>Respirador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>46</td><td>Oxímetro</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>47</td><td>Termômetro</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>48</td><td>Glicosímetro</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>49</td><td>Bolsa de medicação</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>50</td><td>Bolsa de entubação</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>51</td><td>Bolsa de ventilação</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>52</td><td>Bolsa via aérea</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>53</td><td>Armário do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>54</td><td>Gavetas do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>55</td><td>Baú do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+            <tr><td>56</td><td>Painel de controle do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
+        </table>
+        <h2>🛠️ OBSERVAÇÕES DE AVARIAS</h2>
+        <textarea rows="15" style="width: 100%;"></textarea>
+        <h2>✍️ ASSINATURAS</h2>
+        <div class="signature">
+            <p><strong>Condutor Recebendo o Plantão:</strong><br>
+            Nome: _________________________________________<br>
+            Assinatura: ___________________ &nbsp; Data: ___/___/____</p>
+            <p><strong>Condutor Entregando o Plantão:</strong><br>
+            Nome: _________________________________________<br>
+            Assinatura: ___________________ &nbsp; Data: ___/___/____</p>
         </div>
-
-        <div class="container">
-            <h2>Meus Ativos</h2>
-            <table id="ativos-table">
-                <thead>
-                    <tr>
-                        <th>Ativo</th>
-                        <th>Quantidade</th>
-                        <th>Preço Médio (R$)</th>
-                        <th>Cotação Atual (R$)</th>
-                        <th>Patrimônio (R$)</th>
-                        <th>Variação (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Os dados dos ativos serão inseridos aqui pelo JavaScript -->
-                </tbody>
-            </table>
+        <div class="footer">
+            <p>📝Documento válido como registro de inspeção diária – LEFE<br>
+            🗂️ Arquivar após preenchiment.<br> Atualizado em 2025.</p>
         </div>
-
-        <div class="container">
-            <h2>Agenda de Proventos</h2>
-            <ul id="agenda-proventos">
-                <!-- A agenda será preenchida aqui -->
-            </ul>
-        </div>
-    </main>
-    <script src="script.js"></script>
+    </div>
+    
+    <!-- Notificação -->
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        document.getElementById("data").value = new Date().toISOString().split("T")[0];
+        
+        // Função para enviar por e-mail
+        function enviarPorEmail() {
+            // Obter dados do formulário
+            const hospital = document.querySelector('input[placeholder="Hospital HRL"]').value || "Hospital HRL";
+            const data = document.getElementById("data").value;
+            const horarioEntrada = document.querySelectorAll('input[type="time"]')[0].value;
+            const horarioSaida = document.querySelectorAll('input[type="time"]')[1].value;
+            const condutorPlantao = document.querySelector('input[placeholder="Nome completo"]').value;
+            const recebendoDe = document.querySelector('input[placeholder="Nome do condutor anterior"]').value;
+            
+            // Dados da viatura
+            const placa = document.querySelector('input[placeholder="Ex: RKU1F52"]').value;
+            const kmAtual = document.querySelector('input[placeholder="Ex: 337847"]').value;
+            const nivelCombustivel = document.querySelector('input[placeholder="Ex: 5/10 traços"]').value;
+            const crvValido = document.querySelector('input[placeholder="Ano"]').value;
+            const proximaTrocaOleo = document.querySelectorAll('input[placeholder="Km"]')[0].value;
+            
+            // Verificar se cartão de abastecimento está disponível
+            const cartaoDisponivel = document.querySelectorAll('input[type="checkbox"]')[0].checked ? "Sim" : "Não";
+            
+            // Obter itens de inspeção
+            const tabela = document.querySelectorAll('table')[1];
+            const linhas = tabela.querySelectorAll('tr');
+            let itensInspecao = "";
+            
+            for (let i = 1; i < linhas.length; i++) {
+                const celulas = linhas[i].querySelectorAll('td');
+                if (celulas.length >= 4) {
+                    const numero = celulas[0].textContent;
+                    const item = celulas[1].textContent;
+                    const status = celulas[2].querySelector('input').value;
+                    const observacao = celulas[3].querySelector('input').value;
+                    
+                    itensInspecao += `${numero} - ${item}: ${status}`;
+                    if (observacao) {
+                        itensInspecao += ` - Obs: ${observacao}`;
+                    }
+                    itensInspecao += "\n";
+                }
+            }
+            
+            // Obter observações de avarias
+            const observacoesAvarias = document.querySelector('textarea').value;
+            
+            // Criar corpo do e-mail
+            let corpoEmail = `CHECK-LIST DIÁRIO DE INSPEÇÃO VEICULAR E EQUIPAMENTOS\n\n`;
+            corpoEmail += `Hospital: ${hospital}\n`;
+            corpoEmail += `Data: ${data}\n`;
+            corpoEmail += `Horário de Entrada: ${horarioEntrada}\n`;
+            corpoEmail += `Horário de Saída: ${horarioSaida}\n`;
+            corpoEmail += `Condutor de Plantão: ${condutorPlantao}\n`;
+            corpoEmail += `Recebendo de: ${recebendoDe}\n\n`;
+            
+            corpoEmail += `DADOS DA VIATURA\n`;
+            corpoEmail += `Placa: ${placa}\n`;
+            corpoEmail += `Km Atual: ${kmAtual}\n`;
+            corpoEmail += `Nível de Combustível: ${nivelCombustivel}\n`;
+            corpoEmail += `CRV Válido até: ${crvValido}\n`;
+            corpoEmail += `Próxima Troca de Óleo km: ${proximaTrocaOleo}\n`;
+            corpoEmail += `Cartão de Abastecimento Disponível: ${cartaoDisponivel}\n\n`;
+            
+            corpoEmail += `STATUS DE INSPEÇÃO\n`;
+            corpoEmail += `${itensInspecao}\n`;
+            
+            corpoEmail += `OBSERVAÇÕES DE AVARIAS\n`;
+            corpoEmail += `${observacoesAvarias}\n`;
+            
+            // Obter arquivos selecionados
+            const fileInput = document.getElementById('fileInput');
+            const files = fileInput.files;
+            
+            // Criar link mailto
+            let mailtoLink = `mailto:notoristacondutor@gmail.com?subject=Check-list Diário - ${hospital} - ${data}&body=${encodeURIComponent(corpoEmail)}`;
+            
+            // Adicionar anexos se houver (limitação: não é possível anexar arquivos diretamente via mailto)
+            if (files.length > 0) {
+                showNotification("Os arquivos serão anexados manualmente após abrir o cliente de e-mail.");
+            }
+            
+            // Abrir cliente de e-mail
+            window.location.href = mailtoLink;
+            
+            showNotification("E-mail sendo preparado. Verifique seu cliente de e-mail.");
+        }
+        
+        // Função para mostrar notificação
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+    </script>
 </body>
 </html>
