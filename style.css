@@ -1,0 +1,42 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+.summary p {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+#lucro-prejuizo.positivo { color: #28a745; }
+#lucro-prejuizo.negativo { color: #dc3545; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background-color: #f8f9fa;
+}
+#agenda-proventos li {
+    list-style-type: none;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}

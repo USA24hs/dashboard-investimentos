@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Dashboard de Investimentos</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Incluindo a biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Dashboard de Investimentos - Sr. Anderson</h1>
+    </header>
+    <main>
+        <div class="container summary">
+            <h2>Resumo da Carteira</h2>
+            <p><strong>Valor Total Investido:</strong> <span id="total-investido">R$ 0,00</span></p>
+            <p><strong>Patrimônio Atual:</strong> <span id="patrimonio-atual">R$ 0,00</span></p>
+            <p><strong>Lucro/Prejuízo:</strong> <span id="lucro-prejuizo">R$ 0,00</span></p>
+        </div>
+
+        <div class="container">
+            <h2>Distribuição de Ativos (Ações vs FIIs)</h2>
+            <canvas id="distribuicaoChart"></canvas>
+        </div>
+
+        <div class="container">
+            <h2>Meus Ativos</h2>
+            <table id="ativos-table">
+                <thead>
+                    <tr>
+                        <th>Ativo</th>
+                        <th>Quantidade</th>
+                        <th>Preço Médio (R$)</th>
+                        <th>Cotação Atual (R$)</th>
+                        <th>Patrimônio (R$)</th>
+                        <th>Variação (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Os dados dos ativos serão inseridos aqui pelo JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container">
+            <h2>Agenda de Proventos</h2>
+            <ul id="agenda-proventos">
+                <!-- A agenda será preenchida aqui -->
+            </ul>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
