@@ -1,9 +1,9 @@
 // --- Sr. Anderson, EDITE APENAS ESTA PARTE COM SEUS ATIVOS ---
 const minhaCarteira = [
-    { ticker: 'ITSA4', quantidade: 100, precoMedio: 9.50, tipo: 'acao' },
-    { ticker: 'MXRF11', quantidade: 50, precoMedio: 10.20, tipo: 'fii' },
-    { ticker: 'PETR4', quantidade: 30, precoMedio: 25.00, tipo: 'acao' },
-    { ticker: 'HGLG11', quantidade: 20, precoMedio: 160.00, tipo: 'fii' }
+    { ticker:'ITSA4',quantidade:100, precoMedio:9.50, tipo:'acao' },
+    { ticker:'MXRF11',quantidade:50, precoMedio:10.20, tipo:'fii' },
+    { ticker:'PETR4',quantidade:30, precoMedio:25.00, tipo:'acao' },
+    { ticker:'HGLG11',quantidade:20, precoMedio:160.00, tipo:'fii' }
 ];
 // ---------------------------------------------------------------
 
