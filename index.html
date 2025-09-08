@@ -2,346 +2,1714 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Check-list Diário - LEFE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Faturas Avançado</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --container-bg: #fff;
+            --text-color: #333;
+            --border-color: #ddd;
+            --hover-bg: #f8f8f8;
+            --header-bg: #f2f2f2;
+            --header-hover: #e0e0e0;
+            --shadow: rgba(0,0,0,0.1);
+            --primary-color: #2196F3;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --container-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --border-color: #555;
+            --hover-bg: #3a3a3a;
+            --header-bg: #404040;
+            --header-hover: #4a4a4a;
+            --shadow: rgba(0,0,0,0.3);
+            --primary-color: #64b5f6;
+            --success-color: #81c784;
+            --danger-color: #e57373;
+            --warning-color: #ffb74d;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 5px;
-            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            margin: 0;
+            transition: all 0.3s ease;
         }
+        
         .container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 5px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 15px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1, h2 {
-            color: #d90000;
-            border-bottom: 2px solid #d90000;
-            padding-bottom: 5px;
-        }
-        h1 {
-            font-size: 24px;
-            text-align: center;
-        }
-        h2 {
+            cursor: pointer;
             font-size: 16px;
-            margin-top: 5px;
         }
+        
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            margin: 0;
+            flex: 1;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            color: var(--text-color);
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            background-color: var(--header-bg);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
+            background-color: var(--container-bg);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        
+        th {
+            background-color: var(--header-bg);
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        th:hover {
+            background-color: var(--header-hover);
+        }
+        
+        tr:hover {
+            background-color: var(--hover-bg);
+        }
+        
+        .amount {
+            font-weight: bold;
+        }
+        
+        .paid {
+            color: var(--success-color);
+            text-decoration: line-through;
+        }
+        
+        .unpaid {
+            color: var(--danger-color);
+        }
+        
+        .btn {
+            padding: 6px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-add { background-color: var(--success-color); color: white; }
+        .btn-edit { background-color: var(--primary-color); color: white; }
+        .btn-delete { background-color: var(--danger-color); color: white; }
+        .btn-paid { background-color: var(--success-color); color: white; }
+        .btn-export { background-color: var(--warning-color); color: white; }
+        .btn-import { background-color: #9c27b0; color: white; }
+        
+        .form-group {
             margin: 10px 0;
         }
-        th, td {
-            padding: 5px;
-            border: 1px solid #ccc;
-            text-align: left;
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
         }
-        th {
-            background-color: #f0f0f0;
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
         }
-        .status {
-            text-align: center;
-            font-weight: bold;
-        }
-        .ok { color: green; }
-        .atencao { color: orange; }
-        .erro { color: red; }
-        .signature {
-            margin-top: 15px;
-        }
-        .footer {
-            margin-top: 15px;
-            font-size: 12px;
-            text-align: center;
-            color: #666;
-        }
-        /* Toolbar e botão de impressão */
-        .toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            background: transparent;
-            max-width: 900px;
-            margin: 0 auto 5px;
-            text-align: right;
-        }
-        .btn-print, .btn-email {
-            background: #d90000;
-            color: #fff;
-            border: none;
-            padding: 5px 14px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.10);
-            margin-left: 5px;
-        }
-        .btn-print:hover, .btn-email:hover {
-            background: #b80000;
-        }
-        .file-input-container {
+        
+        input[type="text"], input[type="number"], input[type="date"], select, input[type="file"] {
+            padding: 8px;
+            margin: 5px 0 10px 0;
             display: inline-block;
-            margin-left: 5px;
-            position: relative;
-            overflow: hidden;
-            background: #d90000;
-            color: #fff;
-            padding: 5px 14px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.10);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--container-bg);
+            color: var(--text-color);
         }
-        .file-input-container:hover {
-            background: #b80000;
+        
+        input:invalid {
+            border-color: var(--danger-color);
         }
-        .file-input-container input[type=file] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
+        
+        .summary {
+            background-color: #e8f5e9;
             padding: 15px;
             border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            display: none;
-            z-index: 1000;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #2e7d32;
         }
-        @media print {
-            .no-print, .no-print * {
-                display: none !important;
+
+        [data-theme="dark"] .summary {
+            background-color: #1b5e1f;
+            color: #81c784;
+        }
+        
+        .filter-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: var(--header-bg);
+            border-radius: 5px;
+        }
+        
+        .filter-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .notification {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .notification.success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        
+        .notification.error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        .notification.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        [data-theme="dark"] .notification.success {
+            background-color: #1b5e1f;
+            color: #81c784;
+            border-color: #2e7d32;
+        }
+
+        [data-theme="dark"] .notification.error {
+            background-color: #5d1a1d;
+            color: #ef5350;
+            border-color: #c62828;
+        }
+
+        [data-theme="dark"] .notification.warning {
+            background-color: #5d4c1d;
+            color: #ffd54f;
+            border-color: #856404;
+        }
+        
+        .warning { color: var(--warning-color); font-weight: bold; }
+        .expired { color: var(--danger-color); font-weight: bold; }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .chart-container {
+            margin: 20px 0;
+            height: 400px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background-color: var(--header-bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .export-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: var(--header-bg);
+            border-radius: 5px;
+        }
+        
+        .export-controls button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .categoria-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #e3f2fd;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        [data-theme="dark"] .categoria-tag {
+            background-color: #1565c0;
+            color: #ffffff;
+        }
+        
+        .recorrente-badge {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: inherit;
+        }
+        
+        /* Mobile menu */
+        .mobile-tabs-menu {
+            display: none;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            padding: 5px 10px;
+            background-color: var(--header-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .search-advanced {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--header-bg);
+            border-radius: 4px;
+        }
+        
+        .sort-indicator {
+            margin-left: 5px;
+        }
+        
+        /* Modal de confirmação */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--container-bg);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-controls {
+                flex-direction: column;
+                text-align: center;
             }
-            body, .container {
-                margin: 0;
-                padding: 0;
-                box-shadow: none;
-                border-radius: 0;
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                display: block;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+            
+            .btn {
+                padding: 5px 8px;
+                font-size: 12px;
+                margin: 1px;
+            }
+            
+            .tabs {
+                display: none;
+            }
+            
+            .mobile-tabs-menu {
+                display: block;
+            }
+            
+            .export-controls button {
+                width: 100%;
+                margin-right: 0;
+            }
+            
+            .container {
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Botão de impressão e email -->
-    <div class="toolbar no-print">
-        <button class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
-        <div class="file-input-container">
-            📎 Carregar Arquivos
-            <input type="file" id="fileInput" multiple>
-        </div>
-        <button class="btn-email" onclick="enviarPorEmail()">✉️ Enviar por E-mail</button>
-    </div>
-    
     <div class="container">
-        <h1>🚑 LEFE - SERVIÇO DE EMERGÊNCIAS MÉDICAS</h1>
-        <h2> 📋 CHECK-LIST DIÁRIO DE INSPEÇÃO VEICULAR E EQUIPAMENTOS</h2>
-        <p><strong>Hospital:</strong> <input type="text" value="Hospital HRL" style="width: 300px;"> &nbsp;
-        <strong>Data:</strong> <input type="date" id="data"style="width: 110px;"> <br>
-        <strong>Horário de Entrada:</strong> <input type="time" value="07:00"style="width: 80px;"> &nbsp;
-        <strong>Horário de Saída:</strong> <input type="time" value="07:00"style="width: 80px;"> <br>
-        <strong>Condutor de Plantão:</strong> <input type="text" placeholder="Nome completo"style="width: 285px;"> &nbsp; 
-        <strong>Recebendo de:</strong> <input type="text" placeholder="Nome do condutor anterior"style="width: 285px;"></p>
-        <h2>🚑 DADOS DA VIATURA (USA)</h2>
-        <table>
-            <tr><th>Item</th><th>Informação</th></tr>
-            <tr><td><strong>Placa</strong></td><td><input type="text" placeholder="Ex: RKU1F52" style="width: 100px;"></td></tr>
-            <tr><td><strong>Km Atual</strong></td><td><input type="number" placeholder="Ex: 337847" style="width: 100px;"> </td></tr>
-            <tr><td><strong>Nível de Combustível</strong></td><td><input type="text" placeholder="Ex: 5/10 traços" style="width: 100px;"></td></tr>
-            <tr><td><strong>CRV Válido até</strong></td><td><input type="number" placeholder="Ano"style="width: 100px;"></td></tr>
-            <tr><td><strong>Próxima Troca de Óleo km</strong></td><td><input type="number" placeholder="Km" style="width: 100px;"> </td></tr>
-                        <tr><td><strong>Cartão de Abastecimento</strong></td><td><input type="checkbox"> Disponível <input type="checkbox"> Não Disponível</td></tr>
-        </table>
-        <h2>🛠️ STATUS DE INSPEÇÃO</h2>
-        <p><em>Marque o status com: ✅ OK | ⚠️ Cuidado | 🛠️ Quebrado | ❌ Faltando | 🛑 Parar veículo</em></p>
-        <table>
-            <tr><th>#</th><th>Item</th><th>Status</th><th>Observação</th></tr>
-            <tr><td>01</td><td>Óleo do motor</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>02</td><td>Óleo hidráulico (caixa de direção)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>03</td><td>Fluido do radiador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>04</td><td>Água do limpador de para-brisa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>05</td><td>Correia do alternador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>06</td><td>Correia dentada do motor</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>07</td><td>Retrovisores</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>08</td><td>Para-brisa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>09</td><td>Caixa de marchas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>10</td><td>Pisca dos retrovisores</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>11</td><td>Faróis dianteiros</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>12</td><td>Lanternas traseiras</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>13</td><td>Buzina e pisca de alerta</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>14</td><td>Botões dos vidros elétricos</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>15</td><td>Travamento das portas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>16</td><td>Sinalizadores de emergência</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>17</td><td>Sirene</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>18</td><td>Luzes internas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>19</td><td>Farol de embarque</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>20</td><td>Freio de estacionamento</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>21</td><td>Pastilhas de freio (dianteira/traseira)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>22</td><td>Pneus</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>23</td><td>Macaco, chave de roda, triângulo</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>24</td><td>Limpadores/palhetas do para-brisa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>25</td><td>Limpeza interna</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>26</td><td>Limpeza externa</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>27</td><td>Ar condicionado (dianteiro)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>28</td><td>Ar condicionado (traseiro)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>29</td><td>Extintor de incêndio</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>30</td><td>Alarme de estacionamento</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>31</td><td>Alinhamento/Balanceamento</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>32</td><td>Cilindro de oxigênio fixo (01)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>33</td><td>Cintos de segurança</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>34</td><td>Maca e cinto de segurança</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>35</td><td>Cadeira de rodas (se aplicável)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>36</td><td>Prancha/Escada</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>37</td><td>Bateria, inversor, transformador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>38</td><td>Bancos e capas</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>39</td><td>Pintura/Plotagem</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>40</td><td>Câmera de ré (se aplicável)</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>41</td><td>Chave de troca de oxigênio</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>42</td><td>Bala de oxigênio portátil</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>43</td><td>Desfibrilador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>44</td><td>Monitor</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>45</td><td>Respirador</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>46</td><td>Oxímetro</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>47</td><td>Termômetro</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>48</td><td>Glicosímetro</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>49</td><td>Bolsa de medicação</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>50</td><td>Bolsa de entubação</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>51</td><td>Bolsa de ventilação</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>52</td><td>Bolsa via aérea</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>53</td><td>Armário do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>54</td><td>Gavetas do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>55</td><td>Baú do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-            <tr><td>56</td><td>Painel de controle do salão</td><td><input type="text" size="5"></td><td><input type="text" style="width: 500px;"></td></tr>
-        </table>
-        <h2>🛠️ OBSERVAÇÕES DE AVARIAS</h2>
-        <textarea rows="15" style="width: 100%;"></textarea>
-        <h2>✍️ ASSINATURAS</h2>
-        <div class="signature">
-            <p><strong>Condutor Recebendo o Plantão:</strong><br>
-            Nome: _________________________________________<br>
-            Assinatura: ___________________ &nbsp; Data: ___/___/____</p>
-            <p><strong>Condutor Entregando o Plantão:</strong><br>
-            Nome: _________________________________________<br>
-            Assinatura: ___________________ &nbsp; Data: ___/___/____</p>
+        <div class="header-controls">
+            <button class="theme-toggle" onclick="alternarTema()" aria-label="Alternar entre tema claro e escuro">🌓 Tema</button>
+            <h1>Gerenciador de Faturas Avançado</h1>
+            <div></div>
         </div>
-        <div class="footer">
-            <p>📝Documento válido como registro de inspeção diária – LEFE<br>
-            🗂️ Arquivar após preenchiment.<br> Atualizado em 2025.</p>
+        
+        <div id="notification" class="notification" role="alert"></div>
+        
+        <!-- Nova notificação para vencimentos próximos -->
+        <div id="notificacaoVencimento" class="notification warning" style="display: none;">
+            <button class="close-btn" onclick="fecharNotificacaoVencimento()" aria-label="Fechar notificação">✖</button>
+            <strong>⚠️ Aviso de Vencimento</strong>
+            <div id="listaVencimentoProximo"></div>
+        </div>
+        
+        <select class="mobile-tabs-menu" onchange="mostrarAabaMobile(this.value)">
+            <option value="faturas">📋 Faturas</option>
+            <option value="analytics">📊 Análises</option>
+            <option value="backup">💾 Backup</option>
+        </select>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="mostrarAba('faturas')">📋 Faturas</div>
+            <div class="tab" onclick="mostrarAba('analytics')">📊 Análises</div>
+            <div class="tab" onclick="mostrarAba('backup')">💾 Backup</div>
+        </div>
+        
+        <!-- ABA FATURAS -->
+        <div id="faturas" class="tab-content active">
+            <form id="formFatura" onsubmit="adicionarFatura(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipo">Tipo:</label>
+                        <select id="tipo" required>
+                            <option value="">Selecione um tipo</option>
+                            <option value="cartao">💳 Cartão de Crédito</option>
+                            <option value="celular">📱 Celular</option>
+                            <option value="internet">🛜 Internet</option>
+                            <option value="boleto">📃 Boleto</option>
+                            <option value="streaming">📺 Streaming</option>
+                            <option value="seguro">🛡️ Seguro</option>
+                            <option value="financiamento">🏠 Financiamento</option>
+                            <option value="outros">📦 Outros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" placeholder="Nome do cartão ou serviço" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="categoria">Categoria:</label>
+                        <input type="text" id="categoria" list="categoriasSugeridas" placeholder="Ex: Casa, Pessoal, Trabalho">
+                        <datalist id="categoriasSugeridas"></datalist>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fechamento">Data de Fechamento:</label>
+                        <input type="date" id="fechamento" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vencimento">Data de Vencimento:</label>
+                        <input type="date" id="vencimento" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="valor">Valor:</label>
+                        <input type="number" id="valor" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="recorrente"> 🔄 Conta recorrente (gerar automaticamente no próximo mês)
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-add" id="btnAdd">Adicionar Fatura</button>
+                <button type="button" class="btn" id="btnCancel" onclick="cancelarEdicao()" style="display: none; background-color: #9e9e9e;">Cancelar</button>
+            </form>
+            
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label for="filtroTipo">Filtrar por tipo:</label>
+                    <select id="filtroTipo" onchange="filtrarFaturas()">
+                        <option value="">Todos</option>
+                        <option value="cartao">Cartão de Crédito</option>
+                        <option value="celular">Celular</option>
+                        <option value="internet">Internet</option>
+                        <option value="boleto">Boleto</option>
+                        <option value="streaming">Streaming</option>
+                        <option value="seguro">Seguro</option>
+                        <option value="financiamento">Financiamento</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroStatus">Filtrar por status:</label>
+                    <select id="filtroStatus" onchange="filtrarFaturas()">
+                        <option value="">Todos</option>
+                        <option value="pago">Pagos</option>
+                        <option value="pendente">Pendentes</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroCategoria">Filtrar por categoria:</label>
+                    <select id="filtroCategoria" onchange="filtrarFaturas()">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="buscaNome">Buscar por nome:</label>
+                    <input type="text" id="buscaNome" placeholder="Buscar..." onkeyup="filtrarFaturas()">
+                </div>
+                
+                <div class="filter-group">
+                    <button class="btn" onclick="toggleAdvancedSearch()">🔍 Busca Avançada</button>
+                </div>
+            </div>
+            
+            <div id="advancedSearch" class="search-advanced" style="display: none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="buscaValorMin">Valor Mínimo:</label>
+                        <input type="number" id="buscaValorMin" placeholder="0.00" step="0.01" min="0" onchange="filtrarFaturas()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="buscaValorMax">Valor Máximo:</label>
+                        <input type="number" id="buscaValorMax" placeholder="0.00" step="0.01" min="0" onchange="filtrarFaturas()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="buscaDataInicio">De:</label>
+                        <input type="date" id="buscaDataInicio" onchange="filtrarFaturas()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="buscaDataFim">Até:</label>
+                        <input type="date" id="buscaDataFim" onchange="filtrarFaturas()">
+                    </div>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table id="tabelaFaturas">
+                    <thead>
+                        <tr>
+                            <th onclick="ordenarTabela('tipo')">Tipo <span class="sort-indicator" id="sort-tipo">↕</span></th>
+                            <th onclick="ordenarTabela('nome')">Nome <span class="sort-indicator" id="sort-nome">↕</span></th>
+                            <th onclick="ordenarTabela('categoria')">Categoria <span class="sort-indicator" id="sort-categoria">↕</span></th>
+                            <th onclick="ordenarTabela('fechamento')">Fechamento <span class="sort-indicator" id="sort-fechamento">↕</span></th>
+                            <th onclick="ordenarTabela('vencimento')">Vencimento <span class="sort-indicator" id="sort-vencimento">↕</span></th>
+                            <th onclick="ordenarTabela('valor')">Valor <span class="sort-indicator" id="sort-valor">↕</span></th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div class="pagination" id="paginacao"></div>
+            
+            <div class="summary" id="resumoTotal">
+                Total de faturas pendentes: R$ 0,00
+            </div>
+        </div>
+        
+        <!-- ABA ANÁLISES -->
+        <div id="analytics" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFaturas">0</div>
+                    <div>Total de Faturas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="faturasPagas">0</div>
+                    <div>Faturas Pagas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="faturasPendentes">0</div>
+                    <div>Faturas Pendentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="mediaValor">R$ 0</div>
+                    <div>Valor Médio</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="graficoTipos"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="graficoCategorias"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="graficoMensal"></canvas>
+            </div>
+        </div>
+        
+        <!-- ABA BACKUP -->
+        <div id="backup" class="tab-content">
+            <div class="export-controls">
+                <h3>Exportar Dados</h3>
+                <button class="btn btn-export" onclick="exportarCSV()">📊 Exportar CSV</button>
+                <button class="btn btn-export" onclick="exportarBackup()">💾 Backup JSON</button>
+                <button class="btn btn-export" onclick="gerarRelatorioHTML()">📄 Relatório HTML</button>
+                
+                <h3>Importar Dados</h3>
+                <input type="file" id="arquivoBackup" accept=".json" onchange="restaurarBackup(event)" style="margin-bottom: 10px;">
+                <button class="btn btn-import" onclick="document.getElementById('arquivoBackup').click()">📂 Restaurar Backup</button>
+                
+                <h3>Gerenciar Recorrências</h3>
+                <button class="btn btn-add" onclick="gerarFaturasRecorrentes()">🔄 Gerar Faturas do Próximo Mês</button>
+                <button class="btn btn-delete" onclick="confirmarLimpezaDados()">🗑️ Limpar Todos os Dados</button>
+            </div>
         </div>
     </div>
     
-    <!-- Notificação -->
-    <div id="notification" class="notification"></div>
+    <!-- Modal de Confirmação -->
+    <div id="modalConfirmacao" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitulo">Confirmar ação</h3>
+            <p id="modalMensagem">Tem certeza que deseja realizar esta ação?</p>
+            <div class="modal-actions">
+                <button class="btn" onclick="fecharModal()">Cancelar</button>
+                <button class="btn btn-delete" id="modalConfirmarBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
     
     <script>
-        document.getElementById("data").value = new Date().toISOString().split("T")[0];
+        let faturas = [];
+        let editandoId = null;
+        let ordenacaoAtual = { campo: 'vencimento', direcao: 'asc' };
+        let graficos = {};
+        let paginaAtual = 1;
+        const itensPorPagina = 10;
         
-        // Função para enviar por e-mail
-        function enviarPorEmail() {
-            // Obter dados do formulário
-            const hospital = document.querySelector('input[placeholder="Hospital HRL"]').value || "Hospital HRL";
-            const data = document.getElementById("data").value;
-            const horarioEntrada = document.querySelectorAll('input[type="time"]')[0].value;
-            const horarioSaida = document.querySelectorAll('input[type="time"]')[1].value;
-            const condutorPlantao = document.querySelector('input[placeholder="Nome completo"]').value;
-            const recebendoDe = document.querySelector('input[placeholder="Nome do condutor anterior"]').value;
+        // Carregar configurações
+        window.onload = function() {
+            carregarTema();
+            carregarDados();
+            atualizarCategoriasFiltro();
+            definirDatasMinimas();
+            verificarVencimentoProximo();
+            atualizarSugestoesCategorias();
+        }
+        
+        function carregarTema() {
+            const tema = localStorage.getItem('tema') || 'light';
+            document.documentElement.setAttribute('data-theme', tema);
+        }
+        
+        function carregarDados() {
+            const dadosSalvos = localStorage.getItem('faturas');
+            if (dadosSalvos) {
+                faturas = JSON.parse(dadosSalvos);
+                atualizarTabela();
+                atualizarAnalytics();
+            }
+        }
+        
+        function definirDatasMinimas() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('fechamento').setAttribute('min', hoje);
+            document.getElementById('vencimento').setAttribute('min', hoje);
+        }
+        
+        // Gerenciamento de abas
+        function mostrarAba(aba) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Dados da viatura
-            const placa = document.querySelector('input[placeholder="Ex: RKU1F52"]').value;
-            const kmAtual = document.querySelector('input[placeholder="Ex: 337847"]').value;
-            const nivelCombustivel = document.querySelector('input[placeholder="Ex: 5/10 traços"]').value;
-            const crvValido = document.querySelector('input[placeholder="Ano"]').value;
-            const proximaTrocaOleo = document.querySelectorAll('input[placeholder="Km"]')[0].value;
+            event.target.classList.add('active');
+            document.getElementById(aba).classList.add('active');
             
-            // Verificar se cartão de abastecimento está disponível
-            const cartaoDisponivel = document.querySelectorAll('input[type="checkbox"]')[0].checked ? "Sim" : "Não";
+            // Atualizar o menu mobile
+            document.querySelector('.mobile-tabs-menu').value = aba;
             
-            // Obter itens de inspeção
-            const tabela = document.querySelectorAll('table')[1];
-            const linhas = tabela.querySelectorAll('tr');
-            let itensInspecao = "";
+            if (aba === 'analytics') {
+                atualizarAnalytics();
+            }
+        }
+        
+        function mostrarAabaMobile(aba) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            for (let i = 1; i < linhas.length; i++) {
-                const celulas = linhas[i].querySelectorAll('td');
-                if (celulas.length >= 4) {
-                    const numero = celulas[0].textContent;
-                    const item = celulas[1].textContent;
-                    const status = celulas[2].querySelector('input').value;
-                    const observacao = celulas[3].querySelector('input').value;
-                    
-                    itensInspecao += `${numero} - ${item}: ${status}`;
-                    if (observacao) {
-                        itensInspecao += ` - Obs: ${observacao}`;
-                    }
-                    itensInspecao += "\n";
+            // Encontrar a aba correspondente e ativá-la
+            const tabs = document.querySelectorAll('.tab');
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabs[i].textContent.includes(aba === 'faturas' ? 'Faturas' : 
+                                                aba === 'analytics' ? 'Análises' : 'Backup')) {
+                    tabs[i].classList.add('active');
+                    break;
                 }
             }
             
-            // Obter observações de avarias
-            const observacoesAvarias = document.querySelector('textarea').value;
+            document.getElementById(aba).classList.add('active');
             
-            // Criar corpo do e-mail
-            let corpoEmail = `CHECK-LIST DIÁRIO DE INSPEÇÃO VEICULAR E EQUIPAMENTOS\n\n`;
-            corpoEmail += `Hospital: ${hospital}\n`;
-            corpoEmail += `Data: ${data}\n`;
-            corpoEmail += `Horário de Entrada: ${horarioEntrada}\n`;
-            corpoEmail += `Horário de Saída: ${horarioSaida}\n`;
-            corpoEmail += `Condutor de Plantão: ${condutorPlantao}\n`;
-            corpoEmail += `Recebendo de: ${recebendoDe}\n\n`;
-            
-            corpoEmail += `DADOS DA VIATURA\n`;
-            corpoEmail += `Placa: ${placa}\n`;
-            corpoEmail += `Km Atual: ${kmAtual}\n`;
-            corpoEmail += `Nível de Combustível: ${nivelCombustivel}\n`;
-            corpoEmail += `CRV Válido até: ${crvValido}\n`;
-            corpoEmail += `Próxima Troca de Óleo km: ${proximaTrocaOleo}\n`;
-            corpoEmail += `Cartão de Abastecimento Disponível: ${cartaoDisponivel}\n\n`;
-            
-            corpoEmail += `STATUS DE INSPEÇÃO\n`;
-            corpoEmail += `${itensInspecao}\n`;
-            
-            corpoEmail += `OBSERVAÇÕES DE AVARIAS\n`;
-            corpoEmail += `${observacoesAvarias}\n`;
-            
-            // Obter arquivos selecionados
-            const fileInput = document.getElementById('fileInput');
-            const files = fileInput.files;
-            
-            // Criar link mailto
-            let mailtoLink = `mailto:notoristacondutor@gmail.com?subject=Check-list Diário - ${hospital} - ${data}&body=${encodeURIComponent(corpoEmail)}`;
-            
-            // Adicionar anexos se houver (limitação: não é possível anexar arquivos diretamente via mailto)
-            if (files.length > 0) {
-                showNotification("Os arquivos serão anexados manualmente após abrir o cliente de e-mail.");
+            if (aba === 'analytics') {
+                atualizarAnalytics();
             }
-            
-            // Abrir cliente de e-mail
-            window.location.href = mailtoLink;
-            
-            showNotification("E-mail sendo preparado. Verifique seu cliente de e-mail.");
         }
         
-        // Função para mostrar notificação
-        function showNotification(message) {
+        // Tema
+        function alternarTema() {
+            const tema = document.documentElement.getAttribute('data-theme');
+            const novoTema = tema === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', novoTema);
+            localStorage.setItem('tema', novoTema);
+            
+            // Recriar gráficos com novo tema
+            if (document.getElementById('analytics').classList.contains('active')) {
+                setTimeout(() => atualizarAnalytics(), 100);
+            }
+        }
+        
+        // CRUD de faturas
+        function adicionarFatura(event) {
+            event.preventDefault();
+            
+            const tipo = document.getElementById('tipo').value;
+            const nome = document.getElementById('nome').value;
+            const categoria = document.getElementById('categoria').value || 'Geral';
+            const fechamento = document.getElementById('fechamento').value;
+            const vencimento = document.getElementById('vencimento').value;
+            const valor = parseFloat(document.getElementById('valor').value);
+            const recorrente = document.getElementById('recorrente').checked;
+            
+            if (!tipo) {
+                exibirNotificacao('Por favor, selecione um tipo de fatura!', 'error');
+                return;
+            }
+            
+            if (!nome || !fechamento || !vencimento || isNaN(valor)) {
+                exibirNotificacao('Por favor, preencha todos os campos corretamente!', 'error');
+                return;
+            }
+            
+            if (new Date(vencimento) <= new Date(fechamento)) {
+                exibirNotificacao('A data de vencimento deve ser posterior à data de fechamento!', 'error');
+                return;
+            }
+            
+            if (editandoId) {
+                const index = faturas.findIndex(f => f.id === editandoId);
+                if (index !== -1) {
+                    if (faturas[index].pago) {
+                        exibirNotificacao('Não é possível editar uma fatura já paga!', 'error');
+                        return;
+                    }
+                    
+                    faturas[index] = {
+                        ...faturas[index],
+                        tipo, nome, categoria, fechamento, vencimento, valor, recorrente
+                    };
+                    exibirNotificacao('Fatura atualizada com sucesso!', 'success');
+                }
+                cancelarEdicao();
+            } else {
+                const novaFatura = {
+                    id: Date.now(),
+                    tipo, nome, categoria, fechamento, vencimento, valor, recorrente,
+                    pago: false,
+                    dataPagamento: null,
+                    historicoPagamentos: []
+                };
+                faturas.push(novaFatura);
+                exibirNotificacao('Fatura adicionada com sucesso!', 'success');
+            }
+            
+            atualizarLocalStorage();
+            atualizarTabela();
+            atualizarCategoriasFiltro();
+            atualizarSugestoesCategorias();
+            verificarVencimentoProximo();
+            limparFormulario();
+        }
+        
+        function editarFatura(id) {
+            const fatura = faturas.find(f => f.id === id);
+            if (!fatura || fatura.pago) {
+                exibirNotificacao('Não é possível editar uma fatura já paga!', 'error');
+                return;
+            }
+            
+            document.getElementById('tipo').value = fatura.tipo;
+            document.getElementById('nome').value = fatura.nome;
+            document.getElementById('categoria').value = fatura.categoria || '';
+            document.getElementById('fechamento').value = fatura.fechamento;
+            document.getElementById('vencimento').value = fatura.vencimento;
+            document.getElementById('valor').value = fatura.valor;
+            document.getElementById('recorrente').checked = fatura.recorrente || false;
+            
+            editandoId = id;
+            document.getElementById('btnAdd').textContent = 'Atualizar Fatura';
+            document.getElementById('btnCancel').style.display = 'inline-block';
+            
+            window.scrollTo(0, 0);
+        }
+        
+        function cancelarEdicao() {
+            editandoId = null;
+            document.getElementById('btnAdd').textContent = 'Adicionar Fatura';
+            document.getElementById('btnCancel').style.display = 'none';
+            limparFormulario();
+        }
+        
+        function excluirFatura(id) {
+            const fatura = faturas.find(f => f.id === id);
+            let mensagem = 'Tem certeza que deseja excluir esta fatura?';
+            
+            if (fatura && fatura.pago) {
+                mensagem = 'Esta fatura já foi paga. Tem certeza que deseja excluí-la?';
+            }
+            
+            mostrarModal(
+                'Confirmar exclusão',
+                mensagem,
+                () => {
+                    faturas = faturas.filter(f => f.id !== id);
+                    atualizarLocalStorage();
+                    atualizarTabela();
+                    atualizarCategoriasFiltro();
+                    verificarVencimentoProximo();
+                    exibirNotificacao('Fatura excluída com sucesso!', 'success');
+                    fecharModal();
+                }
+            );
+        }
+        
+        function marcarComoPago(id, estaPago) {
+            const fatura = faturas.find(f => f.id === id);
+            if (!fatura) return;
+            
+            const acao = estaPago ? 'marcar como paga' : 'desmarcar pagamento';
+            
+            mostrarModal(
+                'Confirmar ação',
+                `Tem certeza que deseja ${acao} esta fatura?`,
+                () => {
+                    fatura.pago = estaPago;
+                    fatura.dataPagamento = estaPago ? new Date().toISOString().split('T')[0] : null;
+                    
+                    if (estaPago) {
+                        fatura.historicoPagamentos.push({
+                            data: new Date().toISOString(),
+                            valor: fatura.valor
+                        });
+                    }
+                    
+                    atualizarLocalStorage();
+                    atualizarTabela();
+                    verificarVencimentoProximo();
+                    exibirNotificacao(`Fatura ${estaPago ? 'paga' : 'desmarcada'} com sucesso!`, 'success');
+                    
+                    if (editandoId === id) {
+                        cancelarEdicao();
+                    }
+                    fecharModal();
+                }
+            );
+        }
+        
+        // Atualização da tabela
+        function atualizarTabela() {
+            const tbody = document.querySelector('#tabelaFaturas tbody');
+            tbody.innerHTML = '';
+            
+            const faturasOrdenadas = [...faturas].sort((a, b) => {
+                let valorA, valorB;
+                
+                switch(ordenacaoAtual.campo) {
+                    case 'tipo':
+                    case 'nome':
+                    case 'categoria':
+                        valorA = a[ordenacaoAtual.campo] || '';
+                        valorB = b[ordenacaoAtual.campo] || '';
+                        break;
+                    case 'fechamento':
+                    case 'vencimento':
+                        valorA = new Date(a[ordenacaoAtual.campo]);
+                        valorB = new Date(b[ordenacaoAtual.campo]);
+                        break;
+                    case 'valor':
+                        valorA = a.valor;
+                        valorB = b.valor;
+                        break;
+                }
+                
+                if (ordenacaoAtual.direcao === 'asc') {
+                    return valorA > valorB ? 1 : -1;
+                } else {
+                    return valorA < valorB ? 1 : -1;
+                }
+            });
+            
+            // Aplicar filtros
+            const faturasFiltradas = aplicarFiltros(faturasOrdenadas);
+            
+            // Paginação
+            const totalPaginas = Math.ceil(faturasFiltradas.length / itensPorPagina);
+            paginaAtual = Math.min(paginaAtual, totalPaginas || 1);
+            
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = inicio + itensPorPagina;
+            const faturasPagina = faturasFiltradas.slice(inicio, fim);
+            
+            // Atualizar indicadores de ordenação
+            document.querySelectorAll('.sort-indicator').forEach(el => {
+                el.textContent = '↕';
+            });
+            
+            const indicador = document.getElementById(`sort-${ordenacaoAtual.campo}`);
+            if (indicador) {
+                indicador.textContent = ordenacaoAtual.direcao === 'asc' ? '↑' : '↓';
+            }
+            
+            let totalPendente = 0;
+            faturasPagina.forEach(fatura => {
+                const tr = document.createElement('tr');
+                
+                const icones = {
+                    cartao: '💳', celular: '📱', internet: '🛜', boleto: '📃',
+                    streaming: '📺', seguro: '🛡️', financiamento: '🏠', outros: '📦'
+                };
+                
+                const icone = icones[fatura.tipo] || '📦';
+                
+                const hoje = new Date();
+                const vencimento = new Date(fatura.vencimento);
+                const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                let avisoVencimento = '';
+                
+                if (fatura.pago) {
+                    avisoVencimento = ` <span style="color: var(--success-color);">💰 ${formatarData(fatura.dataPagamento)}</span>`;
+                } else if (diffDias < 0) {
+                    avisoVencimento = ` <span class="expired">(Vencida há ${Math.abs(diffDias)} dias)</span>`;
+                } else if (diffDias <= 7) {
+                    avisoVencimento = ` <span class="warning">(Vence em ${diffDias} dias)</span>`;
+                }
+                
+                const categoriaTag = fatura.categoria ? 
+                    `<span class="categoria-tag">${fatura.categoria}</span>` : '';
+                
+                const recorrenteBadge = fatura.recorrente ? 
+                    `<span class="recorrente-badge">🔄</span>` : '';
+                
+                tr.innerHTML = `
+                    <td>${icone} ${fatura.tipo.charAt(0).toUpperCase() + fatura.tipo.slice(1)}</td>
+                    <td>${fatura.nome} ${fatura.pago ? '🔒' : ''} ${recorrenteBadge}</td>
+                    <td>${fatura.categoria || 'Geral'}${categoriaTag}</td>
+                    <td>${formatarData(fatura.fechamento)}</td>
+                    <td>${formatarData(fatura.vencimento)}${avisoVencimento}</td>
+                    <td class="amount ${fatura.pago ? 'paid' : 'unpaid'}">R$ ${fatura.valor.toFixed(2).replace('.', ',')}</td>
+                    <td>
+                        ${!fatura.pago ? 
+                            `<button class="btn btn-edit" onclick="editarFatura(${fatura.id})" aria-label="Editar fatura">Editar</button>` : 
+                            '<span class="lock-icon">🔒</span>'
+                        }
+                        <button class="btn btn-delete" onclick="excluirFatura(${fatura.id})" ${fatura.pago ? 'disabled' : ''} aria-label="Excluir fatura">Excluir</button>
+                        <button class="btn btn-paid" onclick="marcarComoPago(${fatura.id}, ${!fatura.pago})" aria-label="${fatura.pago ? 'Desfazer pagamento' : 'Pagar fatura'}">
+                            ${fatura.pago ? 'Desfazer' : 'Pagar'}
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+                
+                if (!fatura.pago) {
+                    totalPendente += fatura.valor;
+                }
+            });
+            
+            document.getElementById('resumoTotal').innerHTML = 
+                `Total de faturas pendentes: R$ ${totalPendente.toFixed(2).replace('.', ',')}`;
+                
+            // Atualizar paginação
+            atualizarPaginacao(totalPaginas);
+        }
+        
+        function aplicarFiltros(faturasLista) {
+            const filtroTipo = document.getElementById('filtroTipo').value;
+            const filtroStatus = document.getElementById('filtroStatus').value;
+            const filtroCategoria = document.getElementById('filtroCategoria').value;
+            const buscaNome = document.getElementById('buscaNome').value.toLowerCase();
+            const valorMin = parseFloat(document.getElementById('buscaValorMin').value) || 0;
+            const valorMax = parseFloat(document.getElementById('buscaValorMax').value) || Number.MAX_SAFE_INTEGER;
+            const dataInicio = document.getElementById('buscaDataInicio').value;
+            const dataFim = document.getElementById('buscaDataFim').value;
+            
+            return faturasLista.filter(fatura => {
+                const tipoMatch = !filtroTipo || fatura.tipo === filtroTipo;
+                const statusMatch = !filtroStatus || 
+                    (filtroStatus === 'pago' && fatura.pago) || 
+                    (filtroStatus === 'pendente' && !fatura.pago);
+                const categoriaMatch = !filtroCategoria || fatura.categoria === filtroCategoria;
+                const nomeMatch = !buscaNome || fatura.nome.toLowerCase().includes(buscaNome);
+                const valorMatch = fatura.valor >= valorMin && fatura.valor <= valorMax;
+                
+                let dataMatch = true;
+                if (dataInicio) {
+                    dataMatch = dataMatch && new Date(fatura.vencimento) >= new Date(dataInicio);
+                }
+                if (dataFim) {
+                    dataMatch = dataMatch && new Date(fatura.vencimento) <= new Date(dataFim);
+                }
+                
+                return tipoMatch && statusMatch && categoriaMatch && nomeMatch && valorMatch && dataMatch;
+            });
+        }
+        
+        function atualizarPaginacao(totalPaginas) {
+            const paginacao = document.getElementById('paginacao');
+            paginacao.innerHTML = '';
+            
+            if (totalPaginas <= 1) return;
+            
+            // Botão anterior
+            if (paginaAtual > 1) {
+                const btnAnterior = document.createElement('button');
+                btnAnterior.textContent = '«';
+                btnAnterior.onclick = () => mudarPagina(paginaAtual - 1);
+                paginacao.appendChild(btnAnterior);
+            }
+            
+            // Páginas
+            for (let i = 1; i <= totalPaginas; i++) {
+                const btnPagina = document.createElement('button');
+                btnPagina.textContent = i;
+                btnPagina.classList.toggle('active', i === paginaAtual);
+                btnPagina.onclick = () => mudarPagina(i);
+                paginacao.appendChild(btnPagina);
+            }
+            
+            // Botão próximo
+            if (paginaAtual < totalPaginas) {
+                const btnProximo = document.createElement('button');
+                btnProximo.textContent = '»';
+                btnProximo.onclick = () => mudarPagina(paginaAtual + 1);
+                paginacao.appendChild(btnProximo);
+            }
+        }
+        
+        function mudarPagina(pagina) {
+            paginaAtual = pagina;
+            atualizarTabela();
+            window.scrollTo(0, 0);
+        }
+        
+        // Filtros e ordenação
+        function ordenarTabela(campo) {
+            if (ordenacaoAtual.campo === campo) {
+                ordenacaoAtual.direcao = ordenacaoAtual.direcao === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenacaoAtual.campo = campo;
+                ordenacaoAtual.direcao = 'asc';
+            }
+            paginaAtual = 1;
+            atualizarTabela();
+        }
+        
+        function filtrarFaturas() {
+            paginaAtual = 1;
+            atualizarTabela();
+        }
+        
+        function toggleAdvancedSearch() {
+            const advancedSearch = document.getElementById('advancedSearch');
+            advancedSearch.style.display = advancedSearch.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function atualizarCategoriasFiltro() {
+            const select = document.getElementById('filtroCategoria');
+            const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral'))];
+            
+            select.innerHTML = '<option value="">Todas</option>';
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria;
+                option.textContent = categoria;
+                select.appendChild(option);
+            });
+        }
+        
+        function atualizarSugestoesCategorias() {
+            const datalist = document.getElementById('categoriasSugeridas');
+            const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral').filter(Boolean))];
+            
+            datalist.innerHTML = '';
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria;
+                datalist.appendChild(option);
+            });
+        }
+        
+        // Analytics e gráficos
+        function atualizarAnalytics() {
+            const totalFaturas = faturas.length;
+            const faturasPagas = faturas.filter(f => f.pago).length;
+            const faturasPendentes = totalFaturas - faturasPagas;
+            const mediaValor = totalFaturas > 0 ? 
+                faturas.reduce((sum, f) => sum + f.valor, 0) / totalFaturas : 0;
+            
+            document.getElementById('totalFaturas').textContent = totalFaturas;
+            document.getElementById('faturasPagas').textContent = faturasPagas;
+            document.getElementById('faturasPendentes').textContent = faturasPendentes;
+            document.getElementById('mediaValor').textContent = `R$ ${mediaValor.toFixed(2).replace('.', ',')}`;
+            
+            criarGraficoTipos();
+            criarGraficoCategorias();
+            criarGraficoMensal();
+        }
+        
+        function criarGraficoTipos() {
+            const ctx = document.getElementById('graficoTipos').getContext('2d');
+            
+            if (graficos.tipos) {
+                graficos.tipos.destroy();
+            }
+            
+            const tiposCount = {};
+            faturas.forEach(f => {
+                tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
+            });
+            
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#ffffff' : '#333333';
+            
+            graficos.tipos = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(tiposCount),
+                    datasets: [{
+                        data: Object.values(tiposCount),
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribuição por Tipo',
+                            color: textColor
+                        },
+                        legend: {
+                            labels: {
+                                color: textColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function criarGraficoCategorias() {
+            const ctx = document.getElementById('graficoCategorias').getContext('2d');
+            
+            if (graficos.categorias) {
+                graficos.categorias.destroy();
+            }
+            
+            const categoriasValor = {};
+            faturas.forEach(f => {
+                const cat = f.categoria || 'Geral';
+                categoriasValor[cat] = (categoriasValor[cat] || 0) + f.valor;
+            });
+            
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#ffffff' : '#333333';
+            
+            graficos.categorias = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(categoriasValor),
+                    datasets: [{
+                        label: 'Valor Total (R$)',
+                        data: Object.values(categoriasValor),
+                        backgroundColor: '#36A2EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Gastos por Categoria',
+                            color: textColor
+                        },
+                        legend: {
+                            labels: {
+                                color: textColor
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: isDark ? '#555' : '#ddd'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: isDark ? '#555' : '#ddd'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function criarGraficoMensal() {
+            const ctx = document.getElementById('graficoMensal').getContext('2d');
+            
+            if (graficos.mensal) {
+                graficos.mensal.destroy();
+            }
+            
+            const dadosMensais = {};
+            faturas.forEach(f => {
+                const mes = f.vencimento.substring(0, 7);
+                if (!dadosMensais[mes]) {
+                    dadosMensais[mes] = { total: 0, pagos: 0, pendentes: 0 };
+                }
+                dadosMensais[mes].total += f.valor;
+                if (f.pago) {
+                    dadosMensais[mes].pagos += f.valor;
+                } else {
+                    dadosMensais[mes].pendentes += f.valor;
+                }
+            });
+            
+            const meses = Object.keys(dadosMensais).sort();
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#ffffff' : '#333333';
+            
+            graficos.mensal = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: meses,
+                    datasets: [
+                        {
+                            label: 'Total',
+                            data: meses.map(m => dadosMensais[m].total),
+                            borderColor: '#36A2EB',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Pagos',
+                            data: meses.map(m => dadosMensais[m].pagos),
+                            borderColor: '#4BC0C0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Pendentes',
+                            data: meses.map(m => dadosMensais[m].pendentes),
+                            borderColor: '#FF6384',
+                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolução Mensal dos Gastos',
+                            color: textColor
+                        },
+                        legend: {
+                            labels: {
+                                color: textColor
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: isDark ? '#555' : '#ddd'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: isDark ? '#555' : '#ddd'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Funções de recorrência
+        function gerarFaturasRecorrentes() {
+            let geradas = 0;
+            const proximoMes = new Date();
+            proximoMes.setMonth(proximoMes.getMonth() + 1);
+            const proximoMesStr = proximoMes.toISOString().substring(0, 7);
+            
+            faturas.filter(f => f.recorrente).forEach(fatura => {
+                // Verificar se já existe uma fatura para o próximo mês
+                const jaExiste = faturas.some(f => 
+                    f.nome === fatura.nome && 
+                    f.vencimento.startsWith(proximoMesStr)
+                );
+                
+                if (!jaExiste) {
+                    const proximaData = new Date(fatura.vencimento);
+                    proximaData.setMonth(proximaData.getMonth() + 1);
+                    
+                    const proximoFechamento = new Date(fatura.fechamento);
+                    proximoFechamento.setMonth(proximoFechamento.getMonth() + 1);
+                    
+                    const novaFatura = {
+                        ...fatura,
+                        id: Date.now() + geradas,
+                        fechamento: proximoFechamento.toISOString().split('T')[0],
+                        vencimento: proximaData.toISOString().split('T')[0],
+                        pago: false,
+                        dataPagamento: null,
+                        historicoPagamentos: []
+                    };
+                    
+                    faturas.push(novaFatura);
+                    geradas++;
+                }
+            });
+            
+            if (geradas > 0) {
+                atualizarLocalStorage();
+                atualizarTabela();
+                atualizarCategoriasFiltro();
+                verificarVencimentoProximo();
+                exibirNotificacao(`${geradas} faturas recorrentes geradas para o próximo mês!`, 'success');
+            } else {
+                exibirNotificacao('Nenhuma fatura recorrente nova foi gerada.', 'info');
+            }
+        }
+        
+        // Exportação e backup
+        function exportarCSV() {
+            const headers = ['Tipo', 'Nome', 'Categoria', 'Fechamento', 'Vencimento', 'Valor', 'Status', 'Data Pagamento', 'Recorrente'];
+            const csvContent = [
+                headers.join(','),
+                ...faturas.map(f => [
+                    f.tipo,
+                    `"${f.nome.replace(/"/g, '""')}"`,
+                    `"${(f.categoria || 'Geral').replace(/"/g, '""')}"`,
+                    formatarData(f.fechamento),
+                    formatarData(f.vencimento),
+                    f.valor.toFixed(2),
+                    f.pago ? 'Pago' : 'Pendente',
+                    f.dataPagamento ? formatarData(f.dataPagamento) : '',
+                    f.recorrente ? 'Sim' : 'Não'
+                ].join(','))
+            ].join('\n');
+            
+            baixarArquivo(csvContent, `faturas_${obterDataAtual()}.csv`, 'text/csv');
+            exibirNotificacao('CSV exportado com sucesso!', 'success');
+        }
+        
+        function exportarBackup() {
+            const backup = {
+                faturas: faturas,
+                dataBackup: new Date().toISOString(),
+                versao: '2.0',
+                tema: localStorage.getItem('tema')
+            };
+            
+            const json = JSON.stringify(backup, null, 2);
+            baixarArquivo(json, `backup_faturas_${obterDataAtual()}.json`, 'application/json');
+            exibirNotificacao('Backup criado com sucesso!', 'success');
+        }
+        
+        function restaurarBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    if (backup.faturas && Array.isArray(backup.faturas)) {
+                        mostrarModal(
+                            'Restaurar Backup',
+                            'Isso substituirá todos os dados atuais. Continuar?',
+                            () => {
+                                faturas = backup.faturas;
+                                
+                                // Restaurar tema se disponível
+                                if (backup.tema) {
+                                    localStorage.setItem('tema', backup.tema);
+                                    document.documentElement.setAttribute('data-theme', backup.tema);
+                                }
+                                
+                                atualizarLocalStorage();
+                                atualizarTabela();
+                                atualizarCategoriasFiltro();
+                                verificarVencimentoProximo();
+                                exibirNotificacao('Backup restaurado com sucesso!', 'success');
+                                fecharModal();
+                            }
+                        );
+                    } else {
+                        exibirNotificacao('Arquivo de backup inválido!', 'error');
+                    }
+                } catch (error) {
+                    exibirNotificacao('Erro ao ler o arquivo de backup!', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Limpar o input
+            event.target.value = '';
+        }
+        
+        function gerarRelatorioHTML() {
+            const totalGeral = faturas.reduce((sum, f) => sum + f.valor, 0);
+            const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
+            const totalPendente = totalGeral - totalPago;
+            
+            const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Faturas - ${obterDataAtual()}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .summary { background-color: #e8f5e9; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .paid { color: green; text-decoration: line-through; }
+        .unpaid { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Relatório de Faturas</h1>
+    <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+    
+    <div class="summary">
+        <h3>Resumo Financeiro</h3>
+        <p><strong>Total Geral:</strong> R$ ${totalGeral.toFixed(2).replace('.', ',')}</p>
+        <p><strong>Total Pago:</strong> R$ ${totalPago.toFixed(2).replace('.', ',')}</p>
+        <p><strong>Total Pendente:</strong> R$ ${totalPendente.toFixed(2).replace('.', ',')}</p>
+        <p><strong>Total de Faturas:</strong> ${faturas.length}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Vencimento</th>
+                <th>Valor</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${faturas.map(f => `
+                <tr>
+                    <td>${f.tipo}</td>
+                    <td>${f.nome}</td>
+                    <td>${f.categoria || 'Geral'}</td>
+                    <td>${formatarData(f.vencimento)}</td>
+                    <td class="${f.pago ? 'paid' : 'unpaid'}">R$ ${f.valor.toFixed(2).replace('.', ',')}</td>
+                    <td>${f.pago ? 'Pago' : 'Pendente'}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+</body>
+</html>`;
+            
+            baixarArquivo(html, `relatorio_faturas_${obterDataAtual()}.html`, 'text/html');
+            exibirNotificacao('Relatório HTML gerado com sucesso!', 'success');
+        }
+        
+        function confirmarLimpezaDados() {
+            mostrarModal(
+                'Confirmar limpeza',
+                'ATENÇÃO: Isso excluirá TODOS os dados permanentemente. Esta ação não pode ser desfeita. Continuar?',
+                () => {
+                    limparDados();
+                    fecharModal();
+                }
+            );
+        }
+        
+        function limparDados() {
+            faturas = [];
+            atualizarLocalStorage();
+            atualizarTabela();
+            atualizarCategoriasFiltro();
+            verificarVencimentoProximo();
+            exibirNotificacao('Todos os dados foram limpos!', 'success');
+        }
+        
+        // Modal functions
+        function mostrarModal(titulo, mensagem, callback) {
+            document.getElementById('modalTitulo').textContent = titulo;
+            document.getElementById('modalMensagem').textContent = mensagem;
+            document.getElementById('modalConfirmarBtn').onclick = callback;
+            document.getElementById('modalConfirmacao').style.display = 'flex';
+        }
+        
+        function fecharModal() {
+            document.getElementById('modalConfirmacao').style.display = 'none';
+        }
+        
+        // Funções auxiliares
+        function atualizarLocalStorage() {
+            localStorage.setItem('faturas', JSON.stringify(faturas));
+        }
+        
+        function limparFormulario() {
+            document.getElementById('formFatura').reset();
+            cancelarEdicao();
+        }
+        
+        function formatarData(data) {
+            if (!data) return '-';
+            const [ano, mes, dia] = data.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+        
+        function obterDataAtual() {
+            return new Date().toISOString().split('T')[0];
+        }
+        
+        function baixarArquivo(conteudo, nomeArquivo, tipo) {
+            const blob = new Blob([conteudo], { type: tipo });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomeArquivo;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function exibirNotificacao(mensagem, tipo) {
             const notification = document.getElementById('notification');
-            notification.textContent = message;
+            notification.textContent = mensagem;
+            notification.className = 'notification ' + tipo;
             notification.style.display = 'block';
             
             setTimeout(() => {
                 notification.style.display = 'none';
-            }, 5000);
+            }, 4000);
         }
+        
+        // Funções para notificações de vencimento
+        function verificarVencimentoProximo() {
+            const hoje = new Date();
+            const vencimentoProximo = faturas.filter(fatura => {
+                if (fatura.pago) return false;
+                const vencimento = new Date(fatura.vencimento);
+                const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                return diffDias <= 7;
+            });
+
+            const notificacao = document.getElementById('notificacaoVencimento');
+            const lista = document.getElementById('listaVencimentoProximo');
+
+            if (vencimentoProximo.length === 0) {
+                notificacao.style.display = 'none';
+                return;
+            }
+
+            let html = '<ul style="margin-top: 10px; margin-bottom: 0;">';
+            vencimentoProximo.forEach(fatura => {
+                const vencimento = new Date(fatura.vencimento);
+                const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                let texto = '';
+                if (diffDias < 0) {
+                    texto = `Vencida há ${Math.abs(diffDias)} dias`;
+                } else if (diffDias === 0) {
+                    texto = 'Vence hoje';
+                } else {
+                    texto = `Vence em ${diffDias} dias`;
+                }
+                html += `<li><strong>${fatura.nome}</strong> - ${texto} - R$ ${fatura.valor.toFixed(2).replace('.', ',')}</li>`;
+            });
+            html += '</ul>';
+
+            lista.innerHTML = html;
+            notificacao.style.display = 'block';
+        }
+        
+        function fecharNotificacaoVencimento() {
+            const notificacao = document.getElementById('notificacaoVencimento');
+            notificacao.style.display = 'none';
+        }
+        
+        // Fechar modal clicando fora dele
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalConfirmacao');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        };
     </script>
 </body>
 </html>
