@@ -259,6 +259,12 @@
             border: 1px solid #ffeaa7;
         }
 
+        .notification.info {
+            background-color: #e7f3fe;
+            color: #0c5460;
+            border: 1px solid #b3d7ff;
+        }
+
         [data-theme="dark"] .notification.success {
             background-color: #1b5e1f;
             color: #81c784;
@@ -275,6 +281,12 @@
             background-color: #5d4c1d;
             color: #ffd54f;
             border-color: #856404;
+        }
+
+        [data-theme="dark"] .notification.info {
+            background-color: #1b2a41;
+            color: #8ab4f8;
+            border-color: #3b4d63;
         }
         
         .warning { color: var(--warning-color); font-weight: bold; }
@@ -483,7 +495,7 @@
             <div></div>
         </div>
         
-        <div id="notification" class="notification" role="alert"></div>
+        <div id="notification" class="notification" role="status" aria-live="polite"></div>
         
         <!-- Nova notificação para vencimentos próximos -->
         <div id="notificacaoVencimento" class="notification warning" style="display: none;">
@@ -492,16 +504,16 @@
             <div id="listaVencimentoProximo"></div>
         </div>
         
-        <select class="mobile-tabs-menu" onchange="mostrarAabaMobile(this.value)">
+        <select class="mobile-tabs-menu" onchange="mostrarAbaMobile(this.value)" aria-label="Selecionar aba no modo mobile">
             <option value="faturas">📋 Faturas</option>
             <option value="analytics">📊 Análises</option>
             <option value="backup">💾 Backup</option>
         </select>
         
         <div class="tabs">
-            <div class="tab active" onclick="mostrarAba('faturas')">📋 Faturas</div>
-            <div class="tab" onclick="mostrarAba('analytics')">📊 Análises</div>
-            <div class="tab" onclick="mostrarAba('backup')">💾 Backup</div>
+            <div class="tab active" data-aba="faturas" onclick="mostrarAba(event, 'faturas')">📋 Faturas</div>
+            <div class="tab" data-aba="analytics" onclick="mostrarAba(event, 'analytics')">📊 Análises</div>
+            <div class="tab" data-aba="backup" onclick="mostrarAba(event, 'backup')">💾 Backup</div>
         </div>
         
         <!-- ABA FATURAS -->
@@ -596,7 +608,7 @@
                 
                 <div class="filter-group">
                     <label for="buscaNome">Buscar por nome:</label>
-                    <input type="text" id="buscaNome" placeholder="Buscar..." onkeyup="filtrarFaturas()">
+                    <input type="text" id="buscaNome" placeholder="Buscar...">
                 </div>
                 
                 <div class="filter-group">
@@ -674,15 +686,15 @@
             </div>
             
             <div class="chart-container">
-                <canvas id="graficoTipos"></canvas>
+                <canvas id="graficoTipos" aria-label="Gráfico de distribuição por tipo" role="img"></canvas>
             </div>
             
             <div class="chart-container">
-                <canvas id="graficoCategorias"></canvas>
+                <canvas id="graficoCategorias" aria-label="Gráfico de gastos por categoria" role="img"></canvas>
             </div>
             
             <div class="chart-container">
-                <canvas id="graficoMensal"></canvas>
+                <canvas id="graficoMensal" aria-label="Gráfico de evolução mensal dos gastos" role="img"></canvas>
             </div>
         </div>
         
@@ -707,8 +719,8 @@
     </div>
     
     <!-- Modal de Confirmação -->
-    <div id="modalConfirmacao" class="modal">
-        <div class="modal-content">
+    <div id="modalConfirmacao" class="modal" aria-hidden="true" aria-labelledby="modalTitulo" aria-describedby="modalMensagem">
+        <div class="modal-content" role="dialog">
             <h3 id="modalTitulo">Confirmar ação</h3>
             <p id="modalMensagem">Tem certeza que deseja realizar esta ação?</p>
             <div class="modal-actions">
@@ -721,7 +733,28 @@
     <script>
         // Inicializar jsPDF
         window.jsPDF = window.jspdf.jsPDF;
-        
+
+        // Formatter de moeda
+        const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // Helpers de data (uso local para evitar problemas de fuso/ISO)
+        const MS_DIA = 24 * 60 * 60 * 1000;
+        function parseYMD(ymd) { if (!ymd) return null; const [y,m,d] = ymd.split('-').map(Number); return new Date(y, m-1, d); }
+        function formatYMD(d) { const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+        function hojeYMD() { return formatYMD(new Date()); }
+        function diffDias(fromYMD, toYMD) {
+            const a = parseYMD(fromYMD), b = parseYMD(toYMD);
+            if (!a || !b) return 0;
+            a.setHours(0,0,0,0); b.setHours(0,0,0,0);
+            return Math.round((b - a) / MS_DIA);
+        }
+        function formatarData(data) {
+            if (!data) return '-';
+            const [ano, mes, dia] = data.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+        function obterDataAtual() { return hojeYMD(); }
+
         let faturas = [];
         let editandoId = null;
         let ordenacaoAtual = { campo: 'vencimento', direcao: 'asc' };
@@ -737,6 +770,8 @@
             definirDatasMinimas();
             verificarVencimentoProximo();
             atualizarSugestoesCategorias();
+            // Busca com debounce
+            document.getElementById('buscaNome').onkeyup = debounce(filtrarFaturas, 200);
         }
         
         function carregarTema() {
@@ -748,23 +783,23 @@
             const dadosSalvos = localStorage.getItem('faturas');
             if (dadosSalvos) {
                 faturas = JSON.parse(dadosSalvos);
-                atualizarTabela();
-                atualizarAnalytics();
             }
+            atualizarTabela();
+            atualizarAnalytics();
         }
         
         function definirDatasMinimas() {
-            const hoje = new Date().toISOString().split('T')[0];
+            const hoje = hojeYMD();
             document.getElementById('fechamento').setAttribute('min', hoje);
             document.getElementById('vencimento').setAttribute('min', hoje);
         }
         
         // Gerenciamento de abas
-        function mostrarAba(aba) {
+        function mostrarAba(e, aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            event.target.classList.add('active');
+            e.currentTarget.classList.add('active');
             document.getElementById(aba).classList.add('active');
             
             // Atualizar o menu mobile
@@ -775,20 +810,13 @@
             }
         }
         
-        function mostrarAabaMobile(aba) {
+        function mostrarAbaMobile(aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Encontrar a aba correspondente e ativá-la
-            const tabs = document.querySelectorAll('.tab');
-            for (let i = 0; i < tabs.length; i++) {
-                if (tabs[i].textContent.includes(aba === 'faturas' ? 'Faturas' : 
-                                                aba === 'analytics' ? 'Análises' : 'Backup')) {
-                    tabs[i].classList.add('active');
-                    break;
-                }
-            }
-            
+            // Ativar aba correspondente
+            const tab = document.querySelector(`.tab[data-aba="${aba}"]`);
+            if (tab) tab.classList.add('active');
             document.getElementById(aba).classList.add('active');
             
             if (aba === 'analytics') {
@@ -814,8 +842,8 @@
             event.preventDefault();
             
             const tipo = document.getElementById('tipo').value;
-            const nome = document.getElementById('nome').value;
-            const categoria = document.getElementById('categoria').value || 'Geral';
+            const nome = document.getElementById('nome').value.trim();
+            const categoria = (document.getElementById('categoria').value || 'Geral').trim();
             const fechamento = document.getElementById('fechamento').value;
             const vencimento = document.getElementById('vencimento').value;
             const valor = parseFloat(document.getElementById('valor').value);
@@ -831,7 +859,7 @@
                 return;
             }
             
-            if (new Date(vencimento) <= new Date(fechamento)) {
+            if (parseYMD(vencimento) <= parseYMD(fechamento)) {
                 exibirNotificacao('A data de vencimento deve ser posterior à data de fechamento!', 'error');
                 return;
             }
@@ -853,7 +881,7 @@
                 cancelarEdicao();
             } else {
                 const novaFatura = {
-                    id: Date.now(),
+                    id: (crypto?.randomUUID?.() || String(Date.now())),
                     tipo, nome, categoria, fechamento, vencimento, valor, recorrente,
                     pago: false,
                     dataPagamento: null,
@@ -899,6 +927,11 @@
             document.getElementById('btnCancel').style.display = 'none';
             limparFormulario();
         }
+
+        function limparFormulario() {
+            const form = document.getElementById('formFatura');
+            if (form) form.reset();
+        }
         
         function excluirFatura(id) {
             const fatura = faturas.find(f => f.id === id);
@@ -934,7 +967,7 @@
                 `Tem certeza que deseja ${acao} esta fatura?`,
                 () => {
                     fatura.pago = estaPago;
-                    fatura.dataPagamento = estaPago ? new Date().toISOString().split('T')[0] : null;
+                    fatura.dataPagamento = estaPago ? hojeYMD() : null;
                     
                     if (estaPago) {
                         fatura.historicoPagamentos.push({
@@ -961,33 +994,40 @@
             const tbody = document.querySelector('#tabelaFaturas tbody');
             tbody.innerHTML = '';
             
-            const faturasOrdenadas = [...faturas].sort((a, b) => {
+            // Ordenação estável
+            const pares = faturas.map((f, i) => ({ f, i }));
+            const comparar = (a, b) => {
                 let valorA, valorB;
-                
-                switch(ordenacaoAtual.campo) {
+                switch (ordenacaoAtual.campo) {
                     case 'tipo':
                     case 'nome':
                     case 'categoria':
-                        valorA = a[ordenacaoAtual.campo] || '';
-                        valorB = b[ordenacaoAtual.campo] || '';
+                        valorA = (a.f[ordenacaoAtual.campo] || '').toLowerCase();
+                        valorB = (b.f[ordenacaoAtual.campo] || '').toLowerCase();
                         break;
                     case 'fechamento':
                     case 'vencimento':
-                        valorA = new Date(a[ordenacaoAtual.campo]);
-                        valorB = new Date(b[ordenacaoAtual.campo]);
+                        valorA = parseYMD(a.f[ordenacaoAtual.campo]);
+                        valorB = parseYMD(b.f[ordenacaoAtual.campo]);
                         break;
                     case 'valor':
-                        valorA = a.valor;
-                        valorB = b.valor;
+                        valorA = a.f.valor;
+                        valorB = b.f.valor;
                         break;
+                    default:
+                        valorA = a.i; valorB = b.i;
                 }
-                
-                if (ordenacaoAtual.direcao === 'asc') {
-                    return valorA > valorB ? 1 : -1;
+                let res = 0;
+                if (valorA instanceof Date && valorB instanceof Date) {
+                    res = valorA - valorB;
                 } else {
-                    return valorA < valorB ? 1 : -1;
+                    res = valorA > valorB ? 1 : valorA < valorB ? -1 : 0;
                 }
-            });
+                if (ordenacaoAtual.direcao === 'desc') res = -res;
+                if (res === 0) res = a.i - b.i; // estável
+                return res;
+            };
+            const faturasOrdenadas = pares.sort(comparar).map(p => p.f);
             
             // Aplicar filtros
             const faturasFiltradas = aplicarFiltros(faturasOrdenadas);
@@ -1011,6 +1051,7 @@
             }
             
             let totalPendente = 0;
+            const hoje = hojeYMD();
             faturasPagina.forEach(fatura => {
                 const tr = document.createElement('tr');
                 
@@ -1021,17 +1062,17 @@
                 
                 const icone = icones[fatura.tipo] || '📦';
                 
-                const hoje = new Date();
-                const vencimento = new Date(fatura.vencimento);
-                const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                const d = diffDias(hoje, fatura.vencimento);
                 let avisoVencimento = '';
                 
                 if (fatura.pago) {
                     avisoVencimento = ` <span style="color: var(--success-color);">💰 ${formatarData(fatura.dataPagamento)}</span>`;
-                } else if (diffDias < 0) {
-                    avisoVencimento = ` <span class="expired">(Vencida há ${Math.abs(diffDias)} dias)</span>`;
-                } else if (diffDias <= 7) {
-                    avisoVencimento = ` <span class="warning">(Vence em ${diffDias} dias)</span>`;
+                } else if (d < 0) {
+                    avisoVencimento = ` <span class="expired">(Vencida há ${Math.abs(d)} dias)</span>`;
+                } else if (d === 0) {
+                    avisoVencimento = ` <span class="warning">(Vence hoje)</span>`;
+                } else if (d <= 7) {
+                    avisoVencimento = ` <span class="warning">(Vence em ${d} dias)</span>`;
                 }
                 
                 const categoriaTag = fatura.categoria ? 
@@ -1046,14 +1087,14 @@
                     <td>${fatura.categoria || 'Geral'}${categoriaTag}</td>
                     <td>${formatarData(fatura.fechamento)}</td>
                     <td>${formatarData(fatura.vencimento)}${avisoVencimento}</td>
-                    <td class="amount ${fatura.pago ? 'paid' : 'unpaid'}">R$ ${fatura.valor.toFixed(2).replace('.', ',')}</td>
+                    <td class="amount ${fatura.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(fatura.valor)}</td>
                     <td>
                         ${!fatura.pago ? 
-                            `<button class="btn btn-edit" onclick="editarFatura(${fatura.id})" aria-label="Editar fatura">Editar</button>` : 
-                            '<span class="lock-icon">🔒</span>'
+                            `<button class="btn btn-edit" onclick="editarFatura('${fatura.id}')" aria-label="Editar fatura">Editar</button>` : 
+                            '<span class="lock-icon" aria-hidden="true">🔒</span>'
                         }
-                        <button class="btn btn-delete" onclick="excluirFatura(${fatura.id})" ${fatura.pago ? 'disabled' : ''} aria-label="Excluir fatura">Excluir</button>
-                        <button class="btn btn-paid" onclick="marcarComoPago(${fatura.id}, ${!fatura.pago})" aria-label="${fatura.pago ? 'Desfazer pagamento' : 'Pagar fatura'}">
+                        <button class="btn btn-delete" onclick="excluirFatura('${fatura.id}')" aria-label="Excluir fatura">Excluir</button>
+                        <button class="btn btn-paid" onclick="marcarComoPago('${fatura.id}', ${!fatura.pago})" aria-label="${fatura.pago ? 'Desfazer pagamento' : 'Pagar fatura'}">
                             ${fatura.pago ? 'Desfazer' : 'Pagar'}
                         </button>
                     </td>
@@ -1067,7 +1108,7 @@
             });
             
             document.getElementById('resumoTotal').innerHTML = 
-                `Total de faturas pendentes: R$ ${totalPendente.toFixed(2).replace('.', ',')}`;
+                `Total de faturas pendentes: ${fmtBRL.format(totalPendente)}`;
                 
             // Atualizar paginação
             atualizarPaginacao(totalPaginas);
@@ -1094,10 +1135,10 @@
                 
                 let dataMatch = true;
                 if (dataInicio) {
-                    dataMatch = dataMatch && new Date(fatura.vencimento) >= new Date(dataInicio);
+                    dataMatch = dataMatch && parseYMD(fatura.vencimento) >= parseYMD(dataInicio);
                 }
                 if (dataFim) {
-                    dataMatch = dataMatch && new Date(fatura.vencimento) <= new Date(dataFim);
+                    dataMatch = dataMatch && parseYMD(fatura.vencimento) <= parseYMD(dataFim);
                 }
                 
                 return tipoMatch && statusMatch && categoriaMatch && nomeMatch && valorMatch && dataMatch;
@@ -1192,15 +1233,17 @@
         // Analytics e gráficos
         function atualizarAnalytics() {
             const totalFaturas = faturas.length;
-            const faturasPagas = faturas.filter(f => f.pago).length;
-            const faturasPendentes = totalFaturas - faturasPagas;
+            const fPagas = faturas.filter(f => f.pago);
+            const fPendentes = faturas.filter(f => !f.pago);
+            const faturasPagas = fPagas.length;
+            const faturasPendentes = fPendentes.length;
             const mediaValor = totalFaturas > 0 ? 
                 faturas.reduce((sum, f) => sum + f.valor, 0) / totalFaturas : 0;
             
             document.getElementById('totalFaturas').textContent = totalFaturas;
             document.getElementById('faturasPagas').textContent = faturasPagas;
             document.getElementById('faturasPendentes').textContent = faturasPendentes;
-            document.getElementById('mediaValor').textContent = `R$ ${mediaValor.toFixed(2).replace('.', ',')}`;
+            document.getElementById('mediaValor').textContent = fmtBRL.format(mediaValor);
             
             criarGraficoTipos();
             criarGraficoCategorias();
@@ -1209,18 +1252,15 @@
         
         function criarGraficoTipos() {
             const ctx = document.getElementById('graficoTipos').getContext('2d');
-            
-            if (graficos.tipos) {
-                graficos.tipos.destroy();
-            }
+            if (graficos.tipos) graficos.tipos.destroy();
             
             const tiposCount = {};
             faturas.forEach(f => {
                 tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
             });
-            
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#ffffff' : '#333333';
+
+            const cs = getComputedStyle(document.documentElement);
+            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             
             graficos.tipos = new Chart(ctx, {
                 type: 'doughnut',
@@ -1230,7 +1270,7 @@
                         data: Object.values(tiposCount),
                         backgroundColor: [
                             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                            '#9966FF', '#FF9F40', '#8BC34A', '#C9CBCF'
                         ]
                     }]
                 },
@@ -1255,19 +1295,18 @@
         
         function criarGraficoCategorias() {
             const ctx = document.getElementById('graficoCategorias').getContext('2d');
-            
-            if (graficos.categorias) {
-                graficos.categorias.destroy();
-            }
+            if (graficos.categorias) graficos.categorias.destroy();
             
             const categoriasValor = {};
             faturas.forEach(f => {
                 const cat = f.categoria || 'Geral';
                 categoriasValor[cat] = (categoriasValor[cat] || 0) + f.valor;
             });
-            
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#ffffff' : '#333333';
+
+            const cs = getComputedStyle(document.documentElement);
+            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
+            const primary = cs.getPropertyValue('--primary-color').trim() || '#36A2EB';
+            const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
             
             graficos.categorias = new Chart(ctx, {
                 type: 'bar',
@@ -1276,7 +1315,7 @@
                     datasets: [{
                         label: 'Valor Total (R$)',
                         data: Object.values(categoriasValor),
-                        backgroundColor: '#36A2EB'
+                        backgroundColor: primary
                     }]
                 },
                 options: {
@@ -1300,7 +1339,7 @@
                                 color: textColor
                             },
                             grid: {
-                                color: isDark ? '#555' : '#ddd'
+                                color: gridColor
                             }
                         },
                         x: {
@@ -1308,7 +1347,7 @@
                                 color: textColor
                             },
                             grid: {
-                                color: isDark ? '#555' : '#ddd'
+                                color: gridColor
                             }
                         }
                     }
@@ -1318,14 +1357,12 @@
         
         function criarGraficoMensal() {
             const ctx = document.getElementById('graficoMensal').getContext('2d');
-            
-            if (graficos.mensal) {
-                graficos.mensal.destroy();
-            }
+            if (graficos.mensal) graficos.mensal.destroy();
             
             const dadosMensais = {};
             faturas.forEach(f => {
-                const mes = f.vencimento.substring(0, 7);
+                const mes = f.vencimento?.substring(0, 7);
+                if (!mes) return;
                 if (!dadosMensais[mes]) {
                     dadosMensais[mes] = { total: 0, pagos: 0, pendentes: 0 };
                 }
@@ -1338,8 +1375,9 @@
             });
             
             const meses = Object.keys(dadosMensais).sort();
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#ffffff' : '#333333';
+            const cs = getComputedStyle(document.documentElement);
+            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
+            const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
             
             graficos.mensal = new Chart(ctx, {
                 type: 'line',
@@ -1390,7 +1428,7 @@
                                 color: textColor
                             },
                             grid: {
-                                color: isDark ? '#555' : '#ddd'
+                                color: gridColor
                             }
                         },
                         x: {
@@ -1398,7 +1436,7 @@
                                 color: textColor
                             },
                             grid: {
-                                color: isDark ? '#555' : '#ddd'
+                                color: gridColor
                             }
                         }
                     }
@@ -1409,29 +1447,27 @@
         // Funções de recorrência
         function gerarFaturasRecorrentes() {
             let geradas = 0;
-            const proximoMes = new Date();
-            proximoMes.setMonth(proximoMes.getMonth() + 1);
-            const proximoMesStr = proximoMes.toISOString().substring(0, 7);
+
+            // mês/ano do próximo mês (para checagem)
+            const pm = new Date(); pm.setMonth(pm.getMonth() + 1);
+            const proximoMesStr = formatYMD(pm).substring(0, 7);
             
-            faturas.filter(f => f.recorrente).forEach(fatura => {
+            faturas.filter(f => f.recorrente).forEach((fatura, i) => {
                 // Verificar se já existe uma fatura para o próximo mês
-                const jaExiste = faturas.some(f => 
-                    f.nome === fatura.nome && 
-                    f.vencimento.startsWith(proximoMesStr)
+                const jaExiste = faturas.some(ff => 
+                    ff.nome === fatura.nome && 
+                    ff.vencimento?.startsWith(proximoMesStr)
                 );
                 
                 if (!jaExiste) {
-                    const proximaData = new Date(fatura.vencimento);
-                    proximaData.setMonth(proximaData.getMonth() + 1);
-                    
-                    const proximoFechamento = new Date(fatura.fechamento);
-                    proximoFechamento.setMonth(proximoFechamento.getMonth() + 1);
+                    const proxV = parseYMD(fatura.vencimento); proxV.setMonth(proxV.getMonth() + 1);
+                    const proxF = parseYMD(fatura.fechamento); proxF.setMonth(proxF.getMonth() + 1);
                     
                     const novaFatura = {
                         ...fatura,
-                        id: Date.now() + geradas,
-                        fechamento: proximoFechamento.toISOString().split('T')[0],
-                        vencimento: proximaData.toISOString().split('T')[0],
+                        id: (crypto?.randomUUID?.() || (Date.now() + i)),
+                        fechamento: formatYMD(proxF),
+                        vencimento: formatYMD(proxV),
                         pago: false,
                         dataPagamento: null,
                         historicoPagamentos: []
@@ -1456,22 +1492,24 @@
         // Exportação e backup
         function exportarCSV() {
             const headers = ['Tipo', 'Nome', 'Categoria', 'Fechamento', 'Vencimento', 'Valor', 'Status', 'Data Pagamento', 'Recorrente'];
-            const csvContent = [
+            const dadosFiltrados = aplicarFiltros([...faturas]);
+
+            const csvContent = '\uFEFF' + [
                 headers.join(','),
-                ...faturas.map(f => [
+                ...dadosFiltrados.map(f => [
                     f.tipo,
                     `"${f.nome.replace(/"/g, '""')}"`,
                     `"${(f.categoria || 'Geral').replace(/"/g, '""')}"`,
                     formatarData(f.fechamento),
                     formatarData(f.vencimento),
-                    f.valor.toFixed(2),
+                    f.valor.toFixed(2), // mantém ponto para compatibilidade com CSV
                     f.pago ? 'Pago' : 'Pendente',
                     f.dataPagamento ? formatarData(f.dataPagamento) : '',
                     f.recorrente ? 'Sim' : 'Não'
                 ].join(','))
             ].join('\n');
             
-            baixarArquivo(csvContent, `faturas_${obterDataAtual()}.csv`, 'text/csv');
+            baixarArquivo(csvContent, `faturas_${obterDataAtual()}.csv`, 'text/csv;charset=utf-8;');
             exibirNotificacao('CSV exportado com sucesso!', 'success');
         }
         
@@ -1479,7 +1517,7 @@
             const backup = {
                 faturas: faturas,
                 dataBackup: new Date().toISOString(),
-                versao: '2.0',
+                versao: '2.1',
                 tema: localStorage.getItem('tema')
             };
             
@@ -1558,9 +1596,9 @@
     
     <div class="summary">
         <h3>Resumo Financeiro</h3>
-        <p><strong>Total Geral:</strong> R$ ${totalGeral.toFixed(2).replace('.', ',')}</p>
-        <p><strong>Total Pago:</strong> R$ ${totalPago.toFixed(2).replace('.', ',')}</p>
-        <p><strong>Total Pendente:</strong> R$ ${totalPendente.toFixed(2).replace('.', ',')}</p>
+        <p><strong>Total Geral:</strong> ${fmtBRL.format(totalGeral)}</p>
+        <p><strong>Total Pago:</strong> ${fmtBRL.format(totalPago)}</p>
+        <p><strong>Total Pendente:</strong> ${fmtBRL.format(totalPendente)}</p>
         <p><strong>Total de Faturas:</strong> ${faturas.length}</p>
     </div>
     
@@ -1582,7 +1620,7 @@
                     <td>${f.nome}</td>
                     <td>${f.categoria || 'Geral'}</td>
                     <td>${formatarData(f.vencimento)}</td>
-                    <td class="${f.pago ? 'paid' : 'unpaid'}">R$ ${f.valor.toFixed(2).replace('.', ',')}</td>
+                    <td class="${f.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(f.valor)}</td>
                     <td>${f.pago ? 'Pago' : 'Pendente'}</td>
                 </tr>
             `).join('')}
@@ -1595,9 +1633,8 @@
             exibirNotificacao('Relatório HTML gerado com sucesso!', 'success');
         }
         
-        // Função para exportar PDF
+        // Função para exportar PDF (considera filtros)
         function exportarPDF() {
-            // Criar uma nova instância do jsPDF
             const doc = new jsPDF();
             
             // Adicionar título
@@ -1610,9 +1647,10 @@
             doc.setTextColor(100);
             doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 105, 22, { align: 'center' });
             
-            // Calcular totais
-            const totalGeral = faturas.reduce((sum, f) => sum + f.valor, 0);
-            const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
+            // Calcular totais a partir do conjunto filtrado
+            const dadosFiltrados = aplicarFiltros([...faturas]);
+            const totalGeral = dadosFiltrados.reduce((sum, f) => sum + f.valor, 0);
+            const totalPago = dadosFiltrados.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
             
             // Adicionar resumo
@@ -1621,18 +1659,18 @@
             doc.text('Resumo Financeiro', 14, 35);
             
             doc.setFontSize(11);
-            doc.text(`Total Geral: R$ ${totalGeral.toFixed(2).replace('.', ',')}`, 20, 45);
-            doc.text(`Total Pago: R$ ${totalPago.toFixed(2).replace('.', ',')}`, 20, 52);
-            doc.text(`Total Pendente: R$ ${totalPendente.toFixed(2).replace('.', ',')}`, 20, 59);
-            doc.text(`Total de Faturas: ${faturas.length}`, 20, 66);
+            doc.text(`Total Geral: ${fmtBRL.format(totalGeral)}`, 20, 45);
+            doc.text(`Total Pago: ${fmtBRL.format(totalPago)}`, 20, 52);
+            doc.text(`Total Pendente: ${fmtBRL.format(totalPendente)}`, 20, 59);
+            doc.text(`Total de Faturas: ${dadosFiltrados.length}`, 20, 66);
             
             // Preparar dados da tabela
-            const tableData = faturas.map(f => [
+            const tableData = dadosFiltrados.map(f => [
                 f.tipo,
                 f.nome,
                 f.categoria || 'Geral',
                 formatarData(f.vencimento),
-                `R$ ${f.valor.toFixed(2).replace('.', ',')}`,
+                fmtBRL.format(f.valor),
                 f.pago ? 'Pago' : 'Pendente'
             ]);
             
@@ -1696,32 +1734,23 @@
         function mostrarModal(titulo, mensagem, callback) {
             document.getElementById('modalTitulo').textContent = titulo;
             document.getElementById('modalMensagem').textContent = mensagem;
-            document.getElementById('modalConfirmarBtn').onclick = callback;
-            document.getElementById('modalConfirmacao').style.display = 'flex';
+            const btnConfirm = document.getElementById('modalConfirmarBtn');
+            btnConfirm.onclick = callback;
+            const modal = document.getElementById('modalConfirmacao');
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => btnConfirm.focus(), 0);
         }
         
         function fecharModal() {
-            document.getElementById('modalConfirmacao').style.display = 'none';
+            const modal = document.getElementById('modalConfirmacao');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
         }
         
         // Funções auxiliares
         function atualizarLocalStorage() {
             localStorage.setItem('faturas', JSON.stringify(faturas));
-        }
-        
-        function limparFormulario() {
-            document.getElementById('formFatura').reset();
-            cancelarEdicao();
-        }
-        
-        function formatarData(data) {
-            if (!data) return '-';
-            const [ano, mes, dia] = data.split('-');
-            return `${dia}/${mes}/${ano}`;
-        }
-        
-        function obterDataAtual() {
-            return new Date().toISOString().split('T')[0];
         }
         
         function baixarArquivo(conteudo, nomeArquivo, tipo) {
@@ -1747,12 +1776,10 @@
         
         // Funções para notificações de vencimento
         function verificarVencimentoProximo() {
-            const hoje = new Date();
+            const hoje = hojeYMD();
             const vencimentoProximo = faturas.filter(fatura => {
                 if (fatura.pago) return false;
-                const vencimento = new Date(fatura.vencimento);
-                const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
-                return diffDias <= 7;
+                return diffDias(hoje, fatura.vencimento) <= 7;
             });
 
             const notificacao = document.getElementById('notificacaoVencimento');
@@ -1765,17 +1792,16 @@
 
             let html = '<ul style="margin-top: 10px; margin-bottom: 0;">';
             vencimentoProximo.forEach(fatura => {
-                const vencimento = new Date(fatura.vencimento);
-                const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                const d = diffDias(hoje, fatura.vencimento);
                 let texto = '';
-                if (diffDias < 0) {
-                    texto = `Vencida há ${Math.abs(diffDias)} dias`;
-                } else if (diffDias === 0) {
+                if (d < 0) {
+                    texto = `Vencida há ${Math.abs(d)} dias`;
+                } else if (d === 0) {
                     texto = 'Vence hoje';
                 } else {
-                    texto = `Vence em ${diffDias} dias`;
+                    texto = `Vence em ${d} dias`;
                 }
-                html += `<li><strong>${fatura.nome}</strong> - ${texto} - R$ ${fatura.valor.toFixed(2).replace('.', ',')}</li>`;
+                html += `<li><strong>${fatura.nome}</strong> - ${texto} - ${fmtBRL.format(fatura.valor)}</li>`;
             });
             html += '</ul>';
 
@@ -1795,6 +1821,18 @@
                 fecharModal();
             }
         };
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
+
+        // Debounce utilitário
+        function debounce(fn, delay = 200) {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), delay);
+            };
+        }
     </script>
 </body>
 </html>
