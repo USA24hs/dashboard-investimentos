@@ -47,7 +47,7 @@
             margin: 0;
             transition: all 0.3s ease;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -75,21 +75,21 @@
             cursor: pointer;
             font-size: 16px;
         }
-        
+
         h1 {
             text-align: center;
             color: var(--text-color);
             margin: 0;
             flex: 1;
         }
-        
+
         .tabs {
             display: flex;
             border-bottom: 2px solid var(--border-color);
             margin-bottom: 20px;
             overflow-x: auto;
         }
-        
+
         .tab {
             padding: 10px 20px;
             cursor: pointer;
@@ -97,62 +97,62 @@
             white-space: nowrap;
             color: var(--text-color);
         }
-        
+
         .tab.active {
             border-bottom-color: var(--primary-color);
             background-color: var(--header-bg);
         }
-        
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             background-color: var(--container-bg);
         }
-        
+
         th, td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
             color: var(--text-color);
         }
-        
+
         th {
             background-color: var(--header-bg);
             font-weight: bold;
             cursor: pointer;
             position: relative;
         }
-        
+
         th:hover {
             background-color: var(--header-hover);
         }
-        
+
         tr:hover {
             background-color: var(--hover-bg);
         }
-        
+
         .amount {
             font-weight: bold;
         }
-        
+
         .paid {
             color: var(--success-color);
             text-decoration: line-through;
         }
-        
+
         .unpaid {
             color: var(--danger-color);
         }
-        
+
         .btn {
             padding: 6px 10px;
             margin: 2px;
@@ -162,12 +162,12 @@
             font-size: 14px;
             transition: all 0.2s ease;
         }
-        
+
         .btn:hover {
             opacity: 0.9;
             transform: translateY(-1px);
         }
-        
+
         .btn-add { background-color: var(--success-color); color: white; }
         .btn-edit { background-color: var(--primary-color); color: white; }
         .btn-delete { background-color: var(--danger-color); color: white; }
@@ -175,22 +175,22 @@
         .btn-export { background-color: var(--warning-color); color: white; }
         .btn-import { background-color: #9c27b0; color: white; }
         .btn-pdf { background-color: #f44336; color: white; }
-        
+
         .form-group {
             margin: 10px 0;
         }
-        
+
         .form-row {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
         }
-        
+
         .form-row .form-group {
             flex: 1;
             min-width: 200px;
         }
-        
+
         input[type="text"], input[type="number"], input[type="date"], select, input[type="file"] {
             padding: 8px;
             margin: 5px 0 10px 0;
@@ -202,11 +202,11 @@
             background-color: var(--container-bg);
             color: var(--text-color);
         }
-        
+
         input:invalid {
             border-color: var(--danger-color);
         }
-        
+
         .summary {
             background-color: #e8f5e9;
             padding: 15px;
@@ -220,33 +220,33 @@
             background-color: #1b5e1f;
             color: #81c784;
         }
-        
+
         .filter-container {
             margin: 20px 0;
             padding: 15px;
             background-color: var(--header-bg);
             border-radius: 5px;
         }
-        
+
         .filter-group {
             display: inline-block;
             margin-right: 20px;
             margin-bottom: 10px;
         }
-        
+
         .notification {
             padding: 10px;
             margin: 10px 0;
             border-radius: 4px;
             display: none;
         }
-        
+
         .notification.success {
             background-color: #dff0d8;
             color: #3c763d;
             border: 1px solid #d6e9c6;
         }
-        
+
         .notification.error {
             background-color: #f2dede;
             color: #a94442;
@@ -288,52 +288,52 @@
             color: #8ab4f8;
             border-color: #3b4d63;
         }
-        
+
         .warning { color: var(--warning-color); font-weight: bold; }
         .expired { color: var(--danger-color); font-weight: bold; }
-        
+
         .btn:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
-        
+
         .chart-container {
             margin: 20px 0;
             height: 400px;
         }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin: 20px 0;
         }
-        
+
         .stat-card {
             background-color: var(--header-bg);
             padding: 15px;
             border-radius: 8px;
             text-align: center;
         }
-        
+
         .stat-value {
             font-size: 24px;
             font-weight: bold;
             color: var(--primary-color);
         }
-        
+
         .export-controls {
             margin: 20px 0;
             padding: 15px;
             background-color: var(--header-bg);
             border-radius: 5px;
         }
-        
+
         .export-controls button {
             margin-right: 10px;
             margin-bottom: 10px;
         }
-        
+
         .categoria-tag {
             display: inline-block;
             padding: 2px 8px;
@@ -347,16 +347,16 @@
             background-color: #1565c0;
             color: #ffffff;
         }
-        
+
         .recorrente-badge {
             color: var(--warning-color);
             font-weight: bold;
         }
-        
+
         .hidden {
             display: none;
         }
-        
+
         .close-btn {
             float: right;
             background: none;
@@ -365,7 +365,7 @@
             cursor: pointer;
             color: inherit;
         }
-        
+
         /* Mobile menu */
         .mobile-tabs-menu {
             display: none;
@@ -377,14 +377,14 @@
             border-radius: 4px;
             color: var(--text-color);
         }
-        
+
         .pagination {
             display: flex;
             justify-content: center;
             margin-top: 20px;
             gap: 5px;
         }
-        
+
         .pagination button {
             padding: 5px 10px;
             background-color: var(--header-bg);
@@ -393,23 +393,23 @@
             cursor: pointer;
             color: var(--text-color);
         }
-        
+
         .pagination button.active {
             background-color: var(--primary-color);
             color: white;
         }
-        
+
         .search-advanced {
             margin-top: 10px;
             padding: 10px;
             background-color: var(--header-bg);
             border-radius: 4px;
         }
-        
+
         .sort-indicator {
             margin-left: 5px;
         }
-        
+
         /* Modal de confirmação */
         .modal {
             display: none;
@@ -423,7 +423,7 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .modal-content {
             background-color: var(--container-bg);
             padding: 20px;
@@ -432,55 +432,60 @@
             width: 100%;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
-        
+
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
         }
-        
+
+        /* Backup: botões em negrito */
+        #backup .export-controls .btn {
+            font-weight: 700 !important;
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .header-controls {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .form-row {
                 flex-direction: column;
             }
-            
+
             .filter-group {
                 display: block;
                 margin-right: 0;
                 margin-bottom: 15px;
             }
-            
+
             th, td {
                 padding: 8px 10px;
                 font-size: 14px;
             }
-            
+
             .btn {
                 padding: 5px 8px;
                 font-size: 12px;
                 margin: 1px;
             }
-            
+
             .tabs {
                 display: none;
             }
-            
+
             .mobile-tabs-menu {
                 display: block;
             }
-            
+
             .export-controls button {
                 width: 100%;
                 margin-right: 0;
             }
-            
+
             .container {
                 padding: 15px;
             }
@@ -494,28 +499,28 @@
             <h1>Gerenciador de Faturas Avançado</h1>
             <div></div>
         </div>
-        
+
         <div id="notification" class="notification" role="status" aria-live="polite"></div>
-        
+
         <!-- Nova notificação para vencimentos próximos -->
         <div id="notificacaoVencimento" class="notification warning" style="display: none;">
             <button class="close-btn" onclick="fecharNotificacaoVencimento()" aria-label="Fechar notificação">✖</button>
             <strong>⚠️ Aviso de Vencimento</strong>
             <div id="listaVencimentoProximo"></div>
         </div>
-        
+
         <select class="mobile-tabs-menu" onchange="mostrarAbaMobile(this.value)" aria-label="Selecionar aba no modo mobile">
             <option value="faturas">📋 Faturas</option>
             <option value="analytics">📊 Análises</option>
             <option value="backup">💾 Backup</option>
         </select>
-        
+
         <div class="tabs">
             <div class="tab active" data-aba="faturas" onclick="mostrarAba(event, 'faturas')">📋 Faturas</div>
             <div class="tab" data-aba="analytics" onclick="mostrarAba(event, 'analytics')">📊 Análises</div>
             <div class="tab" data-aba="backup" onclick="mostrarAba(event, 'backup')">💾 Backup</div>
         </div>
-        
+
         <!-- ABA FATURAS -->
         <div id="faturas" class="tab-content active">
             <form id="formFatura" onsubmit="adicionarFatura(event)">
@@ -534,46 +539,46 @@
                             <option value="outros">📦 Outros</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="nome">Nome:</label>
                         <input type="text" id="nome" placeholder="Nome do cartão ou serviço" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="categoria">Categoria:</label>
                         <input type="text" id="categoria" list="categoriasSugeridas" placeholder="Ex: Casa, Pessoal, Trabalho">
                         <datalist id="categoriasSugeridas"></datalist>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="fechamento">Data de Fechamento:</label>
                         <input type="date" id="fechamento" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="vencimento">Data de Vencimento:</label>
                         <input type="date" id="vencimento" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="valor">Valor:</label>
                         <input type="number" id="valor" placeholder="0.00" step="0.01" min="0" required>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label>
                         <input type="checkbox" id="recorrente"> 🔄 Conta recorrente (gerar automaticamente no próximo mês)
                     </label>
                 </div>
-                
+
                 <button type="submit" class="btn btn-add" id="btnAdd">Adicionar Fatura</button>
                 <button type="button" class="btn" id="btnCancel" onclick="cancelarEdicao()" style="display: none; background-color: #9e9e9e;">Cancelar</button>
             </form>
-            
+
             <div class="filter-container">
                 <div class="filter-group">
                     <label for="filtroTipo">Filtrar por tipo:</label>
@@ -589,7 +594,7 @@
                         <option value="outros">Outros</option>
                     </select>
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="filtroStatus">Filtrar por status:</label>
                     <select id="filtroStatus" onchange="filtrarFaturas()">
@@ -598,48 +603,48 @@
                         <option value="pendente">Pendentes</option>
                     </select>
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="filtroCategoria">Filtrar por categoria:</label>
                     <select id="filtroCategoria" onchange="filtrarFaturas()">
                         <option value="">Todas</option>
                     </select>
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="buscaNome">Buscar por nome:</label>
                     <input type="text" id="buscaNome" placeholder="Buscar...">
                 </div>
-                
+
                 <div class="filter-group">
                     <button class="btn" onclick="toggleAdvancedSearch()">🔍 Busca Avançada</button>
                 </div>
             </div>
-            
+
             <div id="advancedSearch" class="search-advanced" style="display: none;">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="buscaValorMin">Valor Mínimo:</label>
                         <input type="number" id="buscaValorMin" placeholder="0.00" step="0.01" min="0" onchange="filtrarFaturas()">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="buscaValorMax">Valor Máximo:</label>
                         <input type="number" id="buscaValorMax" placeholder="0.00" step="0.01" min="0" onchange="filtrarFaturas()">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="buscaDataInicio">De:</label>
                         <input type="date" id="buscaDataInicio" onchange="filtrarFaturas()">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="buscaDataFim">Até:</label>
                         <input type="date" id="buscaDataFim" onchange="filtrarFaturas()">
                     </div>
                 </div>
             </div>
-            
+
             <div style="overflow-x: auto;">
                 <table id="tabelaFaturas">
                     <thead>
@@ -656,14 +661,14 @@
                     <tbody></tbody>
                 </table>
             </div>
-            
+
             <div class="pagination" id="paginacao"></div>
-            
+
             <div class="summary" id="resumoTotal">
                 Total de faturas pendentes: R$ 0,00
             </div>
         </div>
-        
+
         <!-- ABA ANÁLISES -->
         <div id="analytics" class="tab-content">
             <div class="stats-grid">
@@ -684,20 +689,20 @@
                     <div>Valor Médio</div>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <canvas id="graficoTipos" aria-label="Gráfico de distribuição por tipo" role="img"></canvas>
             </div>
-            
+
             <div class="chart-container">
                 <canvas id="graficoCategorias" aria-label="Gráfico de gastos por categoria" role="img"></canvas>
             </div>
-            
+
             <div class="chart-container">
                 <canvas id="graficoMensal" aria-label="Gráfico de evolução mensal dos gastos" role="img"></canvas>
             </div>
         </div>
-        
+
         <!-- ABA BACKUP -->
         <div id="backup" class="tab-content">
             <div class="export-controls">
@@ -706,18 +711,18 @@
                 <button class="btn btn-export" onclick="exportarBackup()">💾 Backup JSON</button>
                 <button class="btn btn-export" onclick="gerarRelatorioHTML()">📄 Relatório HTML</button>
                 <button class="btn btn-pdf" onclick="exportarPDF()">📋 Exportar PDF</button>
-                
+
                 <h3>Importar Dados</h3>
                 <input type="file" id="arquivoBackup" accept=".json" onchange="restaurarBackup(event)" style="margin-bottom: 10px;">
                 <button class="btn btn-import" onclick="document.getElementById('arquivoBackup').click()">📂 Restaurar Backup</button>
-                
+
                 <h3>Gerenciar Recorrências</h3>
                 <button class="btn btn-add" onclick="gerarFaturasRecorrentes()">🔄 Gerar Faturas do Próximo Mês</button>
                 <button class="btn btn-delete" onclick="confirmarLimpezaDados()">🗑️ Limpar Todos os Dados</button>
             </div>
         </div>
     </div>
-    
+
     <!-- Modal de Confirmação -->
     <div id="modalConfirmacao" class="modal" aria-hidden="true" aria-labelledby="modalTitulo" aria-describedby="modalMensagem">
         <div class="modal-content" role="dialog">
@@ -729,7 +734,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         // Inicializar jsPDF
         window.jsPDF = window.jspdf.jsPDF;
@@ -761,7 +766,7 @@
         let graficos = {};
         let paginaAtual = 1;
         const itensPorPagina = 10;
-        
+
         // Carregar configurações
         window.onload = function() {
             carregarTema();
@@ -772,13 +777,16 @@
             atualizarSugestoesCategorias();
             // Busca com debounce
             document.getElementById('buscaNome').onkeyup = debounce(filtrarFaturas, 200);
+
+            // Cores aleatórias no Backup ao carregar
+            aplicarCoresAleatoriasBackup();
         }
-        
+
         function carregarTema() {
             const tema = localStorage.getItem('tema') || 'light';
             document.documentElement.setAttribute('data-theme', tema);
         }
-        
+
         function carregarDados() {
             const dadosSalvos = localStorage.getItem('faturas');
             if (dadosSalvos) {
@@ -787,60 +795,71 @@
             atualizarTabela();
             atualizarAnalytics();
         }
-        
+
         function definirDatasMinimas() {
             const hoje = hojeYMD();
             document.getElementById('fechamento').setAttribute('min', hoje);
             document.getElementById('vencimento').setAttribute('min', hoje);
         }
-        
+
         // Gerenciamento de abas
         function mostrarAba(e, aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
+
             e.currentTarget.classList.add('active');
             document.getElementById(aba).classList.add('active');
-            
+
             // Atualizar o menu mobile
             document.querySelector('.mobile-tabs-menu').value = aba;
-            
+
             if (aba === 'analytics') {
                 atualizarAnalytics();
             }
+            if (aba === 'backup') {
+                aplicarCoresAleatoriasBackup();
+            }
         }
-        
+
         function mostrarAbaMobile(aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
+
             // Ativar aba correspondente
             const tab = document.querySelector(`.tab[data-aba="${aba}"]`);
             if (tab) tab.classList.add('active');
             document.getElementById(aba).classList.add('active');
-            
+
             if (aba === 'analytics') {
                 atualizarAnalytics();
             }
+            if (aba === 'backup') {
+                aplicarCoresAleatoriasBackup();
+            }
         }
-        
+
         // Tema
         function alternarTema() {
             const tema = document.documentElement.getAttribute('data-theme');
             const novoTema = tema === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', novoTema);
             localStorage.setItem('tema', novoTema);
-            
+
             // Recriar gráficos com novo tema
             if (document.getElementById('analytics').classList.contains('active')) {
                 setTimeout(() => atualizarAnalytics(), 100);
             }
+
+            // Reaplicar cores aleatórias no Backup se ativo
+            if (document.getElementById('backup').classList.contains('active')) {
+                aplicarCoresAleatoriasBackup();
+            }
         }
-        
+
         // CRUD de faturas
         function adicionarFatura(event) {
             event.preventDefault();
-            
+
             const tipo = document.getElementById('tipo').value;
             const nome = document.getElementById('nome').value.trim();
             const categoria = (document.getElementById('categoria').value || 'Geral').trim();
@@ -848,22 +867,22 @@
             const vencimento = document.getElementById('vencimento').value;
             const valor = parseFloat(document.getElementById('valor').value);
             const recorrente = document.getElementById('recorrente').checked;
-            
+
             if (!tipo) {
                 exibirNotificacao('Por favor, selecione um tipo de fatura!', 'error');
                 return;
             }
-            
+
             if (!nome || !fechamento || !vencimento || isNaN(valor)) {
                 exibirNotificacao('Por favor, preencha todos os campos corretamente!', 'error');
                 return;
             }
-            
+
             if (parseYMD(vencimento) <= parseYMD(fechamento)) {
                 exibirNotificacao('A data de vencimento deve ser posterior à data de fechamento!', 'error');
                 return;
             }
-            
+
             if (editandoId) {
                 const index = faturas.findIndex(f => f.id === editandoId);
                 if (index !== -1) {
@@ -871,7 +890,7 @@
                         exibirNotificacao('Não é possível editar uma fatura já paga!', 'error');
                         return;
                     }
-                    
+
                     faturas[index] = {
                         ...faturas[index],
                         tipo, nome, categoria, fechamento, vencimento, valor, recorrente
@@ -890,7 +909,7 @@
                 faturas.push(novaFatura);
                 exibirNotificacao('Fatura adicionada com sucesso!', 'success');
             }
-            
+
             atualizarLocalStorage();
             atualizarTabela();
             atualizarCategoriasFiltro();
@@ -898,14 +917,14 @@
             verificarVencimentoProximo();
             limparFormulario();
         }
-        
+
         function editarFatura(id) {
             const fatura = faturas.find(f => f.id === id);
             if (!fatura || fatura.pago) {
                 exibirNotificacao('Não é possível editar uma fatura já paga!', 'error');
                 return;
             }
-            
+
             document.getElementById('tipo').value = fatura.tipo;
             document.getElementById('nome').value = fatura.nome;
             document.getElementById('categoria').value = fatura.categoria || '';
@@ -913,14 +932,14 @@
             document.getElementById('vencimento').value = fatura.vencimento;
             document.getElementById('valor').value = fatura.valor;
             document.getElementById('recorrente').checked = fatura.recorrente || false;
-            
+
             editandoId = id;
             document.getElementById('btnAdd').textContent = 'Atualizar Fatura';
             document.getElementById('btnCancel').style.display = 'inline-block';
-            
+
             window.scrollTo(0, 0);
         }
-        
+
         function cancelarEdicao() {
             editandoId = null;
             document.getElementById('btnAdd').textContent = 'Adicionar Fatura';
@@ -932,15 +951,15 @@
             const form = document.getElementById('formFatura');
             if (form) form.reset();
         }
-        
+
         function excluirFatura(id) {
             const fatura = faturas.find(f => f.id === id);
             let mensagem = 'Tem certeza que deseja excluir esta fatura?';
-            
+
             if (fatura && fatura.pago) {
                 mensagem = 'Esta fatura já foi paga. Tem certeza que deseja excluí-la?';
             }
-            
+
             mostrarModal(
                 'Confirmar exclusão',
                 mensagem,
@@ -955,32 +974,32 @@
                 }
             );
         }
-        
+
         function marcarComoPago(id, estaPago) {
             const fatura = faturas.find(f => f.id === id);
             if (!fatura) return;
-            
+
             const acao = estaPago ? 'marcar como paga' : 'desmarcar pagamento';
-            
+
             mostrarModal(
                 'Confirmar ação',
                 `Tem certeza que deseja ${acao} esta fatura?`,
                 () => {
                     fatura.pago = estaPago;
                     fatura.dataPagamento = estaPago ? hojeYMD() : null;
-                    
+
                     if (estaPago) {
                         fatura.historicoPagamentos.push({
                             data: new Date().toISOString(),
                             valor: fatura.valor
                         });
                     }
-                    
+
                     atualizarLocalStorage();
                     atualizarTabela();
                     verificarVencimentoProximo();
                     exibirNotificacao(`Fatura ${estaPago ? 'paga' : 'desmarcada'} com sucesso!`, 'success');
-                    
+
                     if (editandoId === id) {
                         cancelarEdicao();
                     }
@@ -988,12 +1007,12 @@
                 }
             );
         }
-        
+
         // Atualização da tabela
         function atualizarTabela() {
             const tbody = document.querySelector('#tabelaFaturas tbody');
             tbody.innerHTML = '';
-            
+
             // Ordenação estável
             const pares = faturas.map((f, i) => ({ f, i }));
             const comparar = (a, b) => {
@@ -1028,43 +1047,43 @@
                 return res;
             };
             const faturasOrdenadas = pares.sort(comparar).map(p => p.f);
-            
+
             // Aplicar filtros
             const faturasFiltradas = aplicarFiltros(faturasOrdenadas);
-            
+
             // Paginação
             const totalPaginas = Math.ceil(faturasFiltradas.length / itensPorPagina);
             paginaAtual = Math.min(paginaAtual, totalPaginas || 1);
-            
+
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const fim = inicio + itensPorPagina;
             const faturasPagina = faturasFiltradas.slice(inicio, fim);
-            
+
             // Atualizar indicadores de ordenação
             document.querySelectorAll('.sort-indicator').forEach(el => {
                 el.textContent = '↕';
             });
-            
+
             const indicador = document.getElementById(`sort-${ordenacaoAtual.campo}`);
             if (indicador) {
                 indicador.textContent = ordenacaoAtual.direcao === 'asc' ? '↑' : '↓';
             }
-            
+
             let totalPendente = 0;
             const hoje = hojeYMD();
             faturasPagina.forEach(fatura => {
                 const tr = document.createElement('tr');
-                
+
                 const icones = {
                     cartao: '💳', celular: '📱', internet: '🛜', boleto: '📃',
                     streaming: '📺', seguro: '🛡️', financiamento: '🏠', outros: '📦'
                 };
-                
+
                 const icone = icones[fatura.tipo] || '📦';
-                
+
                 const d = diffDias(hoje, fatura.vencimento);
                 let avisoVencimento = '';
-                
+
                 if (fatura.pago) {
                     avisoVencimento = ` <span style="color: var(--success-color);">💰 ${formatarData(fatura.dataPagamento)}</span>`;
                 } else if (d < 0) {
@@ -1074,13 +1093,13 @@
                 } else if (d <= 7) {
                     avisoVencimento = ` <span class="warning">(Vence em ${d} dias)</span>`;
                 }
-                
-                const categoriaTag = fatura.categoria ? 
+
+                const categoriaTag = fatura.categoria ?
                     `<span class="categoria-tag">${fatura.categoria}</span>` : '';
-                
-                const recorrenteBadge = fatura.recorrente ? 
+
+                const recorrenteBadge = fatura.recorrente ?
                     `<span class="recorrente-badge">🔄</span>` : '';
-                
+
                 tr.innerHTML = `
                     <td>${icone} ${fatura.tipo.charAt(0).toUpperCase() + fatura.tipo.slice(1)}</td>
                     <td>${fatura.nome} ${fatura.pago ? '🔒' : ''} ${recorrenteBadge}</td>
@@ -1089,8 +1108,8 @@
                     <td>${formatarData(fatura.vencimento)}${avisoVencimento}</td>
                     <td class="amount ${fatura.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(fatura.valor)}</td>
                     <td>
-                        ${!fatura.pago ? 
-                            `<button class="btn btn-edit" onclick="editarFatura('${fatura.id}')" aria-label="Editar fatura">Editar</button>` : 
+                        ${!fatura.pago ?
+                            `<button class="btn btn-edit" onclick="editarFatura('${fatura.id}')" aria-label="Editar fatura">Editar</button>` :
                             '<span class="lock-icon" aria-hidden="true">🔒</span>'
                         }
                         <button class="btn btn-delete" onclick="excluirFatura('${fatura.id}')" aria-label="Excluir fatura">Excluir</button>
@@ -1099,21 +1118,21 @@
                         </button>
                     </td>
                 `;
-                
+
                 tbody.appendChild(tr);
-                
+
                 if (!fatura.pago) {
                     totalPendente += fatura.valor;
                 }
             });
-            
-            document.getElementById('resumoTotal').innerHTML = 
+
+            document.getElementById('resumoTotal').innerHTML =
                 `Total de faturas pendentes: ${fmtBRL.format(totalPendente)}`;
-                
+
             // Atualizar paginação
             atualizarPaginacao(totalPaginas);
         }
-        
+
         function aplicarFiltros(faturasLista) {
             const filtroTipo = document.getElementById('filtroTipo').value;
             const filtroStatus = document.getElementById('filtroStatus').value;
@@ -1123,16 +1142,16 @@
             const valorMax = parseFloat(document.getElementById('buscaValorMax').value) || Number.MAX_SAFE_INTEGER;
             const dataInicio = document.getElementById('buscaDataInicio').value;
             const dataFim = document.getElementById('buscaDataFim').value;
-            
+
             return faturasLista.filter(fatura => {
                 const tipoMatch = !filtroTipo || fatura.tipo === filtroTipo;
-                const statusMatch = !filtroStatus || 
-                    (filtroStatus === 'pago' && fatura.pago) || 
+                const statusMatch = !filtroStatus ||
+                    (filtroStatus === 'pago' && fatura.pago) ||
                     (filtroStatus === 'pendente' && !fatura.pago);
                 const categoriaMatch = !filtroCategoria || fatura.categoria === filtroCategoria;
                 const nomeMatch = !buscaNome || fatura.nome.toLowerCase().includes(buscaNome);
                 const valorMatch = fatura.valor >= valorMin && fatura.valor <= valorMax;
-                
+
                 let dataMatch = true;
                 if (dataInicio) {
                     dataMatch = dataMatch && parseYMD(fatura.vencimento) >= parseYMD(dataInicio);
@@ -1140,17 +1159,17 @@
                 if (dataFim) {
                     dataMatch = dataMatch && parseYMD(fatura.vencimento) <= parseYMD(dataFim);
                 }
-                
+
                 return tipoMatch && statusMatch && categoriaMatch && nomeMatch && valorMatch && dataMatch;
             });
         }
-        
+
         function atualizarPaginacao(totalPaginas) {
             const paginacao = document.getElementById('paginacao');
             paginacao.innerHTML = '';
-            
+
             if (totalPaginas <= 1) return;
-            
+
             // Botão anterior
             if (paginaAtual > 1) {
                 const btnAnterior = document.createElement('button');
@@ -1158,7 +1177,7 @@
                 btnAnterior.onclick = () => mudarPagina(paginaAtual - 1);
                 paginacao.appendChild(btnAnterior);
             }
-            
+
             // Páginas
             for (let i = 1; i <= totalPaginas; i++) {
                 const btnPagina = document.createElement('button');
@@ -1167,7 +1186,7 @@
                 btnPagina.onclick = () => mudarPagina(i);
                 paginacao.appendChild(btnPagina);
             }
-            
+
             // Botão próximo
             if (paginaAtual < totalPaginas) {
                 const btnProximo = document.createElement('button');
@@ -1176,13 +1195,13 @@
                 paginacao.appendChild(btnProximo);
             }
         }
-        
+
         function mudarPagina(pagina) {
             paginaAtual = pagina;
             atualizarTabela();
             window.scrollTo(0, 0);
         }
-        
+
         // Filtros e ordenação
         function ordenarTabela(campo) {
             if (ordenacaoAtual.campo === campo) {
@@ -1194,21 +1213,21 @@
             paginaAtual = 1;
             atualizarTabela();
         }
-        
+
         function filtrarFaturas() {
             paginaAtual = 1;
             atualizarTabela();
         }
-        
+
         function toggleAdvancedSearch() {
             const advancedSearch = document.getElementById('advancedSearch');
             advancedSearch.style.display = advancedSearch.style.display === 'none' ? 'block' : 'none';
         }
-        
+
         function atualizarCategoriasFiltro() {
             const select = document.getElementById('filtroCategoria');
             const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral'))];
-            
+
             select.innerHTML = '<option value="">Todas</option>';
             categorias.forEach(categoria => {
                 const option = document.createElement('option');
@@ -1217,11 +1236,11 @@
                 select.appendChild(option);
             });
         }
-        
+
         function atualizarSugestoesCategorias() {
             const datalist = document.getElementById('categoriasSugeridas');
             const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral').filter(Boolean))];
-            
+
             datalist.innerHTML = '';
             categorias.forEach(categoria => {
                 const option = document.createElement('option');
@@ -1229,7 +1248,7 @@
                 datalist.appendChild(option);
             });
         }
-        
+
         // Analytics e gráficos
         function atualizarAnalytics() {
             const totalFaturas = faturas.length;
@@ -1237,23 +1256,23 @@
             const fPendentes = faturas.filter(f => !f.pago);
             const faturasPagas = fPagas.length;
             const faturasPendentes = fPendentes.length;
-            const mediaValor = totalFaturas > 0 ? 
+            const mediaValor = totalFaturas > 0 ?
                 faturas.reduce((sum, f) => sum + f.valor, 0) / totalFaturas : 0;
-            
+
             document.getElementById('totalFaturas').textContent = totalFaturas;
             document.getElementById('faturasPagas').textContent = faturasPagas;
             document.getElementById('faturasPendentes').textContent = faturasPendentes;
             document.getElementById('mediaValor').textContent = fmtBRL.format(mediaValor);
-            
+
             criarGraficoTipos();
             criarGraficoCategorias();
             criarGraficoMensal();
         }
-        
+
         function criarGraficoTipos() {
             const ctx = document.getElementById('graficoTipos').getContext('2d');
             if (graficos.tipos) graficos.tipos.destroy();
-            
+
             const tiposCount = {};
             faturas.forEach(f => {
                 tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
@@ -1261,7 +1280,7 @@
 
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
-            
+
             graficos.tipos = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -1292,11 +1311,11 @@
                 }
             });
         }
-        
+
         function criarGraficoCategorias() {
             const ctx = document.getElementById('graficoCategorias').getContext('2d');
             if (graficos.categorias) graficos.categorias.destroy();
-            
+
             const categoriasValor = {};
             faturas.forEach(f => {
                 const cat = f.categoria || 'Geral';
@@ -1307,7 +1326,7 @@
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const primary = cs.getPropertyValue('--primary-color').trim() || '#36A2EB';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-            
+
             graficos.categorias = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1354,11 +1373,11 @@
                 }
             });
         }
-        
+
         function criarGraficoMensal() {
             const ctx = document.getElementById('graficoMensal').getContext('2d');
             if (graficos.mensal) graficos.mensal.destroy();
-            
+
             const dadosMensais = {};
             faturas.forEach(f => {
                 const mes = f.vencimento?.substring(0, 7);
@@ -1373,12 +1392,12 @@
                     dadosMensais[mes].pendentes += f.valor;
                 }
             });
-            
+
             const meses = Object.keys(dadosMensais).sort();
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-            
+
             graficos.mensal = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1443,7 +1462,7 @@
                 }
             });
         }
-        
+
         // Funções de recorrência
         function gerarFaturasRecorrentes() {
             let geradas = 0;
@@ -1451,18 +1470,18 @@
             // mês/ano do próximo mês (para checagem)
             const pm = new Date(); pm.setMonth(pm.getMonth() + 1);
             const proximoMesStr = formatYMD(pm).substring(0, 7);
-            
+
             faturas.filter(f => f.recorrente).forEach((fatura, i) => {
                 // Verificar se já existe uma fatura para o próximo mês
-                const jaExiste = faturas.some(ff => 
-                    ff.nome === fatura.nome && 
+                const jaExiste = faturas.some(ff =>
+                    ff.nome === fatura.nome &&
                     ff.vencimento?.startsWith(proximoMesStr)
                 );
-                
+
                 if (!jaExiste) {
                     const proxV = parseYMD(fatura.vencimento); proxV.setMonth(proxV.getMonth() + 1);
                     const proxF = parseYMD(fatura.fechamento); proxF.setMonth(proxF.getMonth() + 1);
-                    
+
                     const novaFatura = {
                         ...fatura,
                         id: (crypto?.randomUUID?.() || (Date.now() + i)),
@@ -1472,12 +1491,12 @@
                         dataPagamento: null,
                         historicoPagamentos: []
                     };
-                    
+
                     faturas.push(novaFatura);
                     geradas++;
                 }
             });
-            
+
             if (geradas > 0) {
                 atualizarLocalStorage();
                 atualizarTabela();
@@ -1488,7 +1507,7 @@
                 exibirNotificacao('Nenhuma fatura recorrente nova foi gerada.', 'info');
             }
         }
-        
+
         // Exportação e backup
         function exportarCSV() {
             const headers = ['Tipo', 'Nome', 'Categoria', 'Fechamento', 'Vencimento', 'Valor', 'Status', 'Data Pagamento', 'Recorrente'];
@@ -1508,11 +1527,11 @@
                     f.recorrente ? 'Sim' : 'Não'
                 ].join(','))
             ].join('\n');
-            
+
             baixarArquivo(csvContent, `faturas_${obterDataAtual()}.csv`, 'text/csv;charset=utf-8;');
             exibirNotificacao('CSV exportado com sucesso!', 'success');
         }
-        
+
         function exportarBackup() {
             const backup = {
                 faturas: faturas,
@@ -1520,34 +1539,34 @@
                 versao: '2.1',
                 tema: localStorage.getItem('tema')
             };
-            
+
             const json = JSON.stringify(backup, null, 2);
             baixarArquivo(json, `backup_faturas_${obterDataAtual()}.json`, 'application/json');
             exibirNotificacao('Backup criado com sucesso!', 'success');
         }
-        
+
         function restaurarBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const backup = JSON.parse(e.target.result);
-                    
+
                     if (backup.faturas && Array.isArray(backup.faturas)) {
                         mostrarModal(
                             'Restaurar Backup',
                             'Isso substituirá todos os dados atuais. Continuar?',
                             () => {
                                 faturas = backup.faturas;
-                                
+
                                 // Restaurar tema se disponível
                                 if (backup.tema) {
                                     localStorage.setItem('tema', backup.tema);
                                     document.documentElement.setAttribute('data-theme', backup.tema);
                                 }
-                                
+
                                 atualizarLocalStorage();
                                 atualizarTabela();
                                 atualizarCategoriasFiltro();
@@ -1564,16 +1583,16 @@
                 }
             };
             reader.readAsText(file);
-            
+
             // Limpar o input
             event.target.value = '';
         }
-        
+
         function gerarRelatorioHTML() {
             const totalGeral = faturas.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
-            
+
             const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -1593,7 +1612,7 @@
 <body>
     <h1>Relatório de Faturas</h1>
     <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-    
+
     <div class="summary">
         <h3>Resumo Financeiro</h3>
         <p><strong>Total Geral:</strong> ${fmtBRL.format(totalGeral)}</p>
@@ -1601,7 +1620,7 @@
         <p><strong>Total Pendente:</strong> ${fmtBRL.format(totalPendente)}</p>
         <p><strong>Total de Faturas:</strong> ${faturas.length}</p>
     </div>
-    
+
     <table>
         <thead>
             <tr>
@@ -1628,42 +1647,42 @@
     </table>
 </body>
 </html>`;
-            
+
             baixarArquivo(html, `relatorio_faturas_${obterDataAtual()}.html`, 'text/html');
             exibirNotificacao('Relatório HTML gerado com sucesso!', 'success');
         }
-        
+
         // Função para exportar PDF (considera filtros)
         function exportarPDF() {
             const doc = new jsPDF();
-            
+
             // Adicionar título
             doc.setFontSize(20);
             doc.setTextColor(40);
             doc.text('Relatório de Faturas', 105, 15, { align: 'center' });
-            
+
             // Adicionar data de geração
             doc.setFontSize(12);
             doc.setTextColor(100);
             doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 105, 22, { align: 'center' });
-            
+
             // Calcular totais a partir do conjunto filtrado
             const dadosFiltrados = aplicarFiltros([...faturas]);
             const totalGeral = dadosFiltrados.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = dadosFiltrados.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
-            
+
             // Adicionar resumo
             doc.setFontSize(14);
             doc.setTextColor(40);
             doc.text('Resumo Financeiro', 14, 35);
-            
+
             doc.setFontSize(11);
             doc.text(`Total Geral: ${fmtBRL.format(totalGeral)}`, 20, 45);
             doc.text(`Total Pago: ${fmtBRL.format(totalPago)}`, 20, 52);
             doc.text(`Total Pendente: ${fmtBRL.format(totalPendente)}`, 20, 59);
             doc.text(`Total de Faturas: ${dadosFiltrados.length}`, 20, 66);
-            
+
             // Preparar dados da tabela
             const tableData = dadosFiltrados.map(f => [
                 f.tipo,
@@ -1673,7 +1692,7 @@
                 fmtBRL.format(f.valor),
                 f.pago ? 'Pago' : 'Pendente'
             ]);
-            
+
             // Adicionar tabela
             doc.autoTable({
                 head: [['Tipo', 'Nome', 'Categoria', 'Vencimento', 'Valor', 'Status']],
@@ -1695,7 +1714,7 @@
                 },
                 margin: { top: 75 }
             });
-            
+
             // Adicionar número de páginas
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
@@ -1703,13 +1722,13 @@
                 doc.setFontSize(10);
                 doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
             }
-            
+
             // Salvar o PDF
             doc.save(`relatorio_faturas_${obterDataAtual()}.pdf`);
-            
+
             exibirNotificacao('PDF exportado com sucesso!', 'success');
         }
-        
+
         function confirmarLimpezaDados() {
             mostrarModal(
                 'Confirmar limpeza',
@@ -1720,7 +1739,7 @@
                 }
             );
         }
-        
+
         function limparDados() {
             faturas = [];
             atualizarLocalStorage();
@@ -1729,7 +1748,7 @@
             verificarVencimentoProximo();
             exibirNotificacao('Todos os dados foram limpos!', 'success');
         }
-        
+
         // Modal functions
         function mostrarModal(titulo, mensagem, callback) {
             document.getElementById('modalTitulo').textContent = titulo;
@@ -1741,18 +1760,18 @@
             modal.setAttribute('aria-hidden', 'false');
             setTimeout(() => btnConfirm.focus(), 0);
         }
-        
+
         function fecharModal() {
             const modal = document.getElementById('modalConfirmacao');
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
         }
-        
+
         // Funções auxiliares
         function atualizarLocalStorage() {
             localStorage.setItem('faturas', JSON.stringify(faturas));
         }
-        
+
         function baixarArquivo(conteudo, nomeArquivo, tipo) {
             const blob = new Blob([conteudo], { type: tipo });
             const url = window.URL.createObjectURL(blob);
@@ -1762,18 +1781,18 @@
             a.click();
             window.URL.revokeObjectURL(url);
         }
-        
+
         function exibirNotificacao(mensagem, tipo) {
             const notification = document.getElementById('notification');
             notification.textContent = mensagem;
             notification.className = 'notification ' + tipo;
             notification.style.display = 'block';
-            
+
             setTimeout(() => {
                 notification.style.display = 'none';
             }, 4000);
         }
-        
+
         // Funções para notificações de vencimento
         function verificarVencimentoProximo() {
             const hoje = hojeYMD();
@@ -1808,12 +1827,35 @@
             lista.innerHTML = html;
             notificacao.style.display = 'block';
         }
-        
+
         function fecharNotificacaoVencimento() {
             const notificacao = document.getElementById('notificacaoVencimento');
             notificacao.style.display = 'none';
         }
-        
+
+        // Cores aleatórias para os botões do Backup
+        function gerarCorAleatoriaRGB(min = 70, max = 200) {
+            const rand = () => Math.floor(Math.random() * (max - min + 1)) + min;
+            const r = rand(), g = rand(), b = rand();
+            return { r, g, b, css: `rgb(${r}, ${g}, ${b})` };
+        }
+
+        function corTextoContraste({ r, g, b }) {
+            const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+            return yiq >= 150 ? '#000' : '#fff';
+        }
+
+        function aplicarCoresAleatoriasBackup() {
+            const botoes = document.querySelectorAll('#backup .export-controls button.btn');
+            botoes.forEach(btn => {
+                const cor = gerarCorAleatoriaRGB();
+                btn.style.backgroundColor = cor.css;
+                btn.style.color = corTextoContraste(cor);
+                btn.style.fontWeight = '700';
+                btn.style.border = 'none';
+            });
+        }
+
         // Fechar modal clicando fora dele
         window.onclick = function(event) {
             const modal = document.getElementById('modalConfirmacao');
