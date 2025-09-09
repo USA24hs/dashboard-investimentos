@@ -663,6 +663,9 @@
             .card-value {
                 font-size: 1.5rem;
             }
+            .quick-actions {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -732,6 +735,9 @@
                 <button class="quick-action-btn" onclick="scrollToForm()">
                     <i class="fas fa-plus"></i> Nova Fatura
                 </button>
+                <button class="quick-action-btn" onclick="adicionarFaturaRapida()">
+                    <i class="fas fa-save"></i> Adicionar Fatura
+                </button>
                 <button class="quick-action-btn" onclick="filtrarPorStatus('pendente')">
                     <i class="fas fa-clock"></i> Ver Pendentes
                 </button>
@@ -788,9 +794,6 @@
                         <input type="checkbox" id="recorrente"> 🔄 Conta recorrente (gerar automaticamente no próximo mês)
                     </label>
                 </div>
-                <button type="submit" class="btn btn-add" id="btnAdd">
-                    <i class="fas fa-plus"></i> Adicionar Fatura
-                </button>
                 <button type="button" class="btn" id="btnCancel" onclick="cancelarEdicao()" style="display: none; background-color: #9e9e9e;">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
@@ -1244,6 +1247,46 @@
             atualizarCalendar();
             limparFormulario();
         }
+        
+        // Função para adicionar fatura rapidamente
+        function adicionarFaturaRapida() {
+            // Verifica se o formulário está visível
+            const form = document.getElementById('formFatura');
+            const formRect = form.getBoundingClientRect();
+            
+            // Se o formulário não estiver visível na tela, rola até ele
+            if (formRect.top < 0 || formRect.bottom > window.innerHeight) {
+                scrollToForm();
+                
+                // Dá um tempo para o scroll completar antes de tentar submeter
+                setTimeout(() => {
+                    // Verifica se os campos obrigatórios estão preenchidos
+                    const tipo = document.getElementById('tipo').value;
+                    const nome = document.getElementById('nome').value.trim();
+                    const fechamento = document.getElementById('fechamento').value;
+                    const vencimento = document.getElementById('vencimento').value;
+                    const valor = document.getElementById('valor').value;
+                    
+                    if (tipo && nome && fechamento && vencimento && valor) {
+                        // Se todos os campos estiverem preenchidos, submete o formulário
+                        form.dispatchEvent(new Event('submit'));
+                    } else {
+                        // Se não, foca no primeiro campo vazio
+                        if (!tipo) document.getElementById('tipo').focus();
+                        else if (!nome) document.getElementById('nome').focus();
+                        else if (!fechamento) document.getElementById('fechamento').focus();
+                        else if (!vencimento) document.getElementById('vencimento').focus();
+                        else if (!valor) document.getElementById('valor').focus();
+                        
+                        exibirNotificacao('Por favor, preencha todos os campos obrigatórios!', 'warning');
+                    }
+                }, 500);
+            } else {
+                // Se o formulário já estiver visível, apenas submete
+                form.dispatchEvent(new Event('submit'));
+            }
+        }
+        
         function editarFatura(id) {
             const fatura = faturas.find(f => f.id === id);
             if (!fatura || fatura.pago) {
