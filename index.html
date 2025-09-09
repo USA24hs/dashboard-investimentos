@@ -587,7 +587,8 @@
             </div>
             <div class="pagination" id="paginacao"></div>
             <div class="summary" id="resumoTotal">
-                Total de faturas pendentes: R$ 0,00
+                ⏳️ Total de faturas pendentes: R$ 0,00<br>
+                💰 Total de faturas pagas: R$ 0,00
             </div>
         </div>
         <!-- ABA ANÁLISES -->
@@ -611,10 +612,13 @@
                 </div>
             </div>
             <div class="chart-container">
-                <canvas id="graficoTipos" aria-label="Gráfico de distribuição por tipo" role="img"></canvas>
+                <canvas id="graficoNomes" aria-label="Gráfico de faturas por nome" role="img"></canvas>
             </div>
             <div class="chart-container">
                 <canvas id="graficoCategorias" aria-label="Gráfico de gastos por categoria" role="img"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficoCartoes" aria-label="Gráfico de uso de cartões de crédito" role="img"></canvas>
             </div>
             <div class="chart-container">
                 <canvas id="graficoMensal" aria-label="Gráfico de evolução mensal dos gastos" role="img"></canvas>
@@ -957,6 +961,7 @@
                 indicador.textContent = ordenacaoAtual.direcao === 'asc' ? '↑' : '↓';
             }
             let totalPendente = 0;
+            let totalPago = 0;
             const hoje = hojeYMD();
             faturasPagina.forEach(fatura => {
                 const tr = document.createElement('tr');
@@ -967,7 +972,7 @@
                 const icone = icones[fatura.tipo] || '📦';
                 const d = diffDias(hoje, fatura.vencimento);
                 let avisoVencimento = '';
-                               if (fatura.pago) {
+                if (fatura.pago) {
                     avisoVencimento = ` <span style="color: var(--success-color);">💰 ${formatarData(fatura.dataPagamento)}</span>`;
                 } else if (d < 0) {
                     avisoVencimento = ` <span class="expired">(Vencida há ${Math.abs(d)} dias)</span>`;
@@ -999,12 +1004,16 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
-                if (!fatura.pago) {
+                if (fatura.pago) {
+                    totalPago += fatura.valor;
+                } else {
                     totalPendente += fatura.valor;
                 }
             });
-            document.getElementById('resumoTotal').innerHTML =
-                `Total de faturas pendentes: ${fmtBRL.format(totalPendente)}`;
+            document.getElementById('resumoTotal').innerHTML = `
+                Total de faturas pendentes: ${fmtBRL.format(totalPendente)}<br>
+                Total de faturas pagas: ${fmtBRL.format(totalPago)}
+            `;
             // Atualizar paginação
             atualizarPaginacao(totalPaginas);
         }
@@ -1130,29 +1139,54 @@
             document.getElementById('faturasPagas').textContent = faturasPagas;
             document.getElementById('faturasPendentes').textContent = faturasPendentes;
             document.getElementById('mediaValor').textContent = fmtBRL.format(mediaValor);
-            criarGraficoTipos();
+            criarGraficoNomes();
             criarGraficoCategorias();
+            criarGraficoCartoes();
             criarGraficoMensal();
         }
-        function criarGraficoTipos() {
-            const ctx = document.getElementById('graficoTipos').getContext('2d');
-            if (graficos.tipos) graficos.tipos.destroy();
-            const tiposCount = {};
+        function criarGraficoNomes() {
+            const ctx = document.getElementById('graficoNomes').getContext('2d');
+            if (graficos.nomes) graficos.nomes.destroy();
+            
+            // Agrupar por nome da fatura
+            const nomesCount = {};
             faturas.forEach(f => {
-                tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
+                nomesCount[f.nome] = (nomesCount[f.nome] || 0) + 1;
             });
+            
+            // Ordenar por quantidade (maior para menor)
+            const sortedNames = Object.entries(nomesCount).sort((a, b) => b[1] - a[1]);
+            
+            // Limitar aos 10 mais frequentes e agrupar o restante como "Outros"
+            const topNames = sortedNames.slice(0, 10);
+            const outrosCount = sortedNames.slice(10).reduce((sum, [_, count]) => sum + count, 0);
+            
+            const labels = topNames.map(([name, _]) => name);
+            const data = topNames.map(([_, count]) => count);
+            
+            if (outrosCount > 0) {
+                labels.push('Outros');
+                data.push(outrosCount);
+            }
+            
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
-            graficos.tipos = new Chart(ctx, {
+            
+            // Paleta de cores
+            const backgroundColors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                '#9966FF', '#FF9F40', '#8BC34A', '#C9CBCF',
+                '#E7E9ED', '#F7464A', '#46BFBD', '#FDB45C'
+            ];
+            
+            graficos.nomes = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(tiposCount),
+                    labels: labels,
                     datasets: [{
-                        data: Object.values(tiposCount),
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                            '#9966FF', '#FF9F40', '#8BC34A', '#C9CBCF'
-                        ]
+                        data: data,
+                        backgroundColor: backgroundColors.slice(0, labels.length),
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -1161,15 +1195,36 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Distribuição por Tipo',
-                            color: textColor
+                            text: 'Faturas por Nome',
+                            color: textColor,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
                         },
                         legend: {
+                            position: 'right',
                             labels: {
-                                color: textColor
+                                color: textColor,
+                                font: {
+                                    size: 12
+                                },
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
                             }
                         }
-                    }
+                    },
+                    cutout: '50%'
                 }
             });
         }
@@ -1214,6 +1269,94 @@
                         y: {
                             ticks: {
                                 color: textColor
+                            },
+                            grid: {
+                                color: gridColor
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: gridColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        function criarGraficoCartoes() {
+            const ctx = document.getElementById('graficoCartoes').getContext('2d');
+            if (graficos.cartoes) graficos.cartoes.destroy();
+            
+            // Filtrar apenas faturas do tipo 'cartao'
+            const cartoes = faturas.filter(f => f.tipo === 'cartao');
+            
+            // Contar por nome do cartão
+            const contagemPorCartao = {};
+            cartoes.forEach(f => {
+                contagemPorCartao[f.nome] = (contagemPorCartao[f.nome] || 0) + 1;
+            });
+            
+            // Agrupar por tipo de fatura
+            const tiposCount = {};
+            faturas.forEach(f => {
+                tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
+            });
+            
+            const cs = getComputedStyle(document.documentElement);
+            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
+            const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
+            
+            // Cores para os tipos de fatura
+            const coresTipos = {
+                cartao: '#36A2EB',
+                celular: '#FF6384',
+                internet: '#FFCE56',
+                boleto: '#4BC0C0',
+                streaming: '#9966FF',
+                seguro: '#FF9F40',
+                financiamento: '#8BC34A',
+                outros: '#C9CBCF'
+            };
+            
+            // Dados para o gráfico
+            const labels = Object.keys(tiposCount);
+            const data = Object.values(tiposCount);
+            const backgroundColors = labels.map(tipo => coresTipos[tipo] || '#C9CBCF');
+            
+            graficos.cartoes = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade de Faturas',
+                        data: data,
+                        backgroundColor: backgroundColors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribuição por Tipo de Fatura',
+                            color: textColor
+                        },
+                        legend: {
+                            labels: {
+                                color: textColor
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: textColor,
+                                stepSize: 1
                             },
                             grid: {
                                 color: gridColor
