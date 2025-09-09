@@ -10,33 +10,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #f5f5f5;
-            --container-bg: #fff;
-            --text-color: #333;
-            --border-color: #ddd;
-            --hover-bg: #f8f8f8;
-            --header-bg: #f2f2f2;
-            --header-hover: #e0e0e0;
-            --shadow: rgba(0,0,0,0.1);
-            --primary-color: #2196F3;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --warning-color: #ff9800;
+            --bg-color: #f5f7fa;
+            --container-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e1e8ed;
+            --hover-bg: #f8f9fb;
+            --header-bg: #f1f3f5;
+            --header-hover: #e9ecef;
+            --shadow: rgba(0,0,0,0.08);
+            --primary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
             --transition-speed: 0.3s;
         }
         [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --container-bg: #2d2d2d;
-            --text-color: #ffffff;
-            --border-color: #555;
-            --hover-bg: #3a3a3a;
-            --header-bg: #404040;
-            --header-hover: #4a4a4a;
-            --shadow: rgba(0,0,0,0.3);
-            --primary-color: #64b5f6;
-            --success-color: #81c784;
-            --danger-color: #e57373;
-            --warning-color: #ffb74d;
+            --bg-color: #1a1d23;
+            --container-bg: #242830;
+            --text-color: #e4e6eb;
+            --border-color: #3a3f4a;
+            --hover-bg: #2c313a;
+            --header-bg: #2c313a;
+            --header-hover: #363b45;
+            --shadow: rgba(0,0,0,0.4);
+            --primary-color: #5dade2;
+            --success-color: #58d68d;
+            --danger-color: #ec7063;
+            --warning-color: #f8c471;
         }
         * {
             box-sizing: border-box;
@@ -180,9 +180,12 @@
             align-items: center;
             gap: 8px;
             font-weight: 500;
+            transition: all 0.2s ease;
         }
         .quick-action-btn:hover {
             background: var(--header-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px var(--shadow);
         }
         table {
             width: 100%;
@@ -248,7 +251,7 @@
         .btn-paid { background-color: var(--success-color); color: white; }
         .btn-export { background-color: var(--warning-color); color: white; }
         .btn-import { background-color: #9c27b0; color: white; }
-        .btn-pdf { background-color: #f44336; color: white; }
+        .btn-pdf { background-color: var(--danger-color); color: white; }
         .form-group {
             margin: 10px 0;
         }
@@ -294,7 +297,7 @@
             align-items: center;
         }
         [data-theme="dark"] .summary {
-            background: linear-gradient(135deg, #1b5e1f, #2e7d32);
+            background: linear-gradient(135deg, #1e3a28, #2d5a3d);
         }
         .filter-container {
             margin: 20px 0;
@@ -345,24 +348,24 @@
             border: 1px solid #b3d7ff;
         }
         [data-theme="dark"] .notification.success {
-            background-color: #1b5e1f;
-            color: #81c784;
-            border-color: #2e7d32;
+            background-color: #1e3a28;
+            color: #7dd87d;
+            border-color: #2d5a3d;
         }
         [data-theme="dark"] .notification.error {
-            background-color: #5d1a1d;
-            color: #ef5350;
-            border-color: #c62828;
+            background-color: #3a1e1e;
+            color: #ff7d7d;
+            border-color: #5a2d2d;
         }
         [data-theme="dark"] .notification.warning {
-            background-color: #5d4c1d;
-            color: #ffd54f;
-            border-color: #856404;
+            background-color: #3a2e1e;
+            color: #ffd27d;
+            border-color: #5a452d;
         }
         [data-theme="dark"] .notification.info {
-            background-color: #1b2a41;
-            color: #8ab4f8;
-            border-color: #3b4d63;
+            background-color: #1e2a3a;
+            color: #7db8ff;
+            border-color: #2d455a;
         }
         .warning { color: var(--warning-color); font-weight: bold; }
         .expired { color: var(--danger-color); font-weight: bold; }
@@ -421,7 +424,8 @@
             font-weight: 500;
         }
         [data-theme="dark"] .categoria-tag {
-            color: #ffffff;
+            color: #ffffff !important;
+            opacity: 0.9;
         }
         .recorrente-badge {
             color: var(--warning-color);
@@ -724,7 +728,6 @@
                     <p class="card-detail">Faturas em atraso</p>
                 </div>
             </div>
-
             <div class="quick-actions">
                 <button class="quick-action-btn" onclick="scrollToForm()">
                     <i class="fas fa-plus"></i> Nova Fatura
@@ -739,7 +742,6 @@
                     <i class="fas fa-calendar-day"></i> Próximos Vencimentos
                 </button>
             </div>
-
             <form id="formFatura" onsubmit="adicionarFatura(event)">
                 <div class="form-row">
                     <div class="form-group">
@@ -853,7 +855,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Visualização em Tabela -->
             <div id="tableView" style="overflow-x: auto;">
                 <table id="tabelaFaturas">
@@ -871,7 +872,6 @@
                     <tbody></tbody>
                 </table>
             </div>
-
             <!-- Visualização em Calendário -->
             <div id="calendarView" class="calendar-view">
                 <div class="calendar-header">
@@ -887,13 +887,11 @@
                     <!-- Os dias serão preenchidos via JavaScript -->
                 </div>
             </div>
-
             <div class="pagination" id="paginacao"></div>
             <div class="summary" id="resumoTotal">
                 ⏳️ Total de faturas pendentes: R$ 0,00<br>
                 💰 Total de faturas pagas: R$ 0,00
             </div>
-
             <!-- Configurações de Alerta -->
             <div class="alert-settings">
                 <h3><i class="fas fa-bell"></i> Configurações de Alerta</h3>
@@ -998,10 +996,8 @@
     <script>
         // Inicializar jsPDF
         window.jsPDF = window.jspdf.jsPDF;
-
         // Formatter de moeda
         const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-
         // Helpers de data (uso local para evitar problemas de fuso/ISO)
         const MS_DIA = 24 * 60 * 60 * 1000;
         function parseYMD(ymd) { if (!ymd) return null; const [y,m,d] = ymd.split('-').map(Number); return new Date(y, m-1, d); }
@@ -1019,14 +1015,12 @@
             return `${dia}/${mes}/${ano}`;
         }
         function obterDataAtual() { return hojeYMD(); }
-
         // Escapar HTML para evitar XSS
         function esc(str='') {
             return String(str).replace(/[&<>"'/]/g, s =>
                 ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;'}[s])
             );
         }
-
         let faturas = [];
         let editandoId = null;
         let ordenacaoAtual = { campo: 'vencimento', direcao: 'asc' };
@@ -1036,7 +1030,6 @@
         let mesCalendar = new Date().getMonth();
         let anoCalendar = new Date().getFullYear();
         let visualizacaoAtual = 'tabela'; // 'tabela' ou 'calendario'
-
         // Carregar configurações
         window.onload = function() {
             carregarTema();
@@ -1052,17 +1045,17 @@
             document.getElementById('buscaNome').onkeyup = debounce(filtrarFaturas, 200);
             // Cores aleatórias no Backup ao carregar
             aplicarCoresAleatoriasBackup();
+            // Aplicar cores aleatórias nos botões de ações rápidas
+            aplicarCoresAleatoriasQuickActions();
             // Inicializar calendário
             atualizarCalendar();
             // Inicializar busca inteligente
             inicializarBuscaInteligente();
         }
-
         function carregarTema() {
             const tema = localStorage.getItem('tema') || 'light';
             document.documentElement.setAttribute('data-theme', tema);
         }
-
         function carregarPreferenciaFiltros() {
             const filtrosVisiveis = localStorage.getItem('filtrosVisiveis') !== 'false';
             const filterContainer = document.getElementById('filterContainer');
@@ -1070,7 +1063,6 @@
                 filterContainer.classList.add('hidden');
             }
         }
-
         function carregarConfiguracoesAlerta() {
             const alertaDias = localStorage.getItem('alertaDias') || '7';
             const alertaEmail = localStorage.getItem('alertaEmail') === 'true';
@@ -1079,7 +1071,6 @@
             document.getElementById('alertaEmail').checked = alertaEmail;
             document.getElementById('alertaNotificacao').checked = alertaNotificacao;
         }
-
         function salvarConfiguracoesAlerta() {
             const alertaDias = document.getElementById('alertaDias').value;
             const alertaEmail = document.getElementById('alertaEmail').checked;
@@ -1090,7 +1081,6 @@
             verificarVencimentoProximo();
             atualizarDashboard();
         }
-
         function carregarDados() {
             const dadosSalvos = localStorage.getItem('faturas');
             if (dadosSalvos) {
@@ -1099,7 +1089,6 @@
             atualizarTabela();
             atualizarAnalytics();
         }
-
         function definirDatasMinimas() {
             const hoje = hojeYMD();
             ['fechamento', 'vencimento'].forEach(id => {
@@ -1107,7 +1096,6 @@
                 if (!input.value) input.setAttribute('min', hoje);
             });
         }
-
         // Gerenciamento de abas
         function mostrarAba(e, aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1122,8 +1110,10 @@
             if (aba === 'backup') {
                 aplicarCoresAleatoriasBackup();
             }
+            if (aba === 'faturas') {
+                aplicarCoresAleatoriasQuickActions();
+            }
         }
-
         function mostrarAbaMobile(aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1136,14 +1126,15 @@
             if (aba === 'backup') {
                 aplicarCoresAleatoriasBackup();
             }
+            if (aba === 'faturas') {
+                aplicarCoresAleatoriasQuickActions();
+            }
         }
-
         // Alternar entre visualização de tabela e calendário
         function alternarVisualizacao() {
             const tableView = document.getElementById('tableView');
             const calendarView = document.getElementById('calendarView');
             const toggleBtn = document.querySelector('.view-toggle');
-
             if (visualizacaoAtual === 'tabela') {
                 visualizacaoAtual = 'calendario';
                 tableView.style.display = 'none';
@@ -1157,7 +1148,6 @@
                 toggleBtn.innerHTML = '<i class="fas fa-calendar-alt"></i> Ver Calendário';
             }
         }
-
         // Tema
         function alternarTema() {
             const tema = document.documentElement.getAttribute('data-theme');
@@ -1170,8 +1160,10 @@
             if (document.getElementById('backup').classList.contains('active')) {
                 aplicarCoresAleatoriasBackup();
             }
+            if (document.getElementById('faturas').classList.contains('active')) {
+                aplicarCoresAleatoriasQuickActions();
+            }
         }
-
         // Filtros
         function resetFiltros() {
             document.getElementById('filtroTipo').value = '';
@@ -1186,7 +1178,6 @@
             // esconder sugestões
             document.querySelectorAll('.search-suggestions').forEach(el => el.style.display = 'none');
         }
-
         function alternarFiltros() {
             const filterContainer = document.getElementById('filterContainer');
             filterContainer.classList.toggle('hidden');
@@ -1197,7 +1188,6 @@
             }
             atualizarTabela();
         }
-
         // CRUD de faturas
         function adicionarFatura(event) {
             event.preventDefault();
@@ -1208,7 +1198,6 @@
             const vencimento = document.getElementById('vencimento').value;
             const valor = parseFloat(document.getElementById('valor').value);
             const recorrente = document.getElementById('recorrente').checked;
-
             if (!tipo) {
                 exibirNotificacao('Por favor, selecione um tipo de fatura!', 'error');
                 return;
@@ -1221,7 +1210,6 @@
                 exibirNotificacao('A data de vencimento deve ser posterior à data de fechamento!', 'error');
                 return;
             }
-
             if (editandoId) {
                 const index = faturas.findIndex(f => f.id === editandoId);
                 if (index !== -1) {
@@ -1256,7 +1244,6 @@
             atualizarCalendar();
             limparFormulario();
         }
-
         function editarFatura(id) {
             const fatura = faturas.find(f => f.id === id);
             if (!fatura || fatura.pago) {
@@ -1270,18 +1257,15 @@
             document.getElementById('vencimento').value = fatura.vencimento;
             document.getElementById('valor').value = fatura.valor;
             document.getElementById('recorrente').checked = fatura.recorrente || false;
-
             // permitir edição retroativa
             document.getElementById('fechamento').removeAttribute('min');
             document.getElementById('vencimento').removeAttribute('min');
-
             editandoId = id;
             document.getElementById('btnAdd').textContent = 'Atualizar Fatura';
             document.getElementById('btnAdd').innerHTML = '<i class="fas fa-save"></i> Atualizar Fatura';
             document.getElementById('btnCancel').style.display = 'inline-block';
             window.scrollTo(0, 0);
         }
-
         function cancelarEdicao() {
             editandoId = null;
             document.getElementById('btnAdd').textContent = 'Adicionar Fatura';
@@ -1290,12 +1274,10 @@
             limparFormulario();
             definirDatasMinimas();
         }
-
         function limparFormulario() {
             const form = document.getElementById('formFatura');
             if (form) form.reset();
         }
-
         function excluirFatura(id) {
             const fatura = faturas.find(f => f.id === id);
             let mensagem = 'Tem certeza que deseja excluir esta fatura?';
@@ -1318,7 +1300,6 @@
                 }
             );
         }
-
         function marcarComoPago(id, estaPago) {
             const fatura = faturas.find(f => f.id === id);
             if (!fatura) return;
@@ -1348,12 +1329,10 @@
                 }
             );
         }
-
         // Atualização da tabela
         function atualizarTabela() {
             const tbody = document.querySelector('#tabelaFaturas tbody');
             tbody.innerHTML = '';
-
             // Ordenação estável
             const pares = faturas.map((f, i) => ({ f, i }));
             const comparar = (a, b) => {
@@ -1388,17 +1367,14 @@
                 return res;
             };
             const faturasOrdenadas = pares.sort(comparar).map(p => p.f);
-
             // Aplicar filtros
             const faturasFiltradas = aplicarFiltros(faturasOrdenadas);
-
             // Paginação
             const totalPaginas = Math.ceil(faturasFiltradas.length / itensPorPagina);
             paginaAtual = Math.min(paginaAtual, totalPaginas || 1);
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const fim = inicio + itensPorPagina;
             const faturasPagina = faturasFiltradas.slice(inicio, fim);
-
             // Atualizar indicadores de ordenação
             document.querySelectorAll('.sort-indicator').forEach(el => {
                 el.textContent = '↕';
@@ -1407,21 +1383,17 @@
             if (indicador) {
                 indicador.textContent = ordenacaoAtual.direcao === 'asc' ? '↑' : '↓';
             }
-
             let totalPendente = 0;
             let totalPago = 0;
             const hoje = hojeYMD();
-
             faturasPagina.forEach(fatura => {
                 const tr = document.createElement('tr');
-
                 const icones = {
                     cartao: '💳', celular: '📱', internet: '🛜', boleto: '📃',
                     streaming: '📺', seguro: '🛡️', financiamento: '🏠', outros: '📦'
                 };
                 const icone = icones[fatura.tipo] || '📦';
                 const tipoDisplay = fatura.tipo ? fatura.tipo.charAt(0).toUpperCase() + fatura.tipo.slice(1) : '';
-
                 const d = diffDias(hoje, fatura.vencimento);
                 let avisoVencimento = '';
                 if (fatura.pago) {
@@ -1433,20 +1405,17 @@
                 } else if (d <= 7) {
                     avisoVencimento = ` <span class="warning">(Vence em ${d} dias)</span>`;
                 }
-
                 // Gerar cor para a categoria
                 const categoriaHash = fatura.categoria ? fatura.categoria.split('').reduce((a, b) => {
                     a = ((a << 5) - a) + b.charCodeAt(0);
                     return a & a;
                 }, 0) : 0;
                 const categoriaColorIndex = Math.abs(categoriaHash) % 16 + 1;
-
                 const nomeSeguro = esc(fatura.nome);
                 const categoriaSegura = esc(fatura.categoria || 'Geral');
                 const categoriaTag = fatura.categoria ?
                     `<span class="categoria-tag category-color-${categoriaColorIndex}">${categoriaSegura}</span>` : '';
                 const recorrenteBadge = fatura.recorrente ? `<span class="recorrente-badge">🔄</span>` : '';
-
                 tr.innerHTML = `
                     <td>${icone} ${esc(tipoDisplay)}</td>
                     <td>${nomeSeguro} ${fatura.pago ? '🔒' : ''} ${recorrenteBadge}</td>
@@ -1470,21 +1439,18 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
-
                 if (fatura.pago) {
                     totalPago += fatura.valor;
                 } else {
                     totalPendente += fatura.valor;
                 }
             });
-
             document.getElementById('resumoTotal').innerHTML = `
                 ⏳ Total de faturas pendentes: ${fmtBRL.format(totalPendente)}<br>
                 💰 Total de faturas pagas: ${fmtBRL.format(totalPago)}
             `;
             atualizarPaginacao(totalPaginas);
         }
-
         function aplicarFiltros(faturasLista) {
             const filtroTipo = document.getElementById('filtroTipo').value;
             const filtroStatus = document.getElementById('filtroStatus').value;
@@ -1494,7 +1460,6 @@
             const valorMax = parseFloat(document.getElementById('buscaValorMax').value) || Number.MAX_SAFE_INTEGER;
             const dataInicio = document.getElementById('buscaDataInicio').value;
             const dataFim = document.getElementById('buscaDataFim').value;
-
             return faturasLista.filter(fatura => {
                 const tipoMatch = !filtroTipo || fatura.tipo === filtroTipo;
                 const statusMatch = !filtroStatus ||
@@ -1503,7 +1468,6 @@
                 const categoriaMatch = !filtroCategoria || fatura.categoria === filtroCategoria;
                 const nomeMatch = !buscaNome || (fatura.nome || '').toLowerCase().includes(buscaNome);
                 const valorMatch = fatura.valor >= valorMin && fatura.valor <= valorMax;
-
                 let dataMatch = true;
                 if (dataInicio) {
                     dataMatch = dataMatch && parseYMD(fatura.vencimento) >= parseYMD(dataInicio);
@@ -1514,19 +1478,16 @@
                 return tipoMatch && statusMatch && categoriaMatch && nomeMatch && valorMatch && dataMatch;
             });
         }
-
         function atualizarPaginacao(totalPaginas) {
             const paginacao = document.getElementById('paginacao');
             paginacao.innerHTML = '';
             if (totalPaginas <= 1) return;
-
             if (paginaAtual > 1) {
                 const btnAnterior = document.createElement('button');
                 btnAnterior.innerHTML = '<i class="fas fa-chevron-left"></i>';
                 btnAnterior.onclick = () => mudarPagina(paginaAtual - 1);
                 paginacao.appendChild(btnAnterior);
             }
-
             for (let i = 1; i <= totalPaginas; i++) {
                 const btnPagina = document.createElement('button');
                 btnPagina.textContent = i;
@@ -1534,7 +1495,6 @@
                 btnPagina.onclick = () => mudarPagina(i);
                 paginacao.appendChild(btnPagina);
             }
-
             if (paginaAtual < totalPaginas) {
                 const btnProximo = document.createElement('button');
                 btnProximo.innerHTML = '<i class="fas fa-chevron-right"></i>';
@@ -1542,13 +1502,11 @@
                 paginacao.appendChild(btnProximo);
             }
         }
-
         function mudarPagina(pagina) {
             paginaAtual = pagina;
             atualizarTabela();
             window.scrollTo(0, 0);
         }
-
         // Filtros e ordenação
         function ordenarTabela(campo) {
             if (ordenacaoAtual.campo === campo) {
@@ -1560,17 +1518,14 @@
             paginaAtual = 1;
             atualizarTabela();
         }
-
         function filtrarFaturas() {
             paginaAtual = 1;
             atualizarTabela();
         }
-
         function toggleAdvancedSearch() {
             const advancedSearch = document.getElementById('advancedSearch');
             advancedSearch.style.display = advancedSearch.style.display === 'none' ? 'block' : 'none';
         }
-
         function atualizarCategoriasFiltro() {
             const select = document.getElementById('filtroCategoria');
             const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral'))];
@@ -1582,7 +1537,6 @@
                 select.appendChild(option);
             });
         }
-
         function atualizarSugestoesCategorias() {
             const datalist = document.getElementById('categoriasSugeridas');
             const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral').filter(Boolean))];
@@ -1593,37 +1547,31 @@
                 datalist.appendChild(option);
             });
         }
-
         // Dashboard
         function atualizarDashboard() {
             const totalPendente = faturas.filter(f => !f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const hoje = hojeYMD();
             const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7', 10);
-
             const proximosVencimentos = faturas.filter(f =>
                 !f.pago &&
                 diffDias(hoje, f.vencimento) >= 0 &&
                 diffDias(hoje, f.vencimento) <= diasAlerta
             ).length;
-
             const atrasadas = faturas.filter(f =>
                 !f.pago &&
                 diffDias(hoje, f.vencimento) < 0
             ).length;
-
             document.getElementById('dashboard-total-pendente').textContent = fmtBRL.format(totalPendente);
             document.getElementById('dashboard-total-pago').textContent = fmtBRL.format(totalPago);
             document.getElementById('dashboard-proximos-vencimentos').textContent = proximosVencimentos;
             document.getElementById('dashboard-atrasadas').textContent = atrasadas;
         }
-
         // Filtros rápidos
         function filtrarPorStatus(status) {
             document.getElementById('filtroStatus').value = status;
             filtrarFaturas();
         }
-
         function filtrarPorVencimentoProximo() {
             const hoje = hojeYMD();
             const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7', 10);
@@ -1635,20 +1583,16 @@
             document.getElementById('advancedSearch').style.display = 'block';
             filtrarFaturas();
         }
-
         function scrollToForm() {
             document.getElementById('formFatura').scrollIntoView({ behavior: 'smooth' });
         }
-
         // Calendar functions
         function atualizarCalendar() {
             const calendarGrid = document.getElementById('calendarGrid');
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
                                 "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             document.getElementById('calendarMonth').textContent = `${monthNames[mesCalendar]} ${anoCalendar}`;
-
             calendarGrid.innerHTML = '';
-
             // Cabeçalho dos dias da semana
             const daysOfWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
             for (let i = 0; i < 7; i++) {
@@ -1657,31 +1601,25 @@
                 dayHeader.textContent = daysOfWeek[i];
                 calendarGrid.appendChild(dayHeader);
             }
-
             // Obter o primeiro dia do mês e o último dia do mês
             const firstDay = new Date(anoCalendar, mesCalendar, 1);
             const lastDay = new Date(anoCalendar, mesCalendar + 1, 0);
-
             // Dias vazios no início
             for (let i = 0; i < firstDay.getDay(); i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day';
                 calendarGrid.appendChild(emptyDay);
             }
-
             // Dias do mês
             for (let i = 1; i <= lastDay.getDate(); i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day';
-
                 const dayHeader = document.createElement('div');
                 dayHeader.className = 'calendar-day-header';
                 dayHeader.textContent = i;
                 day.appendChild(dayHeader);
-
                 const currentDate = formatYMD(new Date(anoCalendar, mesCalendar, i));
                 const dayFaturas = faturas.filter(f => f.vencimento === currentDate);
-
                 dayFaturas.forEach(fatura => {
                     const event = document.createElement('div');
                     event.className = `calendar-event ${fatura.pago ? 'paid' : ''} ${!fatura.pago && diffDias(hojeYMD(), fatura.vencimento) < 0 ? 'expired' : ''}`;
@@ -1695,11 +1633,9 @@
                     };
                     day.appendChild(event);
                 });
-
                 calendarGrid.appendChild(day);
             }
         }
-
         function mudarMesCalendar(delta) {
             mesCalendar += delta;
             if (mesCalendar < 0) {
@@ -1711,17 +1647,14 @@
             }
             atualizarCalendar();
         }
-
         // Busca inteligente
         function inicializarBuscaInteligente() {
             document.getElementById('nome').addEventListener('input', function(e) {
                 mostrarSugestoes(e.target.value, 'suggestions-container');
             });
-
             document.getElementById('buscaNome').addEventListener('input', function(e) {
                 mostrarSugestoes(e.target.value, 'suggestions-container-table');
             });
-
             document.addEventListener('click', function(e) {
                 if (!e.target.matches('#nome, #buscaNome')) {
                     document.querySelectorAll('.search-suggestions').forEach(el => {
@@ -1730,7 +1663,6 @@
                 }
             });
         }
-
         function mostrarSugestoes(query, containerId) {
             // suporte para chamadas sem containerId (ex.: atributo oninput no HTML)
             if (!containerId) {
@@ -1738,27 +1670,22 @@
                 if (ae && ae.id === 'nome') containerId = 'suggestions-container';
                 else containerId = 'suggestions-container-table';
             }
-
             const container = document.getElementById(containerId);
             if (!container) return;
-
             if (!query) {
                 container.style.display = 'none';
                 container.innerHTML = '';
                 return;
             }
-
             const sugestoes = [...new Set(faturas
                 .filter(f => (f.nome || '').toLowerCase().includes(query.toLowerCase()))
                 .map(f => f.nome)
             )].slice(0, 5);
-
             if (sugestoes.length === 0) {
                 container.style.display = 'none';
                 container.innerHTML = '';
                 return;
             }
-
             container.innerHTML = '';
             sugestoes.forEach(sugestao => {
                 const div = document.createElement('div');
@@ -1775,10 +1702,8 @@
                 };
                 container.appendChild(div);
             });
-
             container.style.display = 'block';
         }
-
         // Analytics e gráficos
         function atualizarAnalytics() {
             const totalFaturas = faturas.length;
@@ -1788,49 +1713,53 @@
             const faturasPendentes = fPendentes.length;
             const mediaValor = totalFaturas > 0 ?
                 faturas.reduce((sum, f) => sum + f.valor, 0) / totalFaturas : 0;
-
             document.getElementById('totalFaturas').textContent = totalFaturas;
             document.getElementById('faturasPagas').textContent = faturasPagas;
             document.getElementById('faturasPendentes').textContent = faturasPendentes;
             document.getElementById('mediaValor').textContent = fmtBRL.format(mediaValor);
-
             criarGraficoNomes();
             criarGraficoCategorias();
             criarGraficoCartoes();
             criarGraficoMensal();
             criarGraficoPrevisao();
         }
-
         function criarGraficoNomes() {
             const ctx = document.getElementById('graficoNomes').getContext('2d');
             if (graficos.nomes) graficos.nomes.destroy();
-
             const nomesCount = {};
             faturas.forEach(f => {
                 nomesCount[f.nome] = (nomesCount[f.nome] || 0) + 1;
             });
-
             const sortedNames = Object.entries(nomesCount).sort((a, b) => b[1] - a[1]);
             const topNames = sortedNames.slice(0, 10);
             const outrosCount = sortedNames.slice(10).reduce((sum, [_, count]) => sum + count, 0);
-
             const labels = topNames.map(([name, _]) => name);
             const data = topNames.map(([_, count]) => count);
-
             if (outrosCount > 0) {
                 labels.push('Outros');
                 data.push(outrosCount);
             }
-
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
-
-            const backgroundColors = [
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            const backgroundColors = isDark ? [
+                'rgba(93, 173, 226, 0.8)',
+                'rgba(88, 214, 141, 0.8)',
+                'rgba(236, 112, 99, 0.8)',
+                'rgba(248, 196, 113, 0.8)',
+                'rgba(163, 122, 219, 0.8)',
+                'rgba(231, 160, 132, 0.8)',
+                'rgba(142, 198, 238, 0.8)',
+                'rgba(231, 218, 132, 0.8)',
+                'rgba(152, 195, 121, 0.8)',
+                'rgba(238, 152, 152, 0.8)'
+            ] : [
                 '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
                 '#9966FF', '#FF9F40', '#8BC34A', '#C9CBCF',
                 '#E7E9ED', '#F7464A', '#46BFBD', '#FDB45C'
             ];
-
+            
             graficos.nomes = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -1878,22 +1807,18 @@
                 }
             });
         }
-
         function criarGraficoCategorias() {
             const ctx = document.getElementById('graficoCategorias').getContext('2d');
             if (graficos.categorias) graficos.categorias.destroy();
-
             const categoriasValor = {};
             faturas.forEach(f => {
                 const cat = f.categoria || 'Geral';
                 categoriasValor[cat] = (categoriasValor[cat] || 0) + f.valor;
             });
-
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const primary = cs.getPropertyValue('--primary-color').trim() || '#36A2EB';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-
             graficos.categorias = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1924,20 +1849,16 @@
                 }
             });
         }
-
         function criarGraficoCartoes() {
             const ctx = document.getElementById('graficoCartoes').getContext('2d');
             if (graficos.cartoes) graficos.cartoes.destroy();
-
             const tiposCount = {};
             faturas.forEach(f => {
                 tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
             });
-
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-
             const coresTipos = {
                 cartao: '#36A2EB',
                 celular: '#FF6384',
@@ -1948,11 +1869,9 @@
                 financiamento: '#8BC34A',
                 outros: '#C9CBCF'
             };
-
             const labels = Object.keys(tiposCount);
             const data = Object.values(tiposCount);
             const backgroundColors = labels.map(tipo => coresTipos[tipo] || '#C9CBCF');
-
             graficos.cartoes = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1984,11 +1903,9 @@
                 }
             });
         }
-
         function criarGraficoMensal() {
             const ctx = document.getElementById('graficoMensal').getContext('2d');
             if (graficos.mensal) graficos.mensal.destroy();
-
             const dadosMensais = {};
             faturas.forEach(f => {
                 const mes = f.vencimento?.substring(0, 7);
@@ -2000,12 +1917,10 @@
                 if (f.pago) dadosMensais[mes].pagos += f.valor;
                 else dadosMensais[mes].pendentes += f.valor;
             });
-
             const meses = Object.keys(dadosMensais).sort();
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-
             graficos.mensal = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2030,11 +1945,9 @@
                 }
             });
         }
-
         function criarGraficoPrevisao() {
             const ctx = document.getElementById('graficoPrevisao').getContext('2d');
             if (graficos.previsao) graficos.previsao.destroy();
-
             const hoje = new Date();
             const mesesDados = [];
             for (let i = 2; i >= 0; i--) {
@@ -2042,7 +1955,6 @@
                 const mesStr = formatYMD(mes).substring(0, 7);
                 mesesDados.push(mesStr);
             }
-
             let total = 0;
             let count = 0;
             mesesDados.forEach(mes => {
@@ -2052,20 +1964,16 @@
                 total += gastoMes;
                 count++;
             });
-
             const media = count > 0 ? total / count : 0;
-
             const mesesPrevisao = [];
             for (let i = 1; i <= 3; i++) {
                 const mes = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
                 const mesNome = mes.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
                 mesesPrevisao.push(mesNome);
             }
-
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-
             graficos.previsao = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -2092,21 +2000,17 @@
                 }
             });
         }
-
         // Funções de recorrência (evita duplicidades por nome+tipo+data)
         function gerarFaturasRecorrentes() {
             let geradas = 0;
             const novas = [];
-
             faturas.filter(f => f.recorrente).forEach((fatura, i) => {
                 const proxV = parseYMD(fatura.vencimento); proxV.setMonth(proxV.getMonth() + 1);
                 const proxF = parseYMD(fatura.fechamento); proxF.setMonth(proxF.getMonth() + 1);
                 const vencProx = formatYMD(proxV);
-
                 const jaExiste =
                     faturas.some(ff => ff.nome === fatura.nome && ff.tipo === fatura.tipo && ff.vencimento === vencProx) ||
                     novas.some(ff => ff.nome === fatura.nome && ff.tipo === fatura.tipo && ff.vencimento === vencProx);
-
                 if (!jaExiste) {
                     novas.push({
                         ...fatura,
@@ -2120,7 +2024,6 @@
                     geradas++;
                 }
             });
-
             if (novas.length) {
                 faturas = faturas.concat(novas);
                 atualizarLocalStorage();
@@ -2134,7 +2037,6 @@
                 exibirNotificacao('Nenhuma fatura recorrente nova foi gerada.', 'info');
             }
         }
-
         // Exportação e backup
         function exportarCSV() {
             const headers = ['Tipo', 'Nome', 'Categoria', 'Fechamento', 'Vencimento', 'Valor', 'Status', 'Data Pagamento', 'Recorrente'];
@@ -2156,7 +2058,6 @@
             baixarArquivo(csvContent, `faturas_${obterDataAtual()}.csv`, 'text/csv;charset=utf-8;');
             exibirNotificacao('CSV exportado com sucesso!', 'success');
         }
-
         function exportarBackup() {
             const backup = {
                 faturas: faturas,
@@ -2168,7 +2069,6 @@
             baixarArquivo(json, `backup_faturas_${obterDataAtual()}.json`, 'application/json');
             exibirNotificacao('Backup criado com sucesso!', 'success');
         }
-
         function restaurarBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -2206,12 +2106,10 @@
             reader.readAsText(file);
             event.target.value = '';
         }
-
         function gerarRelatorioHTML() {
             const totalGeral = faturas.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
-
             const linhas = faturas.map(f => `
                 <tr>
                     <td>${esc(f.tipo)}</td>
@@ -2222,7 +2120,6 @@
                     <td>${f.pago ? 'Pago' : 'Pendente'}</td>
                 </tr>
             `).join('');
-
             const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -2270,7 +2167,6 @@
             baixarArquivo(html, `relatorio_faturas_${obterDataAtual()}.html`, 'text/html');
             exibirNotificacao('Relatório HTML gerado com sucesso!', 'success');
         }
-
         // Exportar PDF (considera filtros)
         function exportarPDF() {
             const doc = new jsPDF();
@@ -2280,12 +2176,10 @@
             doc.setFontSize(12);
             doc.setTextColor(100);
             doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 105, 22, { align: 'center' });
-
             const dadosFiltrados = aplicarFiltros([...faturas]);
             const totalGeral = dadosFiltrados.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = dadosFiltrados.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
-
             doc.setFontSize(14);
             doc.setTextColor(40);
             doc.text('Resumo Financeiro', 14, 35);
@@ -2294,7 +2188,6 @@
             doc.text(`Total Pago: ${fmtBRL.format(totalPago)}`, 20, 52);
             doc.text(`Total Pendente: ${fmtBRL.format(totalPendente)}`, 20, 59);
             doc.text(`Total de Faturas: ${dadosFiltrados.length}`, 20, 66);
-
             const tableData = dadosFiltrados.map(f => [
                 f.tipo,
                 f.nome,
@@ -2303,7 +2196,6 @@
                 fmtBRL.format(f.valor),
                 f.pago ? 'Pago' : 'Pendente'
             ]);
-
             doc.autoTable({
                 head: [['Tipo', 'Nome', 'Categoria', 'Vencimento', 'Valor', 'Status']],
                 body: tableData,
@@ -2318,7 +2210,6 @@
                 styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
                 margin: { top: 75 }
             });
-
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -2328,7 +2219,6 @@
             doc.save(`relatorio_faturas_${obterDataAtual()}.pdf`);
             exibirNotificacao('PDF exportado com sucesso!', 'success');
         }
-
         function confirmarLimpezaDados() {
             mostrarModal(
                 'Confirmar limpeza',
@@ -2339,7 +2229,6 @@
                 }
             );
         }
-
         function limparDados() {
             faturas = [];
             atualizarLocalStorage();
@@ -2350,7 +2239,6 @@
             atualizarCalendar();
             exibirNotificacao('Todos os dados foram limpos!', 'success');
         }
-
         // Modal functions
         function mostrarModal(titulo, mensagem, callback) {
             document.getElementById('modalTitulo').textContent = titulo;
@@ -2362,18 +2250,15 @@
             modal.setAttribute('aria-hidden', 'false');
             setTimeout(() => btnConfirm.focus(), 0);
         }
-
         function fecharModal() {
             const modal = document.getElementById('modalConfirmacao');
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
         }
-
         // Auxiliares
         function atualizarLocalStorage() {
             localStorage.setItem('faturas', JSON.stringify(faturas));
         }
-
         function baixarArquivo(conteudo, nomeArquivo, tipo) {
             const blob = new Blob([conteudo], { type: tipo });
             const url = window.URL.createObjectURL(blob);
@@ -2383,7 +2268,6 @@
             a.click();
             window.URL.revokeObjectURL(url);
         }
-
         function exibirNotificacao(mensagem, tipo) {
             const notification = document.getElementById('notification');
             notification.textContent = mensagem;
@@ -2393,33 +2277,27 @@
                 notification.style.display = 'none';
             }, 4000);
         }
-
         // Notificações de vencimento (janela de +/- diasAlerta)
         function verificarVencimentoProximo() {
             const alertaNotificacao = localStorage.getItem('alertaNotificacao') !== 'false';
             const notificacao = document.getElementById('notificacaoVencimento');
             const lista = document.getElementById('listaVencimentoProximo');
-
             if (!alertaNotificacao) {
                 notificacao.style.display = 'none';
                 return;
             }
-
             const hoje = hojeYMD();
             const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7', 10);
-
             const vencimentoProximo = faturas.filter(fatura => {
                 if (fatura.pago) return false;
                 const d = diffDias(hoje, fatura.vencimento);
                 return d >= -diasAlerta && d <= diasAlerta;
             });
-
             if (vencimentoProximo.length === 0) {
                 notificacao.style.display = 'none';
                 lista.innerHTML = '';
                 return;
             }
-
             let html = '<ul style="margin-top: 10px; margin-bottom: 0;">';
             vencimentoProximo.forEach(fatura => {
                 const d = diffDias(hoje, fatura.vencimento);
@@ -2430,28 +2308,23 @@
                 html += `<li><strong>${esc(fatura.nome)}</strong> - ${texto} - ${fmtBRL.format(fatura.valor)}</li>`;
             });
             html += '</ul>';
-
             lista.innerHTML = html;
             notificacao.style.display = 'block';
         }
-
         function fecharNotificacaoVencimento() {
             const notificacao = document.getElementById('notificacaoVencimento');
             notificacao.style.display = 'none';
         }
-
-        // Cores aleatórias para os botões do Backup
+        // Cores aleatórias para os botões
         function gerarCorAleatoriaRGB(min = 70, max = 200) {
             const rand = () => Math.floor(Math.random() * (max - min + 1)) + min;
             const r = rand(), g = rand(), b = rand();
             return { r, g, b, css: `rgb(${r}, ${g}, ${b})` };
         }
-
         function corTextoContraste({ r, g, b }) {
             const yiq = (r * 299 + g * 587 + b * 114) / 1000;
             return yiq >= 150 ? '#000' : '#fff';
         }
-
         function aplicarCoresAleatoriasBackup() {
             const botoes = document.querySelectorAll('#backup .export-controls button.btn');
             botoes.forEach(btn => {
@@ -2462,7 +2335,17 @@
                 btn.style.border = 'none';
             });
         }
-
+        function aplicarCoresAleatoriasQuickActions() {
+            const botoes = document.querySelectorAll('.quick-actions .quick-action-btn');
+            botoes.forEach(btn => {
+                const cor = gerarCorAleatoriaRGB();
+                btn.style.backgroundColor = cor.css;
+                btn.style.color = corTextoContraste(cor);
+                btn.style.fontWeight = '700';
+                btn.style.border = 'none';
+                btn.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            });
+        }
         // Fechar modal clicando fora
         window.onclick = function(event) {
             const modal = document.getElementById('modalConfirmacao');
@@ -2470,10 +2353,8 @@
                 fecharModal();
             }
         };
-
         // Fechar modal com ESC
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
-
         // Debounce
         function debounce(fn, delay = 200) {
             let t;
