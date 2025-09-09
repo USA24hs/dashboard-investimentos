@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Faturas Avançado</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Biblioteca jsPDF para geração de PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #f5f5f5;
@@ -22,6 +22,7 @@
             --success-color: #4CAF50;
             --danger-color: #f44336;
             --warning-color: #ff9800;
+            --transition-speed: 0.3s;
         }
         [data-theme="dark"] {
             --bg-color: #1a1a1a;
@@ -37,21 +38,25 @@
             --danger-color: #e57373;
             --warning-color: #ffb74d;
         }
+        * {
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             padding: 20px;
             margin: 0;
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background-color: var(--container-bg);
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px var(--shadow);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
         }
         .header-controls {
             display: flex;
@@ -61,55 +66,135 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .theme-toggle, .filter-toggle {
-            background: none;
+        .theme-toggle, .filter-toggle, .view-toggle {
+            background: var(--header-bg);
             border: 2px solid var(--border-color);
             color: var(--text-color);
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px 15px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .theme-toggle:hover, .filter-toggle:hover {
-            background-color: var(--hover-bg);
+        .theme-toggle:hover, .filter-toggle:hover, .view-toggle:hover {
+            background-color: var(--header-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px var(--shadow);
         }
         h1 {
             text-align: center;
             color: var(--text-color);
             margin: 0;
             flex: 1;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--primary-color), #3F51B5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
         .tabs {
             display: flex;
             border-bottom: 2px solid var(--border-color);
             margin-bottom: 20px;
             overflow-x: auto;
+            border-radius: 8px 8px 0 0;
         }
         .tab {
-            padding: 10px 20px;
+            padding: 12px 24px;
             cursor: pointer;
-            border-bottom: 2px solid transparent;
+            border-bottom: 3px solid transparent;
             white-space: nowrap;
             color: var(--text-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .tab.active {
             border-bottom-color: var(--primary-color);
             background-color: var(--header-bg);
+            border-radius: 8px 8px 0 0;
         }
         .tab-content {
             display: none;
+            animation: fadeIn 0.5s ease;
         }
         .tab-content.active {
             display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            background: var(--header-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .card-title {
+            font-size: 1rem;
+            margin: 0 0 15px 0;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--primary-color);
+        }
+        .card-detail {
+            font-size: 0.9rem;
+            margin: 5px 0 0 0;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .quick-action-btn {
+            padding: 10px 15px;
+            background: var(--header-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .quick-action-btn:hover {
+            background: var(--header-hover);
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             background-color: var(--container-bg);
+            box-shadow: 0 2px 8px var(--shadow);
+            border-radius: 10px;
+            overflow: hidden;
         }
         th, td {
-            padding: 12px 15px;
+            padding: 15px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
             color: var(--text-color);
@@ -119,9 +204,13 @@
             font-weight: bold;
             cursor: pointer;
             position: relative;
+            font-weight: 600;
         }
         th:hover {
             background-color: var(--header-hover);
+        }
+        tr {
+            transition: background-color 0.2s ease;
         }
         tr:hover {
             background-color: var(--hover-bg);
@@ -131,23 +220,27 @@
         }
         .paid {
             color: var(--success-color);
-            text-decoration: line-through;
         }
         .unpaid {
             color: var(--danger-color);
         }
         .btn {
-            padding: 6px 10px;
+            padding: 8px 12px;
             margin: 2px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
         }
         .btn:hover {
             opacity: 0.9;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px var(--shadow);
         }
         .btn-add { background-color: var(--success-color); color: white; }
         .btn-edit { background-color: var(--primary-color); color: white; }
@@ -169,37 +262,47 @@
             min-width: 200px;
         }
         input[type="text"], input[type="number"], input[type="date"], select, input[type="file"] {
-            padding: 8px;
+            padding: 12px;
             margin: 5px 0 10px 0;
             display: inline-block;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 8px;
             width: 100%;
             box-sizing: border-box;
             background-color: var(--container-bg);
             color: var(--text-color);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
         }
         input:invalid {
             border-color: var(--danger-color);
         }
         .summary {
-            background-color: #e8f5e9;
-            padding: 15px;
-            border-radius: 5px;
+            background: linear-gradient(135deg, var(--success-color), #66BB6A);
+            padding: 20px;
+            border-radius: 10px;
             margin-top: 20px;
             font-weight: bold;
-            color: #2e7d32;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         [data-theme="dark"] .summary {
-            background-color: #1b5e1f;
-            color: #81c784;
+            background: linear-gradient(135deg, #1b5e1f, #2e7d32);
         }
         .filter-container {
             margin: 20px 0;
-            padding: 15px;
+            padding: 20px;
             background-color: var(--header-bg);
-            border-radius: 5px;
+            border-radius: 10px;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         .filter-container.hidden {
             display: none;
@@ -210,10 +313,16 @@
             margin-bottom: 10px;
         }
         .notification {
-            padding: 10px;
+            padding: 15px;
             margin: 10px 0;
-            border-radius: 4px;
+            border-radius: 8px;
             display: none;
+            animation: slideIn 0.5s ease;
+            position: relative;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         .notification.success {
             background-color: #dff0d8;
@@ -264,29 +373,40 @@
         .chart-container {
             margin: 20px 0;
             height: 400px;
+            background: var(--container-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: 20px;
             margin: 20px 0;
         }
         .stat-card {
             background-color: var(--header-bg);
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
         .stat-value {
-            font-size: 24px;
+            font-size: 2rem;
             font-weight: bold;
             color: var(--primary-color);
+            margin: 10px 0;
         }
         .export-controls {
             margin: 20px 0;
-            padding: 15px;
+            padding: 20px;
             background-color: var(--header-bg);
-            border-radius: 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         .export-controls button {
             margin-right: 10px;
@@ -294,14 +414,13 @@
         }
         .categoria-tag {
             display: inline-block;
-            padding: 2px 8px;
-            background-color: #e3f2fd;
-            border-radius: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
             font-size: 12px;
             margin-left: 5px;
+            font-weight: 500;
         }
         [data-theme="dark"] .categoria-tag {
-            background-color: #1565c0;
             color: #ffffff;
         }
         .recorrente-badge {
@@ -323,12 +442,13 @@
         .mobile-tabs-menu {
             display: none;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
             background-color: var(--header-bg);
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 8px;
             color: var(--text-color);
+            font-size: 16px;
         }
         .pagination {
             display: flex;
@@ -337,12 +457,16 @@
             gap: 5px;
         }
         .pagination button {
-            padding: 5px 10px;
+            padding: 8px 12px;
             background-color: var(--header-bg);
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+        .pagination button:hover {
+            background-color: var(--header-hover);
         }
         .pagination button.active {
             background-color: var(--primary-color);
@@ -350,9 +474,10 @@
         }
         .search-advanced {
             margin-top: 10px;
-            padding: 10px;
+            padding: 15px;
             background-color: var(--header-bg);
-            border-radius: 4px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         .sort-indicator {
             margin-left: 5px;
@@ -369,14 +494,20 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease;
         }
         .modal-content {
             background-color: var(--container-bg);
-            padding: 20px;
-            border-radius: 8px;
+            padding: 30px;
+            border-radius: 12px;
             max-width: 500px;
             width: 100%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            animation: scaleIn 0.3s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
         .modal-actions {
             display: flex;
@@ -384,21 +515,111 @@
             gap: 10px;
             margin-top: 20px;
         }
-        /* Backup: botões em negrito */
-        #backup .export-controls .btn {
-            font-weight: 700 !important;
+        /* Calendar View */
+        .calendar-view {
+            display: none;
+            margin-top: 20px;
         }
-        /* Títulos (páginas/abas) em negrito */
-        h1, h2, h3, h4 {
-            font-weight: 700 !important;
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
-        .tab {
-            font-weight: 700 !important;
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
         }
-        .mobile-tabs-menu {
-            font-weight: 700;
+        .calendar-day {
+            background: var(--header-bg);
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 100px;
+            position: relative;
+        }
+        .calendar-day-header {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .calendar-event {
+            background: var(--primary-color);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+        .calendar-event.paid {
+            background: var(--success-color);
+        }
+        .calendar-event.expired {
+            background: var(--danger-color);
+        }
+        /* Smart Search */
+        .search-suggestions {
+            position: absolute;
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 5px 15px var(--shadow);
+            display: none;
+        }
+        .search-suggestion {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .search-suggestion:hover {
+            background: var(--hover-bg);
+        }
+        /* Category colors */
+        .category-color-1 { background-color: #FF5252; color: white; }
+        .category-color-2 { background-color: #FF4081; color: white; }
+        .category-color-3 { background-color: #E040FB; color: white; }
+        .category-color-4 { background-color: #7C4DFF; color: white; }
+        .category-color-5 { background-color: #536DFE; color: white; }
+        .category-color-6 { background-color: #448AFF; color: white; }
+        .category-color-7 { background-color: #40C4FF; color: white; }
+        .category-color-8 { background-color: #18FFFF; color: white; color: #333; }
+        .category-color-9 { background-color: #64FFDA; color: white; color: #333; }
+        .category-color-10 { background-color: #69F0AE; color: white; }
+        .category-color-11 { background-color: #B2FF59; color: white; color: #333; }
+        .category-color-12 { background-color: #EEFF41; color: white; color: #333; }
+        .category-color-13 { background-color: #FFFF00; color: white; color: #333; }
+        .category-color-14 { background-color: #FFD740; color: white; color: #333; }
+        .category-color-15 { background-color: #FFAB40; color: white; }
+        .category-color-16 { background-color: #FF6E40; color: white; }
+
+        [data-theme="dark"] .category-color-8,
+        [data-theme="dark"] .category-color-9,
+        [data-theme="dark"] .category-color-11,
+        [data-theme="dark"] .category-color-12,
+        [data-theme="dark"] .category-color-13,
+        [data-theme="dark"] .category-color-14 {
+            color: white;
+        }
+
+        /* Alert settings */
+        .alert-settings {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--header-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         /* Responsividade */
+        @media (max-width: 1024px) {
+            .dashboard-cards {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
         @media (max-width: 768px) {
             .header-controls {
                 flex-direction: column;
@@ -413,13 +634,13 @@
                 margin-bottom: 15px;
             }
             th, td {
-                padding: 8px 10px;
+                padding: 10px;
                 font-size: 14px;
             }
             .btn {
-                padding: 5px 8px;
+                padding: 6px 10px;
                 font-size: 12px;
-                margin: 1px;
+                margin: 2px;
             }
             .tabs {
                 display: none;
@@ -434,36 +655,93 @@
             .container {
                 padding: 15px;
             }
+            .calendar-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+            .card-value {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-controls">
-            <button class="theme-toggle" onclick="alternarTema()" aria-label="Alternar entre tema claro e escuro">🌓 Tema</button>
-            <button class="filter-toggle" onclick="alternarFiltros()" aria-label="Mostrar/Ocultar filtros">🔍 Filtros</button>
-            <h1>Gerenciador de Faturas Avançado</h1>
-            <div></div>
+            <button class="theme-toggle" onclick="alternarTema()" aria-label="Alternar entre tema claro e escuro">
+                <i class="fas fa-moon"></i> Tema
+            </button>
+            <button class="filter-toggle" onclick="alternarFiltros()" aria-label="Mostrar/Ocultar filtros">
+                <i class="fas fa-filter"></i> Filtros
+            </button>
+            <h1><i class="fas fa-file-invoice-dollar"></i> Gerenciador de Faturas Avançado</h1>
+            <button class="view-toggle" onclick="alternarVisualizacao()" aria-label="Alternar entre visualização de tabela e calendário">
+                <i class="fas fa-calendar-alt"></i> Visualização
+            </button>
         </div>
         <div id="notification" class="notification" role="status" aria-live="polite"></div>
         <!-- Nova notificação para vencimentos próximos -->
         <div id="notificacaoVencimento" class="notification warning" style="display: none;">
             <button class="close-btn" onclick="fecharNotificacaoVencimento()" aria-label="Fechar notificação">✖</button>
-            <strong>⚠️ Aviso de Vencimento</strong>
+            <strong><i class="fas fa-exclamation-triangle"></i> Aviso de Vencimento</strong>
             <div id="listaVencimentoProximo"></div>
         </div>
         <select class="mobile-tabs-menu" onchange="mostrarAbaMobile(this.value)" aria-label="Selecionar aba no modo mobile">
-            <option value="faturas">📋 Faturas</option>
-            <option value="analytics">📊 Análises</option>
-            <option value="backup">💾 Backup</option>
+            <option value="faturas"><i class="fas fa-file-invoice"></i> Faturas</option>
+            <option value="analytics"><i class="fas fa-chart-line"></i> Análises</option>
+            <option value="backup"><i class="fas fa-database"></i> Backup</option>
         </select>
         <div class="tabs">
-            <div class="tab active" data-aba="faturas" onclick="mostrarAba(event, 'faturas')">📋 Faturas</div>
-            <div class="tab" data-aba="analytics" onclick="mostrarAba(event, 'analytics')">📊 Análises</div>
-            <div class="tab" data-aba="backup" onclick="mostrarAba(event, 'backup')">💾 Backup</div>
+            <div class="tab active" data-aba="faturas" onclick="mostrarAba(event, 'faturas')">
+                <i class="fas fa-file-invoice"></i> Faturas
+            </div>
+            <div class="tab" data-aba="analytics" onclick="mostrarAba(event, 'analytics')">
+                <i class="fas fa-chart-line"></i> Análises
+            </div>
+            <div class="tab" data-aba="backup" onclick="mostrarAba(event, 'backup')">
+                <i class="fas fa-database"></i> Backup
+            </div>
         </div>
         <!-- ABA FATURAS -->
         <div id="faturas" class="tab-content active">
+            <!-- Dashboard de Resumo -->
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <h3 class="card-title"><i class="fas fa-money-bill-wave"></i> Total Pendente</h3>
+                    <p class="card-value" id="dashboard-total-pendente">R$ 0,00</p>
+                    <p class="card-detail">Valor total das faturas em aberto</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3 class="card-title"><i class="fas fa-check-circle"></i> Total Pago</h3>
+                    <p class="card-value" id="dashboard-total-pago">R$ 0,00</p>
+                    <p class="card-detail">Valor total das faturas pagas</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3 class="card-title"><i class="fas fa-calendar-day"></i> Próximos Vencimentos</h3>
+                    <p class="card-value" id="dashboard-proximos-vencimentos">0</p>
+                    <p class="card-detail">Faturas a vencer em 7 dias</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3 class="card-title"><i class="fas fa-exclamation-triangle"></i> Atrasadas</h3>
+                    <p class="card-value" id="dashboard-atrasadas">0</p>
+                    <p class="card-detail">Faturas em atraso</p>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="scrollToForm()">
+                    <i class="fas fa-plus"></i> Nova Fatura
+                </button>
+                <button class="quick-action-btn" onclick="filtrarPorStatus('pendente')">
+                    <i class="fas fa-clock"></i> Ver Pendentes
+                </button>
+                <button class="quick-action-btn" onclick="filtrarPorStatus('pago')">
+                    <i class="fas fa-check"></i> Ver Pagas
+                </button>
+                <button class="quick-action-btn" onclick="filtrarPorVencimentoProximo()">
+                    <i class="fas fa-calendar-day"></i> Próximos Vencimentos
+                </button>
+            </div>
+
             <form id="formFatura" onsubmit="adicionarFatura(event)">
                 <div class="form-row">
                     <div class="form-group">
@@ -483,6 +761,7 @@
                     <div class="form-group">
                         <label for="nome">Nome:</label>
                         <input type="text" id="nome" placeholder="Nome do cartão ou serviço" required>
+                        <div id="suggestions-container" class="search-suggestions"></div>
                     </div>
                     <div class="form-group">
                         <label for="categoria">Categoria:</label>
@@ -509,8 +788,12 @@
                         <input type="checkbox" id="recorrente"> 🔄 Conta recorrente (gerar automaticamente no próximo mês)
                     </label>
                 </div>
-                <button type="submit" class="btn btn-add" id="btnAdd">Adicionar Fatura</button>
-                <button type="button" class="btn" id="btnCancel" onclick="cancelarEdicao()" style="display: none; background-color: #9e9e9e;">Cancelar</button>
+                <button type="submit" class="btn btn-add" id="btnAdd">
+                    <i class="fas fa-plus"></i> Adicionar Fatura
+                </button>
+                <button type="button" class="btn" id="btnCancel" onclick="cancelarEdicao()" style="display: none; background-color: #9e9e9e;">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
             </form>
             <div class="filter-container" id="filterContainer">
                 <div class="filter-group">
@@ -543,10 +826,13 @@
                 </div>
                 <div class="filter-group">
                     <label for="buscaNome">Buscar por nome:</label>
-                    <input type="text" id="buscaNome" placeholder="Buscar...">
+                    <input type="text" id="buscaNome" placeholder="Buscar..." oninput="mostrarSugestoes(this.value)">
+                    <div id="suggestions-container-table" class="search-suggestions"></div>
                 </div>
                 <div class="filter-group">
-                    <button class="btn" onclick="toggleAdvancedSearch()">🔍 Busca Avançada</button>
+                    <button class="btn" onclick="toggleAdvancedSearch()">
+                        <i class="fas fa-search-plus"></i> Busca Avançada
+                    </button>
                 </div>
             </div>
             <div id="advancedSearch" class="search-advanced" style="display: none;">
@@ -569,7 +855,9 @@
                     </div>
                 </div>
             </div>
-            <div style="overflow-x: auto;">
+
+            <!-- Visualização em Tabela -->
+            <div id="tableView" style="overflow-x: auto;">
                 <table id="tabelaFaturas">
                     <thead>
                         <tr>
@@ -585,10 +873,50 @@
                     <tbody></tbody>
                 </table>
             </div>
+
+            <!-- Visualização em Calendário -->
+            <div id="calendarView" class="calendar-view">
+                <div class="calendar-header">
+                    <button class="btn" onclick="mudarMesCalendar(-1)">
+                        <i class="fas fa-chevron-left"></i> Mês Anterior
+                    </button>
+                    <h3 id="calendarMonth">Setembro 2023</h3>
+                    <button class="btn" onclick="mudarMesCalendar(1)">
+                        Próximo Mês <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Os dias serão preenchidos via JavaScript -->
+                </div>
+            </div>
+
             <div class="pagination" id="paginacao"></div>
             <div class="summary" id="resumoTotal">
                 ⏳️ Total de faturas pendentes: R$ 0,00<br>
                 💰 Total de faturas pagas: R$ 0,00
+            </div>
+
+            <!-- Configurações de Alerta -->
+            <div class="alert-settings">
+                <h3><i class="fas fa-bell"></i> Configurações de Alerta</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="alertaDias">Alertar sobre vencimentos em (dias):</label>
+                        <input type="number" id="alertaDias" min="1" max="30" value="7" onchange="salvarConfiguracoesAlerta()">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="alertaEmail" onchange="salvarConfiguracoesAlerta()">
+                            Receber alertas por e-mail
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="alertaNotificacao" checked onchange="salvarConfiguracoesAlerta()">
+                            Mostrar notificações no sistema
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- ABA ANÁLISES -->
@@ -623,21 +951,38 @@
             <div class="chart-container">
                 <canvas id="graficoMensal" aria-label="Gráfico de evolução mensal dos gastos" role="img"></canvas>
             </div>
+            <div class="chart-container">
+                <canvas id="graficoPrevisao" aria-label="Gráfico de previsão de gastos futuros" role="img"></canvas>
+            </div>
         </div>
         <!-- ABA BACKUP -->
         <div id="backup" class="tab-content">
             <div class="export-controls">
-                <h3>Exportar Dados</h3>
-                <button class="btn btn-export" onclick="exportarCSV()">📊 Exportar CSV</button>
-                <button class="btn btn-export" onclick="exportarBackup()">💾 Backup JSON</button>
-                <button class="btn btn-export" onclick="gerarRelatorioHTML()">📄 Relatório HTML</button>
-                <button class="btn btn-pdf" onclick="exportarPDF()">📋 Exportar PDF</button>
-                <h3>Importar Dados</h3>
+                <h3><i class="fas fa-file-export"></i> Exportar Dados</h3>
+                <button class="btn btn-export" onclick="exportarCSV()">
+                    <i class="fas fa-file-csv"></i> Exportar CSV
+                </button>
+                <button class="btn btn-export" onclick="exportarBackup()">
+                    <i class="fas fa-file-export"></i> Backup JSON
+                </button>
+                <button class="btn btn-export" onclick="gerarRelatorioHTML()">
+                    <i class="fas fa-file-code"></i> Relatório HTML
+                </button>
+                <button class="btn btn-pdf" onclick="exportarPDF()">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+                <h3><i class="fas fa-file-import"></i> Importar Dados</h3>
                 <input type="file" id="arquivoBackup" accept=".json" onchange="restaurarBackup(event)" style="margin-bottom: 10px;">
-                <button class="btn btn-import" onclick="document.getElementById('arquivoBackup').click()">📂 Restaurar Backup</button>
-                <h3>Gerenciar Recorrências</h3>
-                <button class="btn btn-add" onclick="gerarFaturasRecorrentes()">🔄 Gerar Faturas do Próximo Mês</button>
-                <button class="btn btn-delete" onclick="confirmarLimpezaDados()">🗑️ Limpar Todos os Dados</button>
+                <button class="btn btn-import" onclick="document.getElementById('arquivoBackup').click()">
+                    <i class="fas fa-file-import"></i> Restaurar Backup
+                </button>
+                <h3><i class="fas fa-sync-alt"></i> Gerenciar Recorrências</h3>
+                <button class="btn btn-add" onclick="gerarFaturasRecorrentes()">
+                    <i class="fas fa-plus-circle"></i> Gerar Faturas do Próximo Mês
+                </button>
+                <button class="btn btn-delete" onclick="confirmarLimpezaDados()">
+                    <i class="fas fa-trash"></i> Limpar Todos os Dados
+                </button>
             </div>
         </div>
     </div>
@@ -680,24 +1025,36 @@
         let graficos = {};
         let paginaAtual = 1;
         const itensPorPagina = 10;
+        let mesCalendar = new Date().getMonth();
+        let anoCalendar = new Date().getFullYear();
+        let visualizacaoAtual = 'tabela'; // 'tabela' ou 'calendario'
+
         // Carregar configurações
         window.onload = function() {
             carregarTema();
             carregarPreferenciaFiltros();
             carregarDados();
+            carregarConfiguracoesAlerta();
             atualizarCategoriasFiltro();
             definirDatasMinimas();
             verificarVencimentoProximo();
             atualizarSugestoesCategorias();
+            atualizarDashboard();
             // Busca com debounce
             document.getElementById('buscaNome').onkeyup = debounce(filtrarFaturas, 200);
             // Cores aleatórias no Backup ao carregar
             aplicarCoresAleatoriasBackup();
+            // Inicializar calendário
+            atualizarCalendar();
+            // Inicializar busca inteligente
+            inicializarBuscaInteligente();
         }
+
         function carregarTema() {
             const tema = localStorage.getItem('tema') || 'light';
             document.documentElement.setAttribute('data-theme', tema);
         }
+
         function carregarPreferenciaFiltros() {
             const filtrosVisiveis = localStorage.getItem('filtrosVisiveis') !== 'false';
             const filterContainer = document.getElementById('filterContainer');
@@ -706,6 +1063,29 @@
                 filterContainer.classList.add('hidden');
             }
         }
+
+        function carregarConfiguracoesAlerta() {
+            const alertaDias = localStorage.getItem('alertaDias') || '7';
+            const alertaEmail = localStorage.getItem('alertaEmail') === 'true';
+            const alertaNotificacao = localStorage.getItem('alertaNotificacao') !== 'false';
+            
+            document.getElementById('alertaDias').value = alertaDias;
+            document.getElementById('alertaEmail').checked = alertaEmail;
+            document.getElementById('alertaNotificacao').checked = alertaNotificacao;
+        }
+
+        function salvarConfiguracoesAlerta() {
+            const alertaDias = document.getElementById('alertaDias').value;
+            const alertaEmail = document.getElementById('alertaEmail').checked;
+            const alertaNotificacao = document.getElementById('alertaNotificacao').checked;
+            
+            localStorage.setItem('alertaDias', alertaDias);
+            localStorage.setItem('alertaEmail', alertaEmail);
+            localStorage.setItem('alertaNotificacao', alertaNotificacao);
+            
+            verificarVencimentoProximo();
+        }
+
         function carregarDados() {
             const dadosSalvos = localStorage.getItem('faturas');
             if (dadosSalvos) {
@@ -714,11 +1094,13 @@
             atualizarTabela();
             atualizarAnalytics();
         }
+
         function definirDatasMinimas() {
             const hoje = hojeYMD();
             document.getElementById('fechamento').setAttribute('min', hoje);
             document.getElementById('vencimento').setAttribute('min', hoje);
         }
+
         // Gerenciamento de abas
         function mostrarAba(e, aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -734,6 +1116,7 @@
                 aplicarCoresAleatoriasBackup();
             }
         }
+
         function mostrarAbaMobile(aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -748,6 +1131,25 @@
                 aplicarCoresAleatoriasBackup();
             }
         }
+
+        // Alternar entre visualização de tabela e calendário
+        function alternarVisualizacao() {
+            if (visualizacaoAtual === 'tabela') {
+                visualizacaoAtual = 'calendario';
+                document.getElementById('tableView').style.display = 'none';
+                document.getElementById('calendarView').style.display = 'block';
+                document.querySelector('.view-toggle i').className = 'fas fa-list';
+                document.querySelector('.view-toggle').innerHTML = '<i class="fas fa-list"></i> Visualização';
+                atualizarCalendar();
+            } else {
+                visualizacaoAtual = 'tabela';
+                document.getElementById('tableView').style.display = 'block';
+                document.getElementById('calendarView').style.display = 'none';
+                document.querySelector('.view-toggle i').className = 'fas fa-calendar-alt';
+                document.querySelector('.view-toggle').innerHTML = '<i class="fas fa-calendar-alt"></i> Visualização';
+            }
+        }
+
         // Tema
         function alternarTema() {
             const tema = document.documentElement.getAttribute('data-theme');
@@ -763,6 +1165,7 @@
                 aplicarCoresAleatoriasBackup();
             }
         }
+
         // Filtros
         function alternarFiltros() {
             const filterContainer = document.getElementById('filterContainer');
@@ -777,6 +1180,7 @@
                 atualizarTabela();
             }
         }
+
         // CRUD de faturas
         function adicionarFatura(event) {
             event.preventDefault();
@@ -829,8 +1233,11 @@
             atualizarCategoriasFiltro();
             atualizarSugestoesCategorias();
             verificarVencimentoProximo();
+            atualizarDashboard();
+            atualizarCalendar();
             limparFormulario();
         }
+
         function editarFatura(id) {
             const fatura = faturas.find(f => f.id === id);
             if (!fatura || fatura.pago) {
@@ -846,19 +1253,24 @@
             document.getElementById('recorrente').checked = fatura.recorrente || false;
             editandoId = id;
             document.getElementById('btnAdd').textContent = 'Atualizar Fatura';
+            document.getElementById('btnAdd').innerHTML = '<i class="fas fa-save"></i> Atualizar Fatura';
             document.getElementById('btnCancel').style.display = 'inline-block';
             window.scrollTo(0, 0);
         }
+
         function cancelarEdicao() {
             editandoId = null;
             document.getElementById('btnAdd').textContent = 'Adicionar Fatura';
+            document.getElementById('btnAdd').innerHTML = '<i class="fas fa-plus"></i> Adicionar Fatura';
             document.getElementById('btnCancel').style.display = 'none';
             limparFormulario();
         }
+
         function limparFormulario() {
             const form = document.getElementById('formFatura');
             if (form) form.reset();
         }
+
         function excluirFatura(id) {
             const fatura = faturas.find(f => f.id === id);
             let mensagem = 'Tem certeza que deseja excluir esta fatura?';
@@ -874,11 +1286,14 @@
                     atualizarTabela();
                     atualizarCategoriasFiltro();
                     verificarVencimentoProximo();
+                    atualizarDashboard();
+                    atualizarCalendar();
                     exibirNotificacao('Fatura excluída com sucesso!', 'success');
                     fecharModal();
                 }
             );
         }
+
         function marcarComoPago(id, estaPago) {
             const fatura = faturas.find(f => f.id === id);
             if (!fatura) return;
@@ -898,6 +1313,8 @@
                     atualizarLocalStorage();
                     atualizarTabela();
                     verificarVencimentoProximo();
+                    atualizarDashboard();
+                    atualizarCalendar();
                     exibirNotificacao(`Fatura ${estaPago ? 'paga' : 'desmarcada'} com sucesso!`, 'success');
                     if (editandoId === id) {
                         cancelarEdicao();
@@ -906,6 +1323,7 @@
                 }
             );
         }
+
         // Atualização da tabela
         function atualizarTabela() {
             const tbody = document.querySelector('#tabelaFaturas tbody');
@@ -981,8 +1399,15 @@
                 } else if (d <= 7) {
                     avisoVencimento = ` <span class="warning">(Vence em ${d} dias)</span>`;
                 }
+                // Gerar cor para a categoria
+                const categoriaHash = fatura.categoria ? fatura.categoria.split('').reduce((a, b) => {
+                    a = ((a << 5) - a) + b.charCodeAt(0);
+                    return a & a;
+                }, 0) : 0;
+                const categoriaColorIndex = Math.abs(categoriaHash) % 16 + 1;
+                
                 const categoriaTag = fatura.categoria ?
-                    `<span class="categoria-tag">${fatura.categoria}</span>` : '';
+                    `<span class="categoria-tag category-color-${categoriaColorIndex}">${fatura.categoria}</span>` : '';
                 const recorrenteBadge = fatura.recorrente ?
                     `<span class="recorrente-badge">🔄</span>` : '';
                 tr.innerHTML = `
@@ -994,12 +1419,16 @@
                     <td class="amount ${fatura.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(fatura.valor)}</td>
                     <td>
                         ${!fatura.pago ?
-                            `<button class="btn btn-edit" onclick="editarFatura('${fatura.id}')" aria-label="Editar fatura">Editar</button>` :
+                            `<button class="btn btn-edit" onclick="editarFatura('${fatura.id}')" aria-label="Editar fatura">
+                                <i class="fas fa-edit"></i>
+                            </button>` :
                             '<span class="lock-icon" aria-hidden="true">🔒</span>'
                         }
-                        <button class="btn btn-delete" onclick="excluirFatura('${fatura.id}')" aria-label="Excluir fatura">Excluir</button>
+                        <button class="btn btn-delete" onclick="excluirFatura('${fatura.id}')" aria-label="Excluir fatura">
+                            <i class="fas fa-trash"></i>
+                        </button>
                         <button class="btn btn-paid" onclick="marcarComoPago('${fatura.id}', ${!fatura.pago})" aria-label="${fatura.pago ? 'Desfazer pagamento' : 'Pagar fatura'}">
-                            ${fatura.pago ? 'Desfazer' : 'Pagar'}
+                            ${fatura.pago ? '<i class="fas fa-undo"></i>' : '<i class="fas fa-check"></i>'}
                         </button>
                     </td>
                 `;
@@ -1017,6 +1446,7 @@
             // Atualizar paginação
             atualizarPaginacao(totalPaginas);
         }
+
         function aplicarFiltros(faturasLista) {
             // Se os filtros estiverem ocultos, retorna todas as faturas
             if (document.getElementById('filterContainer').classList.contains('hidden')) {
@@ -1049,6 +1479,7 @@
                 return tipoMatch && statusMatch && categoriaMatch && nomeMatch && valorMatch && dataMatch;
             });
         }
+
         function atualizarPaginacao(totalPaginas) {
             const paginacao = document.getElementById('paginacao');
             paginacao.innerHTML = '';
@@ -1056,7 +1487,7 @@
             // Botão anterior
             if (paginaAtual > 1) {
                 const btnAnterior = document.createElement('button');
-                btnAnterior.textContent = '«';
+                btnAnterior.innerHTML = '<i class="fas fa-chevron-left"></i>';
                 btnAnterior.onclick = () => mudarPagina(paginaAtual - 1);
                 paginacao.appendChild(btnAnterior);
             }
@@ -1071,16 +1502,18 @@
             // Botão próximo
             if (paginaAtual < totalPaginas) {
                 const btnProximo = document.createElement('button');
-                btnProximo.textContent = '»';
+                btnProximo.innerHTML = '<i class="fas fa-chevron-right"></i>';
                 btnProximo.onclick = () => mudarPagina(paginaAtual + 1);
                 paginacao.appendChild(btnProximo);
             }
         }
+
         function mudarPagina(pagina) {
             paginaAtual = pagina;
             atualizarTabela();
             window.scrollTo(0, 0);
         }
+
         // Filtros e ordenação
         function ordenarTabela(campo) {
             if (ordenacaoAtual.campo === campo) {
@@ -1092,6 +1525,7 @@
             paginaAtual = 1;
             atualizarTabela();
         }
+
         function filtrarFaturas() {
             // Se os filtros estiverem ocultos, não faz nada
             if (document.getElementById('filterContainer').classList.contains('hidden')) {
@@ -1101,10 +1535,12 @@
             paginaAtual = 1;
             atualizarTabela();
         }
+
         function toggleAdvancedSearch() {
             const advancedSearch = document.getElementById('advancedSearch');
             advancedSearch.style.display = advancedSearch.style.display === 'none' ? 'block' : 'none';
         }
+
         function atualizarCategoriasFiltro() {
             const select = document.getElementById('filtroCategoria');
             const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral'))];
@@ -1116,6 +1552,7 @@
                 select.appendChild(option);
             });
         }
+
         function atualizarSugestoesCategorias() {
             const datalist = document.getElementById('categoriasSugeridas');
             const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral').filter(Boolean))];
@@ -1126,6 +1563,182 @@
                 datalist.appendChild(option);
             });
         }
+
+        // Dashboard
+        function atualizarDashboard() {
+            const totalPendente = faturas.filter(f => !f.pago).reduce((sum, f) => sum + f.valor, 0);
+            const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
+            const hoje = hojeYMD();
+            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7');
+            const proximosVencimentos = faturas.filter(f => 
+                !f.pago && 
+                diffDias(hoje, f.vencimento) >= 0 && 
+                diffDias(hoje, f.vencimento) <= diasAlerta
+            ).length;
+            const atrasadas = faturas.filter(f => 
+                !f.pago && 
+                diffDias(hoje, f.vencimento) < 0
+            ).length;
+
+            document.getElementById('dashboard-total-pendente').textContent = fmtBRL.format(totalPendente);
+            document.getElementById('dashboard-total-pago').textContent = fmtBRL.format(totalPago);
+            document.getElementById('dashboard-proximos-vencimentos').textContent = proximosVencimentos;
+            document.getElementById('dashboard-atrasadas').textContent = atrasadas;
+        }
+
+        // Filtros rápidos
+        function filtrarPorStatus(status) {
+            document.getElementById('filtroStatus').value = status;
+            filtrarFaturas();
+        }
+
+        function filtrarPorVencimentoProximo() {
+            const hoje = hojeYMD();
+            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7');
+            document.getElementById('buscaDataInicio').value = hoje;
+            const dataFim = new Date();
+            dataFim.setDate(dataFim.getDate() + diasAlerta);
+            document.getElementById('buscaDataFim').value = formatYMD(dataFim);
+            document.getElementById('filtroStatus').value = 'pendente';
+            toggleAdvancedSearch();
+            filtrarFaturas();
+        }
+
+        function scrollToForm() {
+            document.getElementById('formFatura').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Calendar functions
+        function atualizarCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            
+            document.getElementById('calendarMonth').textContent = `${monthNames[mesCalendar]} ${anoCalendar}`;
+            
+            // Limpar o calendário
+            calendarGrid.innerHTML = '';
+            
+            // Obter o primeiro dia do mês e o último dia do mês
+            const firstDay = new Date(anoCalendar, mesCalendar, 1);
+            const lastDay = new Date(anoCalendar, mesCalendar + 1, 0);
+            
+            // Dias da semana headers
+            const daysOfWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+            for (let i = 0; i < 7; i++) {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = daysOfWeek[i];
+                calendarGrid.appendChild(dayHeader);
+            }
+            
+            // Dias vazios no início
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // Dias do mês
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = i;
+                day.appendChild(dayHeader);
+                
+                // Verificar se há faturas neste dia
+                const currentDate = formatYMD(new Date(anoCalendar, mesCalendar, i));
+                const dayFaturas = faturas.filter(f => f.vencimento === currentDate);
+                
+                dayFaturas.forEach(fatura => {
+                    const event = document.createElement('div');
+                    event.className = `calendar-event ${fatura.pago ? 'paid' : ''} ${!fatura.pago && diffDias(hojeYMD(), fatura.vencimento) < 0 ? 'expired' : ''}`;
+                    event.innerHTML = `${fatura.nome} - ${fmtBRL.format(fatura.valor)}`;
+                    event.onclick = () => {
+                        if (fatura.pago) {
+                            marcarComoPago(fatura.id, false);
+                        } else {
+                            marcarComoPago(fatura.id, true);
+                        }
+                    };
+                    day.appendChild(event);
+                });
+                
+                calendarGrid.appendChild(day);
+            }
+        }
+
+        function mudarMesCalendar(delta) {
+            mesCalendar += delta;
+            if (mesCalendar < 0) {
+                mesCalendar = 11;
+                anoCalendar--;
+            } else if (mesCalendar > 11) {
+                mesCalendar = 0;
+                anoCalendar++;
+            }
+            atualizarCalendar();
+        }
+
+        // Busca inteligente
+        function inicializarBuscaInteligente() {
+            document.getElementById('nome').addEventListener('input', function(e) {
+                mostrarSugestoes(e.target.value, 'suggestions-container');
+            });
+            
+            document.getElementById('buscaNome').addEventListener('input', function(e) {
+                mostrarSugestoes(e.target.value, 'suggestions-container-table');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!e.target.matches('#nome, #buscaNome')) {
+                    document.querySelectorAll('.search-suggestions').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                }
+            });
+        }
+
+        function mostrarSugestoes(query, containerId) {
+            const container = document.getElementById(containerId);
+            if (!query) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            const sugestoes = [...new Set(faturas
+                .filter(f => f.nome.toLowerCase().includes(query.toLowerCase()))
+                .map(f => f.nome)
+            )].slice(0, 5);
+            
+            if (sugestoes.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.innerHTML = '';
+            sugestoes.forEach(sugestao => {
+                const div = document.createElement('div');
+                div.className = 'search-suggestion';
+                div.textContent = sugestao;
+                div.onclick = () => {
+                    if (containerId === 'suggestions-container') {
+                        document.getElementById('nome').value = sugestao;
+                    } else {
+                        document.getElementById('buscaNome').value = sugestao;
+                        filtrarFaturas();
+                    }
+                    container.style.display = 'none';
+                };
+                container.appendChild(div);
+            });
+            
+            container.style.display = 'block';
+        }
+
         // Analytics e gráficos
         function atualizarAnalytics() {
             const totalFaturas = faturas.length;
@@ -1143,7 +1756,9 @@
             criarGraficoCategorias();
             criarGraficoCartoes();
             criarGraficoMensal();
+            criarGraficoPrevisao();
         }
+
         function criarGraficoNomes() {
             const ctx = document.getElementById('graficoNomes').getContext('2d');
             if (graficos.nomes) graficos.nomes.destroy();
@@ -1228,6 +1843,7 @@
                 }
             });
         }
+
         function criarGraficoCategorias() {
             const ctx = document.getElementById('graficoCategorias').getContext('2d');
             if (graficos.categorias) graficos.categorias.destroy();
@@ -1286,6 +1902,7 @@
                 }
             });
         }
+
         function criarGraficoCartoes() {
             const ctx = document.getElementById('graficoCartoes').getContext('2d');
             if (graficos.cartoes) graficos.cartoes.destroy();
@@ -1374,6 +1991,7 @@
                 }
             });
         }
+
         function criarGraficoMensal() {
             const ctx = document.getElementById('graficoMensal').getContext('2d');
             if (graficos.mensal) graficos.mensal.destroy();
@@ -1459,6 +2077,94 @@
                 }
             });
         }
+
+        function criarGraficoPrevisao() {
+            const ctx = document.getElementById('graficoPrevisao').getContext('2d');
+            if (graficos.previsao) graficos.previsao.destroy();
+            
+            // Calcular média de gastos dos últimos 3 meses
+            const hoje = new Date();
+            const mesesDados = [];
+            for (let i = 2; i >= 0; i--) {
+                const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                const mesStr = formatYMD(mes).substring(0, 7);
+                mesesDados.push(mesStr);
+            }
+            
+            let total = 0;
+            let count = 0;
+            mesesDados.forEach(mes => {
+                const gastoMes = faturas
+                    .filter(f => f.vencimento?.startsWith(mes))
+                    .reduce((sum, f) => sum + f.valor, 0);
+                total += gastoMes;
+                count++;
+            });
+            
+            const media = count > 0 ? total / count : 0;
+            
+            // Previsão para os próximos 3 meses
+            const mesesPrevisao = [];
+            for (let i = 1; i <= 3; i++) {
+                const mes = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+                const mesNome = mes.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+                mesesPrevisao.push(mesNome);
+            }
+            
+            const cs = getComputedStyle(document.documentElement);
+            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
+            const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
+            
+            graficos.previsao = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: mesesPrevisao,
+                    datasets: [{
+                        label: 'Previsão de Gastos (R$)',
+                        data: [media, media, media],
+                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Previsão de Gastos Futuros (Baseada nos últimos 3 meses)',
+                            color: textColor
+                        },
+                        legend: {
+                            labels: {
+                                color: textColor
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: gridColor
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor
+                            },
+                            grid: {
+                                color: gridColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         // Funções de recorrência
         function gerarFaturasRecorrentes() {
             let geradas = 0;
@@ -1492,11 +2198,14 @@
                 atualizarTabela();
                 atualizarCategoriasFiltro();
                 verificarVencimentoProximo();
+                atualizarDashboard();
+                atualizarCalendar();
                 exibirNotificacao(`${geradas} faturas recorrentes geradas para o próximo mês!`, 'success');
             } else {
                 exibirNotificacao('Nenhuma fatura recorrente nova foi gerada.', 'info');
             }
         }
+
         // Exportação e backup
         function exportarCSV() {
             const headers = ['Tipo', 'Nome', 'Categoria', 'Fechamento', 'Vencimento', 'Valor', 'Status', 'Data Pagamento', 'Recorrente'];
@@ -1518,6 +2227,7 @@
             baixarArquivo(csvContent, `faturas_${obterDataAtual()}.csv`, 'text/csv;charset=utf-8;');
             exibirNotificacao('CSV exportado com sucesso!', 'success');
         }
+
         function exportarBackup() {
             const backup = {
                 faturas: faturas,
@@ -1529,6 +2239,7 @@
             baixarArquivo(json, `backup_faturas_${obterDataAtual()}.json`, 'application/json');
             exibirNotificacao('Backup criado com sucesso!', 'success');
         }
+
         function restaurarBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1550,6 +2261,8 @@
                                 atualizarTabela();
                                 atualizarCategoriasFiltro();
                                 verificarVencimentoProximo();
+                                atualizarDashboard();
+                                atualizarCalendar();
                                 exibirNotificacao('Backup restaurado com sucesso!', 'success');
                                 fecharModal();
                             }
@@ -1564,6 +2277,7 @@
             reader.readAsText(file);
             event.target.value = '';
         }
+
         function gerarRelatorioHTML() {
             const totalGeral = faturas.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
@@ -1624,6 +2338,7 @@
             baixarArquivo(html, `relatorio_faturas_${obterDataAtual()}.html`, 'text/html');
             exibirNotificacao('Relatório HTML gerado com sucesso!', 'success');
         }
+
         // Exportar PDF (considera filtros)
         function exportarPDF() {
             const doc = new jsPDF();
@@ -1682,6 +2397,7 @@
             doc.save(`relatorio_faturas_${obterDataAtual()}.pdf`);
             exibirNotificacao('PDF exportado com sucesso!', 'success');
         }
+
         function confirmarLimpezaDados() {
             mostrarModal(
                 'Confirmar limpeza',
@@ -1692,14 +2408,18 @@
                 }
             );
         }
+
         function limparDados() {
             faturas = [];
             atualizarLocalStorage();
             atualizarTabela();
             atualizarCategoriasFiltro();
             verificarVencimentoProximo();
+            atualizarDashboard();
+            atualizarCalendar();
             exibirNotificacao('Todos os dados foram limpos!', 'success');
         }
+
         // Modal functions
         function mostrarModal(titulo, mensagem, callback) {
             document.getElementById('modalTitulo').textContent = titulo;
@@ -1710,15 +2430,18 @@
             modal.setAttribute('aria-hidden', 'false');
             setTimeout(() => btnConfirm.focus(), 0);
         }
+
         function fecharModal() {
             const modal = document.getElementById('modalConfirmacao');
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
         }
+
         // Auxiliares
         function atualizarLocalStorage() {
             localStorage.setItem('faturas', JSON.stringify(faturas));
         }
+
         function baixarArquivo(conteudo, nomeArquivo, tipo) {
             const blob = new Blob([conteudo], { type: tipo });
             const url = window.URL.createObjectURL(blob);
@@ -1728,6 +2451,7 @@
             a.click();
             window.URL.revokeObjectURL(url);
         }
+
         function exibirNotificacao(mensagem, tipo) {
             const notification = document.getElementById('notification');
             notification.textContent = mensagem;
@@ -1737,12 +2461,21 @@
                 notification.style.display = 'none';
             }, 4000);
         }
+
         // Notificações de vencimento
         function verificarVencimentoProximo() {
+            // Verificar se as notificações estão habilitadas
+            const alertaNotificacao = localStorage.getItem('alertaNotificacao') !== 'false';
+            if (!alertaNotificacao) {
+                document.getElementById('notificacaoVencimento').style.display = 'none';
+                return;
+            }
+            
             const hoje = hojeYMD();
+            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7');
             const vencimentoProximo = faturas.filter(fatura => {
                 if (fatura.pago) return false;
-                return diffDias(hoje, fatura.vencimento) <= 7;
+                return diffDias(hoje, fatura.vencimento) <= diasAlerta;
             });
             const notificacao = document.getElementById('notificacaoVencimento');
             const lista = document.getElementById('listaVencimentoProximo');
@@ -1767,20 +2500,24 @@
             lista.innerHTML = html;
             notificacao.style.display = 'block';
         }
+
         function fecharNotificacaoVencimento() {
             const notificacao = document.getElementById('notificacaoVencimento');
             notificacao.style.display = 'none';
         }
+
         // Cores aleatórias para os botões do Backup
         function gerarCorAleatoriaRGB(min = 70, max = 200) {
             const rand = () => Math.floor(Math.random() * (max - min + 1)) + min;
             const r = rand(), g = rand(), b = rand();
             return { r, g, b, css: `rgb(${r}, ${g}, ${b})` };
         }
+
         function corTextoContraste({ r, g, b }) {
             const yiq = (r * 299 + g * 587 + b * 114) / 1000;
             return yiq >= 150 ? '#000' : '#fff';
         }
+
         function aplicarCoresAleatoriasBackup() {
             const botoes = document.querySelectorAll('#backup .export-controls button.btn');
             botoes.forEach(btn => {
@@ -1791,6 +2528,7 @@
                 btn.style.border = 'none';
             });
         }
+
         // Fechar modal clicando fora
         window.onclick = function(event) {
             const modal = document.getElementById('modalConfirmacao');
@@ -1798,8 +2536,10 @@
                 fecharModal();
             }
         };
+
         // Fechar modal com ESC
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
+
         // Debounce
         function debounce(fn, delay = 200) {
             let t;
