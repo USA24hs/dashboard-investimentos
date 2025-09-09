@@ -587,16 +587,15 @@
         .category-color-5 { background-color: #536DFE; color: white; }
         .category-color-6 { background-color: #448AFF; color: white; }
         .category-color-7 { background-color: #40C4FF; color: white; }
-        .category-color-8 { background-color: #18FFFF; color: white; color: #333; }
-        .category-color-9 { background-color: #64FFDA; color: white; color: #333; }
+        .category-color-8  { background-color: #18FFFF; color: #333; }
+        .category-color-9  { background-color: #64FFDA; color: #333; }
         .category-color-10 { background-color: #69F0AE; color: white; }
-        .category-color-11 { background-color: #B2FF59; color: white; color: #333; }
-        .category-color-12 { background-color: #EEFF41; color: white; color: #333; }
-        .category-color-13 { background-color: #FFFF00; color: white; color: #333; }
-        .category-color-14 { background-color: #FFD740; color: white; color: #333; }
+        .category-color-11 { background-color: #B2FF59; color: #333; }
+        .category-color-12 { background-color: #EEFF41; color: #333; }
+        .category-color-13 { background-color: #FFFF00; color: #333; }
+        .category-color-14 { background-color: #FFD740; color: #333; }
         .category-color-15 { background-color: #FFAB40; color: white; }
         .category-color-16 { background-color: #FF6E40; color: white; }
-
         [data-theme="dark"] .category-color-8,
         [data-theme="dark"] .category-color-9,
         [data-theme="dark"] .category-color-11,
@@ -605,7 +604,6 @@
         [data-theme="dark"] .category-color-14 {
             color: white;
         }
-
         /* Alert settings */
         .alert-settings {
             margin-top: 20px;
@@ -675,7 +673,7 @@
             </button>
             <h1><i class="fas fa-file-invoice-dollar"></i> Gerenciador de Faturas Avançado</h1>
             <button class="view-toggle" onclick="alternarVisualizacao()" aria-label="Alternar entre visualização de tabela e calendário">
-                <i class="fas fa-calendar-alt"></i> Visualização
+                <i class="fas fa-calendar-alt"></i> Ver Calendário
             </button>
         </div>
         <div id="notification" class="notification" role="status" aria-live="polite"></div>
@@ -1000,8 +998,10 @@
     <script>
         // Inicializar jsPDF
         window.jsPDF = window.jspdf.jsPDF;
+
         // Formatter de moeda
         const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
         // Helpers de data (uso local para evitar problemas de fuso/ISO)
         const MS_DIA = 24 * 60 * 60 * 1000;
         function parseYMD(ymd) { if (!ymd) return null; const [y,m,d] = ymd.split('-').map(Number); return new Date(y, m-1, d); }
@@ -1019,6 +1019,14 @@
             return `${dia}/${mes}/${ano}`;
         }
         function obterDataAtual() { return hojeYMD(); }
+
+        // Escapar HTML para evitar XSS
+        function esc(str='') {
+            return String(str).replace(/[&<>"'/]/g, s =>
+                ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;'}[s])
+            );
+        }
+
         let faturas = [];
         let editandoId = null;
         let ordenacaoAtual = { campo: 'vencimento', direcao: 'asc' };
@@ -1058,7 +1066,6 @@
         function carregarPreferenciaFiltros() {
             const filtrosVisiveis = localStorage.getItem('filtrosVisiveis') !== 'false';
             const filterContainer = document.getElementById('filterContainer');
-            
             if (!filtrosVisiveis) {
                 filterContainer.classList.add('hidden');
             }
@@ -1068,7 +1075,6 @@
             const alertaDias = localStorage.getItem('alertaDias') || '7';
             const alertaEmail = localStorage.getItem('alertaEmail') === 'true';
             const alertaNotificacao = localStorage.getItem('alertaNotificacao') !== 'false';
-            
             document.getElementById('alertaDias').value = alertaDias;
             document.getElementById('alertaEmail').checked = alertaEmail;
             document.getElementById('alertaNotificacao').checked = alertaNotificacao;
@@ -1078,12 +1084,11 @@
             const alertaDias = document.getElementById('alertaDias').value;
             const alertaEmail = document.getElementById('alertaEmail').checked;
             const alertaNotificacao = document.getElementById('alertaNotificacao').checked;
-            
             localStorage.setItem('alertaDias', alertaDias);
             localStorage.setItem('alertaEmail', alertaEmail);
             localStorage.setItem('alertaNotificacao', alertaNotificacao);
-            
             verificarVencimentoProximo();
+            atualizarDashboard();
         }
 
         function carregarDados() {
@@ -1097,8 +1102,10 @@
 
         function definirDatasMinimas() {
             const hoje = hojeYMD();
-            document.getElementById('fechamento').setAttribute('min', hoje);
-            document.getElementById('vencimento').setAttribute('min', hoje);
+            ['fechamento', 'vencimento'].forEach(id => {
+                const input = document.getElementById(id);
+                if (!input.value) input.setAttribute('min', hoje);
+            });
         }
 
         // Gerenciamento de abas
@@ -1120,7 +1127,6 @@
         function mostrarAbaMobile(aba) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            // Ativar aba correspondente
             const tab = document.querySelector(`.tab[data-aba="${aba}"]`);
             if (tab) tab.classList.add('active');
             document.getElementById(aba).classList.add('active');
@@ -1134,19 +1140,21 @@
 
         // Alternar entre visualização de tabela e calendário
         function alternarVisualizacao() {
+            const tableView = document.getElementById('tableView');
+            const calendarView = document.getElementById('calendarView');
+            const toggleBtn = document.querySelector('.view-toggle');
+
             if (visualizacaoAtual === 'tabela') {
                 visualizacaoAtual = 'calendario';
-                document.getElementById('tableView').style.display = 'none';
-                document.getElementById('calendarView').style.display = 'block';
-                document.querySelector('.view-toggle i').className = 'fas fa-list';
-                document.querySelector('.view-toggle').innerHTML = '<i class="fas fa-list"></i> Visualização';
+                tableView.style.display = 'none';
+                calendarView.style.display = 'block';
+                toggleBtn.innerHTML = '<i class="fas fa-list"></i> Ver Lista';
                 atualizarCalendar();
             } else {
                 visualizacaoAtual = 'tabela';
-                document.getElementById('tableView').style.display = 'block';
-                document.getElementById('calendarView').style.display = 'none';
-                document.querySelector('.view-toggle i').className = 'fas fa-calendar-alt';
-                document.querySelector('.view-toggle').innerHTML = '<i class="fas fa-calendar-alt"></i> Visualização';
+                tableView.style.display = 'block';
+                calendarView.style.display = 'none';
+                toggleBtn.innerHTML = '<i class="fas fa-calendar-alt"></i> Ver Calendário';
             }
         }
 
@@ -1156,29 +1164,38 @@
             const novoTema = tema === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', novoTema);
             localStorage.setItem('tema', novoTema);
-            // Recriar gráficos com novo tema
             if (document.getElementById('analytics').classList.contains('active')) {
                 setTimeout(() => atualizarAnalytics(), 100);
             }
-            // Reaplicar cores aleatórias no Backup se ativo
             if (document.getElementById('backup').classList.contains('active')) {
                 aplicarCoresAleatoriasBackup();
             }
         }
 
         // Filtros
+        function resetFiltros() {
+            document.getElementById('filtroTipo').value = '';
+            document.getElementById('filtroStatus').value = '';
+            document.getElementById('filtroCategoria').value = '';
+            document.getElementById('buscaNome').value = '';
+            document.getElementById('buscaValorMin').value = '';
+            document.getElementById('buscaValorMax').value = '';
+            document.getElementById('buscaDataInicio').value = '';
+            document.getElementById('buscaDataFim').value = '';
+            document.getElementById('advancedSearch').style.display = 'none';
+            // esconder sugestões
+            document.querySelectorAll('.search-suggestions').forEach(el => el.style.display = 'none');
+        }
+
         function alternarFiltros() {
             const filterContainer = document.getElementById('filterContainer');
             filterContainer.classList.toggle('hidden');
-            
-            // Salvar preferência no localStorage
             const isVisible = !filterContainer.classList.contains('hidden');
             localStorage.setItem('filtrosVisiveis', isVisible);
-            
-            // Se os filtros estiverem ocultos, atualizar a tabela para mostrar todos os itens
             if (!isVisible) {
-                atualizarTabela();
+                resetFiltros();
             }
+            atualizarTabela();
         }
 
         // CRUD de faturas
@@ -1191,6 +1208,7 @@
             const vencimento = document.getElementById('vencimento').value;
             const valor = parseFloat(document.getElementById('valor').value);
             const recorrente = document.getElementById('recorrente').checked;
+
             if (!tipo) {
                 exibirNotificacao('Por favor, selecione um tipo de fatura!', 'error');
                 return;
@@ -1203,6 +1221,7 @@
                 exibirNotificacao('A data de vencimento deve ser posterior à data de fechamento!', 'error');
                 return;
             }
+
             if (editandoId) {
                 const index = faturas.findIndex(f => f.id === editandoId);
                 if (index !== -1) {
@@ -1251,6 +1270,11 @@
             document.getElementById('vencimento').value = fatura.vencimento;
             document.getElementById('valor').value = fatura.valor;
             document.getElementById('recorrente').checked = fatura.recorrente || false;
+
+            // permitir edição retroativa
+            document.getElementById('fechamento').removeAttribute('min');
+            document.getElementById('vencimento').removeAttribute('min');
+
             editandoId = id;
             document.getElementById('btnAdd').textContent = 'Atualizar Fatura';
             document.getElementById('btnAdd').innerHTML = '<i class="fas fa-save"></i> Atualizar Fatura';
@@ -1264,6 +1288,7 @@
             document.getElementById('btnAdd').innerHTML = '<i class="fas fa-plus"></i> Adicionar Fatura';
             document.getElementById('btnCancel').style.display = 'none';
             limparFormulario();
+            definirDatasMinimas();
         }
 
         function limparFormulario() {
@@ -1328,6 +1353,7 @@
         function atualizarTabela() {
             const tbody = document.querySelector('#tabelaFaturas tbody');
             tbody.innerHTML = '';
+
             // Ordenação estável
             const pares = faturas.map((f, i) => ({ f, i }));
             const comparar = (a, b) => {
@@ -1362,14 +1388,17 @@
                 return res;
             };
             const faturasOrdenadas = pares.sort(comparar).map(p => p.f);
+
             // Aplicar filtros
             const faturasFiltradas = aplicarFiltros(faturasOrdenadas);
+
             // Paginação
             const totalPaginas = Math.ceil(faturasFiltradas.length / itensPorPagina);
             paginaAtual = Math.min(paginaAtual, totalPaginas || 1);
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const fim = inicio + itensPorPagina;
             const faturasPagina = faturasFiltradas.slice(inicio, fim);
+
             // Atualizar indicadores de ordenação
             document.querySelectorAll('.sort-indicator').forEach(el => {
                 el.textContent = '↕';
@@ -1378,16 +1407,21 @@
             if (indicador) {
                 indicador.textContent = ordenacaoAtual.direcao === 'asc' ? '↑' : '↓';
             }
+
             let totalPendente = 0;
             let totalPago = 0;
             const hoje = hojeYMD();
+
             faturasPagina.forEach(fatura => {
                 const tr = document.createElement('tr');
+
                 const icones = {
                     cartao: '💳', celular: '📱', internet: '🛜', boleto: '📃',
                     streaming: '📺', seguro: '🛡️', financiamento: '🏠', outros: '📦'
                 };
                 const icone = icones[fatura.tipo] || '📦';
+                const tipoDisplay = fatura.tipo ? fatura.tipo.charAt(0).toUpperCase() + fatura.tipo.slice(1) : '';
+
                 const d = diffDias(hoje, fatura.vencimento);
                 let avisoVencimento = '';
                 if (fatura.pago) {
@@ -1399,21 +1433,24 @@
                 } else if (d <= 7) {
                     avisoVencimento = ` <span class="warning">(Vence em ${d} dias)</span>`;
                 }
+
                 // Gerar cor para a categoria
                 const categoriaHash = fatura.categoria ? fatura.categoria.split('').reduce((a, b) => {
                     a = ((a << 5) - a) + b.charCodeAt(0);
                     return a & a;
                 }, 0) : 0;
                 const categoriaColorIndex = Math.abs(categoriaHash) % 16 + 1;
-                
+
+                const nomeSeguro = esc(fatura.nome);
+                const categoriaSegura = esc(fatura.categoria || 'Geral');
                 const categoriaTag = fatura.categoria ?
-                    `<span class="categoria-tag category-color-${categoriaColorIndex}">${fatura.categoria}</span>` : '';
-                const recorrenteBadge = fatura.recorrente ?
-                    `<span class="recorrente-badge">🔄</span>` : '';
+                    `<span class="categoria-tag category-color-${categoriaColorIndex}">${categoriaSegura}</span>` : '';
+                const recorrenteBadge = fatura.recorrente ? `<span class="recorrente-badge">🔄</span>` : '';
+
                 tr.innerHTML = `
-                    <td>${icone} ${fatura.tipo.charAt(0).toUpperCase() + fatura.tipo.slice(1)}</td>
-                    <td>${fatura.nome} ${fatura.pago ? '🔒' : ''} ${recorrenteBadge}</td>
-                    <td>${fatura.categoria || 'Geral'}${categoriaTag}</td>
+                    <td>${icone} ${esc(tipoDisplay)}</td>
+                    <td>${nomeSeguro} ${fatura.pago ? '🔒' : ''} ${recorrenteBadge}</td>
+                    <td>${categoriaSegura}${categoriaTag}</td>
                     <td>${formatarData(fatura.fechamento)}</td>
                     <td>${formatarData(fatura.vencimento)}${avisoVencimento}</td>
                     <td class="amount ${fatura.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(fatura.valor)}</td>
@@ -1433,26 +1470,22 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
+
                 if (fatura.pago) {
                     totalPago += fatura.valor;
                 } else {
                     totalPendente += fatura.valor;
                 }
             });
+
             document.getElementById('resumoTotal').innerHTML = `
                 ⏳ Total de faturas pendentes: ${fmtBRL.format(totalPendente)}<br>
                 💰 Total de faturas pagas: ${fmtBRL.format(totalPago)}
             `;
-            // Atualizar paginação
             atualizarPaginacao(totalPaginas);
         }
 
         function aplicarFiltros(faturasLista) {
-            // Se os filtros estiverem ocultos, retorna todas as faturas
-            if (document.getElementById('filterContainer').classList.contains('hidden')) {
-                return faturasLista;
-            }
-            
             const filtroTipo = document.getElementById('filtroTipo').value;
             const filtroStatus = document.getElementById('filtroStatus').value;
             const filtroCategoria = document.getElementById('filtroCategoria').value;
@@ -1461,14 +1494,16 @@
             const valorMax = parseFloat(document.getElementById('buscaValorMax').value) || Number.MAX_SAFE_INTEGER;
             const dataInicio = document.getElementById('buscaDataInicio').value;
             const dataFim = document.getElementById('buscaDataFim').value;
+
             return faturasLista.filter(fatura => {
                 const tipoMatch = !filtroTipo || fatura.tipo === filtroTipo;
                 const statusMatch = !filtroStatus ||
                     (filtroStatus === 'pago' && fatura.pago) ||
                     (filtroStatus === 'pendente' && !fatura.pago);
                 const categoriaMatch = !filtroCategoria || fatura.categoria === filtroCategoria;
-                const nomeMatch = !buscaNome || fatura.nome.toLowerCase().includes(buscaNome);
+                const nomeMatch = !buscaNome || (fatura.nome || '').toLowerCase().includes(buscaNome);
                 const valorMatch = fatura.valor >= valorMin && fatura.valor <= valorMax;
+
                 let dataMatch = true;
                 if (dataInicio) {
                     dataMatch = dataMatch && parseYMD(fatura.vencimento) >= parseYMD(dataInicio);
@@ -1484,14 +1519,14 @@
             const paginacao = document.getElementById('paginacao');
             paginacao.innerHTML = '';
             if (totalPaginas <= 1) return;
-            // Botão anterior
+
             if (paginaAtual > 1) {
                 const btnAnterior = document.createElement('button');
                 btnAnterior.innerHTML = '<i class="fas fa-chevron-left"></i>';
                 btnAnterior.onclick = () => mudarPagina(paginaAtual - 1);
                 paginacao.appendChild(btnAnterior);
             }
-            // Páginas
+
             for (let i = 1; i <= totalPaginas; i++) {
                 const btnPagina = document.createElement('button');
                 btnPagina.textContent = i;
@@ -1499,7 +1534,7 @@
                 btnPagina.onclick = () => mudarPagina(i);
                 paginacao.appendChild(btnPagina);
             }
-            // Botão próximo
+
             if (paginaAtual < totalPaginas) {
                 const btnProximo = document.createElement('button');
                 btnProximo.innerHTML = '<i class="fas fa-chevron-right"></i>';
@@ -1527,11 +1562,6 @@
         }
 
         function filtrarFaturas() {
-            // Se os filtros estiverem ocultos, não faz nada
-            if (document.getElementById('filterContainer').classList.contains('hidden')) {
-                return;
-            }
-            
             paginaAtual = 1;
             atualizarTabela();
         }
@@ -1569,14 +1599,16 @@
             const totalPendente = faturas.filter(f => !f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const hoje = hojeYMD();
-            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7');
-            const proximosVencimentos = faturas.filter(f => 
-                !f.pago && 
-                diffDias(hoje, f.vencimento) >= 0 && 
+            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7', 10);
+
+            const proximosVencimentos = faturas.filter(f =>
+                !f.pago &&
+                diffDias(hoje, f.vencimento) >= 0 &&
                 diffDias(hoje, f.vencimento) <= diasAlerta
             ).length;
-            const atrasadas = faturas.filter(f => 
-                !f.pago && 
+
+            const atrasadas = faturas.filter(f =>
+                !f.pago &&
                 diffDias(hoje, f.vencimento) < 0
             ).length;
 
@@ -1594,13 +1626,13 @@
 
         function filtrarPorVencimentoProximo() {
             const hoje = hojeYMD();
-            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7');
+            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7', 10);
             document.getElementById('buscaDataInicio').value = hoje;
             const dataFim = new Date();
             dataFim.setDate(dataFim.getDate() + diasAlerta);
             document.getElementById('buscaDataFim').value = formatYMD(dataFim);
             document.getElementById('filtroStatus').value = 'pendente';
-            toggleAdvancedSearch();
+            document.getElementById('advancedSearch').style.display = 'block';
             filtrarFaturas();
         }
 
@@ -1613,17 +1645,11 @@
             const calendarGrid = document.getElementById('calendarGrid');
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
                                 "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            
             document.getElementById('calendarMonth').textContent = `${monthNames[mesCalendar]} ${anoCalendar}`;
-            
-            // Limpar o calendário
+
             calendarGrid.innerHTML = '';
-            
-            // Obter o primeiro dia do mês e o último dia do mês
-            const firstDay = new Date(anoCalendar, mesCalendar, 1);
-            const lastDay = new Date(anoCalendar, mesCalendar + 1, 0);
-            
-            // Dias da semana headers
+
+            // Cabeçalho dos dias da semana
             const daysOfWeek = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
             for (let i = 0; i < 7; i++) {
                 const dayHeader = document.createElement('div');
@@ -1631,32 +1657,35 @@
                 dayHeader.textContent = daysOfWeek[i];
                 calendarGrid.appendChild(dayHeader);
             }
-            
+
+            // Obter o primeiro dia do mês e o último dia do mês
+            const firstDay = new Date(anoCalendar, mesCalendar, 1);
+            const lastDay = new Date(anoCalendar, mesCalendar + 1, 0);
+
             // Dias vazios no início
             for (let i = 0; i < firstDay.getDay(); i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day';
                 calendarGrid.appendChild(emptyDay);
             }
-            
+
             // Dias do mês
             for (let i = 1; i <= lastDay.getDate(); i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day';
-                
+
                 const dayHeader = document.createElement('div');
                 dayHeader.className = 'calendar-day-header';
                 dayHeader.textContent = i;
                 day.appendChild(dayHeader);
-                
-                // Verificar se há faturas neste dia
+
                 const currentDate = formatYMD(new Date(anoCalendar, mesCalendar, i));
                 const dayFaturas = faturas.filter(f => f.vencimento === currentDate);
-                
+
                 dayFaturas.forEach(fatura => {
                     const event = document.createElement('div');
                     event.className = `calendar-event ${fatura.pago ? 'paid' : ''} ${!fatura.pago && diffDias(hojeYMD(), fatura.vencimento) < 0 ? 'expired' : ''}`;
-                    event.innerHTML = `${fatura.nome} - ${fmtBRL.format(fatura.valor)}`;
+                    event.textContent = `${fatura.nome} - ${fmtBRL.format(fatura.valor)}`;
                     event.onclick = () => {
                         if (fatura.pago) {
                             marcarComoPago(fatura.id, false);
@@ -1666,7 +1695,7 @@
                     };
                     day.appendChild(event);
                 });
-                
+
                 calendarGrid.appendChild(day);
             }
         }
@@ -1688,11 +1717,11 @@
             document.getElementById('nome').addEventListener('input', function(e) {
                 mostrarSugestoes(e.target.value, 'suggestions-container');
             });
-            
+
             document.getElementById('buscaNome').addEventListener('input', function(e) {
                 mostrarSugestoes(e.target.value, 'suggestions-container-table');
             });
-            
+
             document.addEventListener('click', function(e) {
                 if (!e.target.matches('#nome, #buscaNome')) {
                     document.querySelectorAll('.search-suggestions').forEach(el => {
@@ -1703,22 +1732,33 @@
         }
 
         function mostrarSugestoes(query, containerId) {
+            // suporte para chamadas sem containerId (ex.: atributo oninput no HTML)
+            if (!containerId) {
+                const ae = document.activeElement;
+                if (ae && ae.id === 'nome') containerId = 'suggestions-container';
+                else containerId = 'suggestions-container-table';
+            }
+
             const container = document.getElementById(containerId);
+            if (!container) return;
+
             if (!query) {
                 container.style.display = 'none';
+                container.innerHTML = '';
                 return;
             }
-            
+
             const sugestoes = [...new Set(faturas
-                .filter(f => f.nome.toLowerCase().includes(query.toLowerCase()))
+                .filter(f => (f.nome || '').toLowerCase().includes(query.toLowerCase()))
                 .map(f => f.nome)
             )].slice(0, 5);
-            
+
             if (sugestoes.length === 0) {
                 container.style.display = 'none';
+                container.innerHTML = '';
                 return;
             }
-            
+
             container.innerHTML = '';
             sugestoes.forEach(sugestao => {
                 const div = document.createElement('div');
@@ -1735,7 +1775,7 @@
                 };
                 container.appendChild(div);
             });
-            
+
             container.style.display = 'block';
         }
 
@@ -1748,10 +1788,12 @@
             const faturasPendentes = fPendentes.length;
             const mediaValor = totalFaturas > 0 ?
                 faturas.reduce((sum, f) => sum + f.valor, 0) / totalFaturas : 0;
+
             document.getElementById('totalFaturas').textContent = totalFaturas;
             document.getElementById('faturasPagas').textContent = faturasPagas;
             document.getElementById('faturasPendentes').textContent = faturasPendentes;
             document.getElementById('mediaValor').textContent = fmtBRL.format(mediaValor);
+
             criarGraficoNomes();
             criarGraficoCategorias();
             criarGraficoCartoes();
@@ -1762,38 +1804,33 @@
         function criarGraficoNomes() {
             const ctx = document.getElementById('graficoNomes').getContext('2d');
             if (graficos.nomes) graficos.nomes.destroy();
-            
-            // Agrupar por nome da fatura
+
             const nomesCount = {};
             faturas.forEach(f => {
                 nomesCount[f.nome] = (nomesCount[f.nome] || 0) + 1;
             });
-            
-            // Ordenar por quantidade (maior para menor)
+
             const sortedNames = Object.entries(nomesCount).sort((a, b) => b[1] - a[1]);
-            
-            // Limitar aos 10 mais frequentes e agrupar o restante como "Outros"
             const topNames = sortedNames.slice(0, 10);
             const outrosCount = sortedNames.slice(10).reduce((sum, [_, count]) => sum + count, 0);
-            
+
             const labels = topNames.map(([name, _]) => name);
             const data = topNames.map(([_, count]) => count);
-            
+
             if (outrosCount > 0) {
                 labels.push('Outros');
                 data.push(outrosCount);
             }
-            
+
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
-            
-            // Paleta de cores
+
             const backgroundColors = [
                 '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
                 '#9966FF', '#FF9F40', '#8BC34A', '#C9CBCF',
                 '#E7E9ED', '#F7464A', '#46BFBD', '#FDB45C'
             ];
-            
+
             graficos.nomes = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -1821,9 +1858,7 @@
                             position: 'right',
                             labels: {
                                 color: textColor,
-                                font: {
-                                    size: 12
-                                },
+                                font: { size: 12 },
                                 padding: 15
                             }
                         },
@@ -1847,15 +1882,18 @@
         function criarGraficoCategorias() {
             const ctx = document.getElementById('graficoCategorias').getContext('2d');
             if (graficos.categorias) graficos.categorias.destroy();
+
             const categoriasValor = {};
             faturas.forEach(f => {
                 const cat = f.categoria || 'Geral';
                 categoriasValor[cat] = (categoriasValor[cat] || 0) + f.valor;
             });
+
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const primary = cs.getPropertyValue('--primary-color').trim() || '#36A2EB';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
+
             graficos.categorias = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1870,33 +1908,17 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Gastos por Categoria',
-                            color: textColor
-                        },
-                        legend: {
-                            labels: {
-                                color: textColor
-                            }
-                        }
+                        title: { display: true, text: 'Gastos por Categoria', color: textColor },
+                        legend: { labels: { color: textColor } }
                     },
                     scales: {
                         y: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
                         },
                         x: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
                         }
                     }
                 }
@@ -1906,27 +1928,16 @@
         function criarGraficoCartoes() {
             const ctx = document.getElementById('graficoCartoes').getContext('2d');
             if (graficos.cartoes) graficos.cartoes.destroy();
-            
-            // Filtrar apenas faturas do tipo 'cartao'
-            const cartoes = faturas.filter(f => f.tipo === 'cartao');
-            
-            // Contar por nome do cartão
-            const contagemPorCartao = {};
-            cartoes.forEach(f => {
-                contagemPorCartao[f.nome] = (contagemPorCartao[f.nome] || 0) + 1;
-            });
-            
-            // Agrupar por tipo de fatura
+
             const tiposCount = {};
             faturas.forEach(f => {
                 tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
             });
-            
+
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-            
-            // Cores para os tipos de fatura
+
             const coresTipos = {
                 cartao: '#36A2EB',
                 celular: '#FF6384',
@@ -1937,12 +1948,11 @@
                 financiamento: '#8BC34A',
                 outros: '#C9CBCF'
             };
-            
-            // Dados para o gráfico
+
             const labels = Object.keys(tiposCount);
             const data = Object.values(tiposCount);
             const backgroundColors = labels.map(tipo => coresTipos[tipo] || '#C9CBCF');
-            
+
             graficos.cartoes = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1957,35 +1967,18 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Distribuição por Tipo de Fatura',
-                            color: textColor
-                        },
-                        legend: {
-                            labels: {
-                                color: textColor
-                            }
-                        }
+                        title: { display: true, text: 'Distribuição por Tipo de Fatura', color: textColor },
+                        legend: { labels: { color: textColor } }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: {
-                                color: textColor,
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: gridColor
-                            }
+                            ticks: { color: textColor, stepSize: 1 },
+                            grid: { color: gridColor }
                         },
                         x: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
                         }
                     }
                 }
@@ -1995,6 +1988,7 @@
         function criarGraficoMensal() {
             const ctx = document.getElementById('graficoMensal').getContext('2d');
             if (graficos.mensal) graficos.mensal.destroy();
+
             const dadosMensais = {};
             faturas.forEach(f => {
                 const mes = f.vencimento?.substring(0, 7);
@@ -2003,76 +1997,35 @@
                     dadosMensais[mes] = { total: 0, pagos: 0, pendentes: 0 };
                 }
                 dadosMensais[mes].total += f.valor;
-                if (f.pago) {
-                    dadosMensais[mes].pagos += f.valor;
-                } else {
-                    dadosMensais[mes].pendentes += f.valor;
-                }
+                if (f.pago) dadosMensais[mes].pagos += f.valor;
+                else dadosMensais[mes].pendentes += f.valor;
             });
+
             const meses = Object.keys(dadosMensais).sort();
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
+
             graficos.mensal = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: meses,
                     datasets: [
-                        {
-                            label: 'Total',
-                            data: meses.map(m => dadosMensais[m].total),
-                            borderColor: '#36A2EB',
-                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                            fill: true
-                        },
-                        {
-                            label: 'Pagos',
-                            data: meses.map(m => dadosMensais[m].pagos),
-                            borderColor: '#4BC0C0',
-                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                            fill: true
-                        },
-                        {
-                            label: 'Pendentes',
-                            data: meses.map(m => dadosMensais[m].pendentes),
-                            borderColor: '#FF6384',
-                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                            fill: true
-                        }
+                        { label: 'Total', data: meses.map(m => dadosMensais[m].total), borderColor: '#36A2EB', backgroundColor: 'rgba(54, 162, 235, 0.1)', fill: true },
+                        { label: 'Pagos', data: meses.map(m => dadosMensais[m].pagos), borderColor: '#4BC0C0', backgroundColor: 'rgba(75, 192, 192, 0.1)', fill: true },
+                        { label: 'Pendentes', data: meses.map(m => dadosMensais[m].pendentes), borderColor: '#FF6384', backgroundColor: 'rgba(255, 99, 132, 0.1)', fill: true }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Evolução Mensal dos Gastos',
-                            color: textColor
-                        },
-                        legend: {
-                            labels: {
-                                color: textColor
-                            }
-                        }
+                        title: { display: true, text: 'Evolução Mensal dos Gastos', color: textColor },
+                        legend: { labels: { color: textColor } }
                     },
                     scales: {
-                        y: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        }
+                        y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } }
                     }
                 }
             });
@@ -2081,8 +2034,7 @@
         function criarGraficoPrevisao() {
             const ctx = document.getElementById('graficoPrevisao').getContext('2d');
             if (graficos.previsao) graficos.previsao.destroy();
-            
-            // Calcular média de gastos dos últimos 3 meses
+
             const hoje = new Date();
             const mesesDados = [];
             for (let i = 2; i >= 0; i--) {
@@ -2090,7 +2042,7 @@
                 const mesStr = formatYMD(mes).substring(0, 7);
                 mesesDados.push(mesStr);
             }
-            
+
             let total = 0;
             let count = 0;
             mesesDados.forEach(mes => {
@@ -2100,21 +2052,20 @@
                 total += gastoMes;
                 count++;
             });
-            
+
             const media = count > 0 ? total / count : 0;
-            
-            // Previsão para os próximos 3 meses
+
             const mesesPrevisao = [];
             for (let i = 1; i <= 3; i++) {
                 const mes = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
                 const mesNome = mes.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
                 mesesPrevisao.push(mesNome);
             }
-            
+
             const cs = getComputedStyle(document.documentElement);
             const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
             const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-            
+
             graficos.previsao = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -2131,69 +2082,47 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: 'Previsão de Gastos Futuros (Baseada nos últimos 3 meses)',
-                            color: textColor
-                        },
-                        legend: {
-                            labels: {
-                                color: textColor
-                            }
-                        }
+                        title: { display: true, text: 'Previsão de Gastos Futuros (Baseada nos últimos 3 meses)', color: textColor },
+                        legend: { labels: { color: textColor } }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        }
+                        y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } }
                     }
                 }
             });
         }
 
-        // Funções de recorrência
+        // Funções de recorrência (evita duplicidades por nome+tipo+data)
         function gerarFaturasRecorrentes() {
             let geradas = 0;
-            // mês/ano do próximo mês (para checagem)
-            const pm = new Date(); pm.setMonth(pm.getMonth() + 1);
-            const proximoMesStr = formatYMD(pm).substring(0, 7);
+            const novas = [];
+
             faturas.filter(f => f.recorrente).forEach((fatura, i) => {
-                // Verificar se já existe uma fatura para o próximo mês
-                const jaExiste = faturas.some(ff =>
-                    ff.nome === fatura.nome &&
-                    ff.vencimento?.startsWith(proximoMesStr)
-                );
+                const proxV = parseYMD(fatura.vencimento); proxV.setMonth(proxV.getMonth() + 1);
+                const proxF = parseYMD(fatura.fechamento); proxF.setMonth(proxF.getMonth() + 1);
+                const vencProx = formatYMD(proxV);
+
+                const jaExiste =
+                    faturas.some(ff => ff.nome === fatura.nome && ff.tipo === fatura.tipo && ff.vencimento === vencProx) ||
+                    novas.some(ff => ff.nome === fatura.nome && ff.tipo === fatura.tipo && ff.vencimento === vencProx);
+
                 if (!jaExiste) {
-                    const proxV = parseYMD(fatura.vencimento); proxV.setMonth(proxV.getMonth() + 1);
-                    const proxF = parseYMD(fatura.fechamento); proxF.setMonth(proxF.getMonth() + 1);
-                    const novaFatura = {
+                    novas.push({
                         ...fatura,
-                        id: (crypto?.randomUUID?.() || (Date.now() + i)),
+                        id: (crypto?.randomUUID?.() || String(Date.now() + i)),
                         fechamento: formatYMD(proxF),
-                        vencimento: formatYMD(proxV),
+                        vencimento: vencProx,
                         pago: false,
                         dataPagamento: null,
                         historicoPagamentos: []
-                    };
-                    faturas.push(novaFatura);
+                    });
                     geradas++;
                 }
             });
-            if (geradas > 0) {
+
+            if (novas.length) {
+                faturas = faturas.concat(novas);
                 atualizarLocalStorage();
                 atualizarTabela();
                 atualizarCategoriasFiltro();
@@ -2214,8 +2143,8 @@
                 headers.join(','),
                 ...dadosFiltrados.map(f => [
                     f.tipo,
-                    `"${f.nome.replace(/"/g, '""')}"`,
-                    `"${(f.categoria || 'Geral').replace(/"/g, '""')}"`,
+                    `"${(f.nome || '').replace(/"/g, '""')}"`,
+                    `"${((f.categoria || 'Geral')).replace(/"/g, '""')}"`,
                     formatarData(f.fechamento),
                     formatarData(f.vencimento),
                     f.valor.toFixed(2),
@@ -2282,6 +2211,18 @@
             const totalGeral = faturas.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
+
+            const linhas = faturas.map(f => `
+                <tr>
+                    <td>${esc(f.tipo)}</td>
+                    <td>${esc(f.nome)}</td>
+                    <td>${esc(f.categoria || 'Geral')}</td>
+                    <td>${formatarData(f.vencimento)}</td>
+                    <td class="${f.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(f.valor)}</td>
+                    <td>${f.pago ? 'Pago' : 'Pendente'}</td>
+                </tr>
+            `).join('');
+
             const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -2321,16 +2262,7 @@
             </tr>
         </thead>
         <tbody>
-            ${faturas.map(f => `
-                <tr>
-                    <td>${f.tipo}</td>
-                    <td>${f.nome}</td>
-                    <td>${f.categoria || 'Geral'}</td>
-                    <td>${formatarData(f.vencimento)}</td>
-                    <td class="${f.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(f.valor)}</td>
-                    <td>${f.pago ? 'Pago' : 'Pendente'}</td>
-                </tr>
-            `).join('')}
+            ${linhas}
         </tbody>
     </table>
 </body>
@@ -2348,10 +2280,12 @@
             doc.setFontSize(12);
             doc.setTextColor(100);
             doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 105, 22, { align: 'center' });
+
             const dadosFiltrados = aplicarFiltros([...faturas]);
             const totalGeral = dadosFiltrados.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = dadosFiltrados.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
+
             doc.setFontSize(14);
             doc.setTextColor(40);
             doc.text('Resumo Financeiro', 14, 35);
@@ -2360,6 +2294,7 @@
             doc.text(`Total Pago: ${fmtBRL.format(totalPago)}`, 20, 52);
             doc.text(`Total Pendente: ${fmtBRL.format(totalPendente)}`, 20, 59);
             doc.text(`Total de Faturas: ${dadosFiltrados.length}`, 20, 66);
+
             const tableData = dadosFiltrados.map(f => [
                 f.tipo,
                 f.nome,
@@ -2368,6 +2303,7 @@
                 fmtBRL.format(f.valor),
                 f.pago ? 'Pago' : 'Pendente'
             ]);
+
             doc.autoTable({
                 head: [['Tipo', 'Nome', 'Categoria', 'Vencimento', 'Valor', 'Status']],
                 body: tableData,
@@ -2378,16 +2314,11 @@
                     textColor: 255,
                     fontStyle: 'bold'
                 },
-                alternateRowStyles: {
-                    fillColor: [240, 240, 240]
-                },
-                styles: {
-                    fontSize: 9,
-                    cellPadding: 3,
-                    overflow: 'linebreak'
-                },
+                alternateRowStyles: { fillColor: [240, 240, 240] },
+                styles: { fontSize: 9, cellPadding: 3, overflow: 'linebreak' },
                 margin: { top: 75 }
             });
+
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -2423,6 +2354,7 @@
         // Modal functions
         function mostrarModal(titulo, mensagem, callback) {
             document.getElementById('modalTitulo').textContent = titulo;
+            document.getElementById('modalMensagem').textContent = mensagem;
             const btnConfirm = document.getElementById('modalConfirmarBtn');
             btnConfirm.onclick = callback;
             const modal = document.getElementById('modalConfirmacao');
@@ -2462,41 +2394,43 @@
             }, 4000);
         }
 
-        // Notificações de vencimento
+        // Notificações de vencimento (janela de +/- diasAlerta)
         function verificarVencimentoProximo() {
-            // Verificar se as notificações estão habilitadas
             const alertaNotificacao = localStorage.getItem('alertaNotificacao') !== 'false';
-            if (!alertaNotificacao) {
-                document.getElementById('notificacaoVencimento').style.display = 'none';
-                return;
-            }
-            
-            const hoje = hojeYMD();
-            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7');
-            const vencimentoProximo = faturas.filter(fatura => {
-                if (fatura.pago) return false;
-                return diffDias(hoje, fatura.vencimento) <= diasAlerta;
-            });
             const notificacao = document.getElementById('notificacaoVencimento');
             const lista = document.getElementById('listaVencimentoProximo');
-            if (vencimentoProximo.length === 0) {
+
+            if (!alertaNotificacao) {
                 notificacao.style.display = 'none';
                 return;
             }
+
+            const hoje = hojeYMD();
+            const diasAlerta = parseInt(localStorage.getItem('alertaDias') || '7', 10);
+
+            const vencimentoProximo = faturas.filter(fatura => {
+                if (fatura.pago) return false;
+                const d = diffDias(hoje, fatura.vencimento);
+                return d >= -diasAlerta && d <= diasAlerta;
+            });
+
+            if (vencimentoProximo.length === 0) {
+                notificacao.style.display = 'none';
+                lista.innerHTML = '';
+                return;
+            }
+
             let html = '<ul style="margin-top: 10px; margin-bottom: 0;">';
             vencimentoProximo.forEach(fatura => {
                 const d = diffDias(hoje, fatura.vencimento);
                 let texto = '';
-                if (d < 0) {
-                    texto = `Vencida há ${Math.abs(d)} dias`;
-                } else if (d === 0) {
-                    texto = 'Vence hoje';
-                } else {
-                    texto = `Vence em ${d} dias`;
-                }
-                html += `<li><strong>${fatura.nome}</strong> - ${texto} - ${fmtBRL.format(fatura.valor)}</li>`;
+                if (d < 0) texto = `Vencida há ${Math.abs(d)} dias`;
+                else if (d === 0) texto = 'Vence hoje';
+                else texto = `Vence em ${d} dias`;
+                html += `<li><strong>${esc(fatura.nome)}</strong> - ${texto} - ${fmtBRL.format(fatura.valor)}</li>`;
             });
             html += '</ul>';
+
             lista.innerHTML = html;
             notificacao.style.display = 'block';
         }
