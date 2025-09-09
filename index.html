@@ -445,6 +445,17 @@
             font-weight: 700 !important;
         }
 
+        /* Títulos (páginas/abas) em negrito */
+        h1, h2, h3, h4 {
+            font-weight: 700 !important;
+        }
+        .tab {
+            font-weight: 700 !important;
+        }
+        .mobile-tabs-menu {
+            font-weight: 700;
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .header-controls {
@@ -1084,7 +1095,7 @@
                 const d = diffDias(hoje, fatura.vencimento);
                 let avisoVencimento = '';
 
-                if (fatura.pago) {
+                               if (fatura.pago) {
                     avisoVencimento = ` <span style="color: var(--success-color);">💰 ${formatarData(fatura.dataPagamento)}</span>`;
                 } else if (d < 0) {
                     avisoVencimento = ` <span class="expired">(Vencida há ${Math.abs(d)} dias)</span>`;
@@ -1521,7 +1532,7 @@
                     `"${(f.categoria || 'Geral').replace(/"/g, '""')}"`,
                     formatarData(f.fechamento),
                     formatarData(f.vencimento),
-                    f.valor.toFixed(2), // mantém ponto para compatibilidade com CSV
+                    f.valor.toFixed(2),
                     f.pago ? 'Pago' : 'Pendente',
                     f.dataPagamento ? formatarData(f.dataPagamento) : '',
                     f.recorrente ? 'Sim' : 'Não'
@@ -1561,7 +1572,6 @@
                             () => {
                                 faturas = backup.faturas;
 
-                                // Restaurar tema se disponível
                                 if (backup.tema) {
                                     localStorage.setItem('tema', backup.tema);
                                     document.documentElement.setAttribute('data-theme', backup.tema);
@@ -1584,7 +1594,6 @@
             };
             reader.readAsText(file);
 
-            // Limpar o input
             event.target.value = '';
         }
 
@@ -1607,6 +1616,7 @@
         .summary { background-color: #e8f5e9; padding: 15px; margin: 20px 0; border-radius: 5px; }
         .paid { color: green; text-decoration: line-through; }
         .unpaid { color: red; }
+        h1, h2, h3 { font-weight: 700; }
     </style>
 </head>
 <body>
@@ -1652,27 +1662,23 @@
             exibirNotificacao('Relatório HTML gerado com sucesso!', 'success');
         }
 
-        // Função para exportar PDF (considera filtros)
+        // Exportar PDF (considera filtros)
         function exportarPDF() {
             const doc = new jsPDF();
 
-            // Adicionar título
             doc.setFontSize(20);
             doc.setTextColor(40);
             doc.text('Relatório de Faturas', 105, 15, { align: 'center' });
 
-            // Adicionar data de geração
             doc.setFontSize(12);
             doc.setTextColor(100);
             doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 105, 22, { align: 'center' });
 
-            // Calcular totais a partir do conjunto filtrado
             const dadosFiltrados = aplicarFiltros([...faturas]);
             const totalGeral = dadosFiltrados.reduce((sum, f) => sum + f.valor, 0);
             const totalPago = dadosFiltrados.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
             const totalPendente = totalGeral - totalPago;
 
-            // Adicionar resumo
             doc.setFontSize(14);
             doc.setTextColor(40);
             doc.text('Resumo Financeiro', 14, 35);
@@ -1683,7 +1689,6 @@
             doc.text(`Total Pendente: ${fmtBRL.format(totalPendente)}`, 20, 59);
             doc.text(`Total de Faturas: ${dadosFiltrados.length}`, 20, 66);
 
-            // Preparar dados da tabela
             const tableData = dadosFiltrados.map(f => [
                 f.tipo,
                 f.nome,
@@ -1693,7 +1698,6 @@
                 f.pago ? 'Pago' : 'Pendente'
             ]);
 
-            // Adicionar tabela
             doc.autoTable({
                 head: [['Tipo', 'Nome', 'Categoria', 'Vencimento', 'Valor', 'Status']],
                 body: tableData,
@@ -1715,7 +1719,6 @@
                 margin: { top: 75 }
             });
 
-            // Adicionar número de páginas
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -1723,9 +1726,7 @@
                 doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
             }
 
-            // Salvar o PDF
             doc.save(`relatorio_faturas_${obterDataAtual()}.pdf`);
-
             exibirNotificacao('PDF exportado com sucesso!', 'success');
         }
 
@@ -1752,7 +1753,6 @@
         // Modal functions
         function mostrarModal(titulo, mensagem, callback) {
             document.getElementById('modalTitulo').textContent = titulo;
-            document.getElementById('modalMensagem').textContent = mensagem;
             const btnConfirm = document.getElementById('modalConfirmarBtn');
             btnConfirm.onclick = callback;
             const modal = document.getElementById('modalConfirmacao');
@@ -1767,7 +1767,7 @@
             modal.setAttribute('aria-hidden', 'true');
         }
 
-        // Funções auxiliares
+        // Auxiliares
         function atualizarLocalStorage() {
             localStorage.setItem('faturas', JSON.stringify(faturas));
         }
@@ -1793,7 +1793,7 @@
             }, 4000);
         }
 
-        // Funções para notificações de vencimento
+        // Notificações de vencimento
         function verificarVencimentoProximo() {
             const hoje = hojeYMD();
             const vencimentoProximo = faturas.filter(fatura => {
@@ -1856,7 +1856,7 @@
             });
         }
 
-        // Fechar modal clicando fora dele
+        // Fechar modal clicando fora
         window.onclick = function(event) {
             const modal = document.getElementById('modalConfirmacao');
             if (event.target === modal) {
@@ -1867,7 +1867,7 @@
         // Fechar modal com ESC
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
 
-        // Debounce utilitário
+        // Debounce
         function debounce(fn, delay = 200) {
             let t;
             return (...args) => {
