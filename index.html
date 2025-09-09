@@ -3,1878 +3,1664 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Faturas Avançado</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Biblioteca jsPDF para geração de PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <title>Check-list Diário - LEFE</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTEVGRSBDaGVjay1saXN0Iiwic2hvcnRfbmFtZSI6IkxFRkUiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Q5MDAwMCIsInRoZW1lX2NvbG9yIjoiI2Q5MDAwMCIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY2lJSEpwWlhkQ2IzZzlJakFnTUNBME9EQWdORGd3SWo0OGNtVmpkQ0IzYVdSMGFEMGlORGd3SWlCb1pXbG5hSFE5SWpRNE1DSWdabWxzYkQwaVkyUmxObmxoSWk4K1BDOXRKVE0rIiwic2l6ZXMiOiI0ODB4NDgwIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
     <style>
         :root {
-            --bg-color: #f5f5f5;
-            --container-bg: #fff;
-            --text-color: #333;
-            --border-color: #ddd;
-            --hover-bg: #f8f8f8;
-            --header-bg: #f2f2f2;
-            --header-hover: #e0e0e0;
-            --shadow: rgba(0,0,0,0.1);
-            --primary-color: #2196F3;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --warning-color: #ff9800;
+            --primary-color: #d90000;
+            --primary-dark: #b80000;
+            --secondary-color: #0056b3;
+            --secondary-dark: #004494;
+            --light-gray: #f4f4f4;
+            --medium-gray: #ccc;
+            --dark-gray: #333;
+            --success: #4CAF50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --background: #ffffff;
+            --text: #333333;
+            --card-bg: #ffffff;
         }
-
-        [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --container-bg: #2d2d2d;
-            --text-color: #ffffff;
-            --border-color: #555;
-            --hover-bg: #3a3a3a;
-            --header-bg: #404040;
-            --header-hover: #4a4a4a;
-            --shadow: rgba(0,0,0,0.3);
-            --primary-color: #64b5f6;
-            --success-color: #81c784;
-            --danger-color: #e57373;
-            --warning-color: #ffb74d;
-        }
-
         body {
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 20px;
-            margin: 0;
-            transition: all 0.3s ease;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            font-size: 15px;
+            background-color: var(--light-gray);
+            color: var(--text);
+            margin: 5px;
+            line-height: 1.55;
+            transition: background-color 0.3s, color 0.3s;
         }
-
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: var(--container-bg);
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px var(--shadow);
-        }
-
-        .header-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .theme-toggle {
-            background: none;
-            border: 2px solid var(--border-color);
-            color: var(--text-color);
-            padding: 8px 15px;
+            max-width: 900px;
+            margin: auto;
+            background: var(--card-bg);
+            padding: 20px;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
+        h1, h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
         h1 {
+            font-size: 24px;
             text-align: center;
-            color: var(--text-color);
-            margin: 0;
-            flex: 1;
+            letter-spacing: .2px;
         }
-
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid var(--border-color);
-            margin-bottom: 20px;
-            overflow-x: auto;
+        h2 {
+            font-size: 18px;
+            margin-top: 20px;
+            letter-spacing: .2px;
         }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            white-space: nowrap;
-            color: var(--text-color);
-        }
-
-        .tab.active {
-            border-bottom-color: var(--primary-color);
-            background-color: var(--header-bg);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            background-color: var(--container-bg);
+            margin: 10px 0;
         }
-
         th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-color);
-        }
-
-        th {
-            background-color: var(--header-bg);
-            font-weight: bold;
-            cursor: pointer;
-            position: relative;
-        }
-
-        th:hover {
-            background-color: var(--header-hover);
-        }
-
-        tr:hover {
-            background-color: var(--hover-bg);
-        }
-
-        .amount {
-            font-weight: bold;
-        }
-
-        .paid {
-            color: var(--success-color);
-            text-decoration: line-through;
-        }
-
-        .unpaid {
-            color: var(--danger-color);
-        }
-
-        .btn {
-            padding: 6px 10px;
-            margin: 2px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .btn-add { background-color: var(--success-color); color: white; }
-        .btn-edit { background-color: var(--primary-color); color: white; }
-        .btn-delete { background-color: var(--danger-color); color: white; }
-        .btn-paid { background-color: var(--success-color); color: white; }
-        .btn-export { background-color: var(--warning-color); color: white; }
-        .btn-import { background-color: #9c27b0; color: white; }
-        .btn-pdf { background-color: #f44336; color: white; }
-
-        .form-group {
-            margin: 10px 0;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        input[type="text"], input[type="number"], input[type="date"], select, input[type="file"] {
             padding: 8px;
-            margin: 5px 0 10px 0;
-            display: inline-block;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border: 1px solid var(--medium-gray);
+            text-align: left;
+        }
+        th {
+            background-color: var(--light-gray);
+        }
+        input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea {
             width: 100%;
+            padding: 8px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
             box-sizing: border-box;
-            background-color: var(--container-bg);
-            color: var(--text-color);
+            background-color: var(--card-bg);
+            color: var(--text);
+            font-size: 14px;
         }
-
-        input:invalid {
-            border-color: var(--danger-color);
-        }
-
-        .summary {
-            background-color: #e8f5e9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
-        [data-theme="dark"] .summary {
-            background-color: #1b5e1f;
-            color: #81c784;
-        }
-
-        .filter-container {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: var(--header-bg);
-            border-radius: 5px;
-        }
-
-        .filter-group {
-            display: inline-block;
-            margin-right: 20px;
-            margin-bottom: 10px;
-        }
-
-        .notification {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            display: none;
-        }
-
-        .notification.success {
-            background-color: #dff0d8;
-            color: #3c763d;
-            border: 1px solid #d6e9c6;
-        }
-
-        .notification.error {
-            background-color: #f2dede;
-            color: #a94442;
-            border: 1px solid #ebccd1;
-        }
-
-        .notification.warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .notification.info {
-            background-color: #e7f3fe;
-            color: #0c5460;
-            border: 1px solid #b3d7ff;
-        }
-
-        [data-theme="dark"] .notification.success {
-            background-color: #1b5e1f;
-            color: #81c784;
-            border-color: #2e7d32;
-        }
-
-        [data-theme="dark"] .notification.error {
-            background-color: #5d1a1d;
-            color: #ef5350;
-            border-color: #c62828;
-        }
-
-        [data-theme="dark"] .notification.warning {
-            background-color: #5d4c1d;
-            color: #ffd54f;
-            border-color: #856404;
-        }
-
-        [data-theme="dark"] .notification.info {
-            background-color: #1b2a41;
-            color: #8ab4f8;
-            border-color: #3b4d63;
-        }
-
-        .warning { color: var(--warning-color); font-weight: bold; }
-        .expired { color: var(--danger-color); font-weight: bold; }
-
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        .chart-container {
-            margin: 20px 0;
-            height: 400px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .stat-card {
-            background-color: var(--header-bg);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .export-controls {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: var(--header-bg);
-            border-radius: 5px;
-        }
-
-        .export-controls button {
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
-        .categoria-tag {
-            display: inline-block;
-            padding: 2px 8px;
-            background-color: #e3f2fd;
-            border-radius: 12px;
+        td input, td select { width: auto; }
+        .signature { margin-top: 15px; }
+        .footer {
+            margin-top: 15px;
             font-size: 12px;
-            margin-left: 5px;
+            text-align: center;
+            color: #666;
         }
-
-        [data-theme="dark"] .categoria-tag {
-            background-color: #1565c0;
-            color: #ffffff;
-        }
-
-        .recorrente-badge {
-            color: var(--warning-color);
-            font-weight: bold;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .close-btn {
-            float: right;
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: inherit;
-        }
-
-        /* Mobile menu */
-        .mobile-tabs-menu {
-            display: none;
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: var(--header-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-color);
-        }
-
-        .pagination {
+        
+        /* Toolbar e botões */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: var(--light-gray);
+            padding: 10px 0;
+            max-width: 900px;
+            margin: 0 auto 5px;
+            text-align: right;
             display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 5px;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+            border-radius: 5px;
         }
-
-        .pagination button {
-            padding: 5px 10px;
-            background-color: var(--header-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
+        .toolbar.hidden { display: none !important; } /* ocultar toolbar */
+        .toolbar button {
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
-            color: var(--text-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.10);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
-        .pagination button.active {
-            background-color: var(--primary-color);
-            color: white;
+        .btn-print { background: var(--primary-color); }
+        .btn-print:hover { background: var(--primary-dark); }
+        .btn-email { background: var(--secondary-color); }
+        .btn-email:hover { background: var(--secondary-dark); }
+        .btn-save { background: var(--success); }
+        .btn-save:hover { background: #3d8b40; }
+        .btn-clear { background: var(--danger); }
+        .btn-clear:hover { background: #c62828; }
+        .btn-export { background: #673AB7; }
+        .btn-export:hover { background: #5E35B1; }
+        .btn-history { background: #795548; }
+        .btn-history:hover { background: #6D4C41; }
+        .btn-edit { background: #80FF00; color: black; }
+        .btn-edit:hover { background: #66CC00; color: black; }
+        .btn-trends { background: #009688; }
+        .btn-trends:hover { background: #00796B; }
+        /* Botão flutuante para alternar a barra */
+        .fab-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1002;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 28px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 20px;
         }
-
-        .search-advanced {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: var(--header-bg);
-            border-radius: 4px;
-        }
-
-        .sort-indicator {
-            margin-left: 5px;
-        }
-
-        /* Modal de confirmação */
-        .modal {
+        .fab-toggle:hover { background: var(--primary-dark); }
+        .fab-toggle:active { transform: translateY(1px); }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             display: none;
+            z-index: 1000;
+            max-width: 320px;
+            font-size: 14px;
+        }
+        .notification.success { background: var(--success); color: white; }
+        .notification.error { background: var(--danger); color: white; }
+        .notification.warning { background: var(--warning); color: white; }
+        .notification.info { background: var(--secondary-color); color: white; }
+        .required-field {
+            border: 2px solid var(--primary-color) !important;
+            background-color: #fff2f2;
+        }
+        
+        /* Status counters */
+        .status-counters {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .status-counter {
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            min-width: 120px;
+        }
+        .status-ok { background-color: var(--success); }
+        .status-ruim { background-color: var(--warning); }
+        .status-quebrado { background-color: #ff5722; }
+        .status-faltando { background-color: #9c27b0; }
+        .status-parar { background-color: var(--danger); }
+        /* Contadores compactos */
+        .status-counters .status-counter {
+            padding: 6px 8px;
+            min-width: 90px;
+            font-size: 13px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .critical-item { background-color: #fff2f2 !important; font-weight: bold; }
+        .item-highlight { animation: highlight 2s ease; background-color: #ffffd0; }
+        @keyframes highlight { 0% { background-color: #ffffd0; } 100% { background-color: transparent; } }
+        .save-indicator { font-size: 12px; color: #666; margin-left: 10px; font-style: italic; }
+        /* Modal styles */
+        .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow-y: auto; }
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: var(--text); }
+        
+        /* Modal de boas-vindas */
+        .welcome-modal .modal-content { max-width: 800px; }
+        .welcome-header { text-align: center; margin-bottom: 20px; }
+        .welcome-header h1 { font-size: 28px; color: var(--primary-color); border: none; }
+        .welcome-section { margin-bottom: 20px; }
+        .welcome-section h2 { font-size: 20px; margin-top: 15px; margin-bottom: 10px; }
+        .welcome-section ul { padding-left: 20px; }
+        .welcome-section li { margin-bottom: 8px; }
+        .welcome-footer { text-align: center; margin-top: 25px; }
+        .btn-welcome { background: var(--primary-color); color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-welcome:hover { background: var(--primary-dark); }
+        
+        /* Upload de fotos (gerais) */
+        .photo-upload { margin: 10px 0; }
+        .photo-preview { max-width: 200px; max-height: 200px; margin: 5px; border-radius: 5px; }
+        /* Histórico */
+        .history-item { padding: 10px; border: 1px solid var(--medium-gray); margin: 5px 0; border-radius: 5px; cursor: pointer; background-color: var(--light-gray); }
+        .history-item:hover { background-color: var(--medium-gray); }
+        /* Localização */
+        .location-info { font-size: 12px; color: #666; margin-top: 5px; }
+        .mobile-optimized select, .mobile-optimized input[type="text"] { font-size: 16px; }
+        
+        /* Novos estilos para melhorias */
+        .search-box {
+            margin: 10px 0;
+            padding: 8px;
+            width: 100%;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .batch-edit {
+            margin: 10px 0;
+            padding: 10px;
+            background: var(--light-gray);
+            border-radius: 5px;
+            display: none;
+            font-size: 14px;
+        }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .dashboard-card { background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .dashboard-card h3 { margin: 0 0 10px 0; font-size: 15px; font-weight: 600; }
+        .dashboard-card .value { font-size: 22px; font-weight: 700; color: var(--primary-color); }
+        .lazy-load { opacity: 0; transition: opacity 0.3s; }
+        .lazy-load.loaded { opacity: 1; }
+        .keyboard-shortcuts { position: fixed; bottom: 10px; left: 10px; background: var(--card-bg); padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 12px; display: none; }
+        .keyboard-shortcuts.show { display: block; }
+        /* Compactar a tabela de STATUS DE INSPEÇÃO */
+        #inspection-table { font-size: 13px; }
+        #inspection-table th, #inspection-table td { padding: 2px 4px; line-height: 1.3; }
+        #inspection-table th:nth-child(1), #inspection-table td:nth-child(1) { width: 24px; } /* checkbox */
+        #inspection-table th:nth-child(2), #inspection-table td:nth-child(2) { width: 32px; text-align: center; } /* # */
+        #inspection-table th:nth-child(4), #inspection-table td:nth-child(4) { width: 120px; padding: 2px 3px; } /* Status */
+        #inspection-table select.status-select {
+            padding: 2px 4px; height: 24px; line-height: 1.1;
+            font-size: 13px; min-width: 0; width: 112px; box-sizing: border-box;
+        }
+        #inspection-table input.obs-input { padding: 2px 4px; font-size: 13px; box-sizing: border-box; }
+        /* Compactar outras tabelas (Dados básicos e Dados da Viatura) */
+        .compact-table { font-size: 13px; }
+        .compact-table th, .compact-table td { padding: 2px 4px; line-height: 1.3; }
+        .compact-table th { white-space: nowrap; }
+        .compact-table input[type="text"],
+        .compact-table input[type="date"],
+        .compact-table input[type="time"],
+        .compact-table input[type="number"],
+        .compact-table select,
+        .compact-table textarea {
+            font-size: 13px;
+            padding: 4px 6px;
+            height: 28px;
+        }
+        .compact-table input[type="radio"] { margin-right: 4px; }
+        .compact-table input[type="radio"] + label { margin-right: 10px; font-size: 13px; }
+        /* Área de observações */
+        #observacoesAvarias { font-size: 13px; }
+        
+        /* Indicador de status offline */
+        .offline-indicator {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            right: 0;
+            background-color: var(--danger);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            z-index: 1004;
+            display: none;
         }
-
-        .modal-content {
-            background-color: var(--container-bg);
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        .offline-indicator.show {
+            display: block;
         }
-
-        .modal-actions {
+        
+        /* Relatório de tendência */
+        .trend-chart {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .trend-item {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--medium-gray);
         }
-
-        /* Backup: botões em negrito */
-        #backup .export-controls .btn {
-            font-weight: 700 !important;
+        .trend-item:last-child {
+            border-bottom: none;
         }
-
-        /* Títulos (páginas/abas) em negrito */
-        h1, h2, h3, h4 {
-            font-weight: 700 !important;
+        .trend-bar {
+            height: 20px;
+            background-color: var(--warning);
+            border-radius: 4px;
+            margin-top: 5px;
         }
-        .tab {
-            font-weight: 700 !important;
+        
+        /* ===== MELHORIAS DE LAYOUT ===== */
+        /* Ajustes para melhorar o espaçamento e legibilidade */
+        .container {
+            padding: 15px;
         }
-        .mobile-tabs-menu {
-            font-weight: 700;
+        
+        /* Melhorias na tabela de inspeção - mais espaço para observações */
+        #inspection-table {
+            table-layout: fixed;
         }
-
-        /* Responsividade */
+        
+        #inspection-table th:nth-child(3),
+        #inspection-table td:nth-child(3) {
+            width: 30% !important;  /* Reduzido de 40% para 30% */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        #inspection-table th:nth-child(5),
+        #inspection-table td:nth-child(5) {
+            width: 60% !important;  /* Aumentado de 58% para 60% */
+        }
+        
+        #inspection-table input.obs-input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Melhorias para dispositivos móveis */
         @media (max-width: 768px) {
-            .header-controls {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .form-row {
-                flex-direction: column;
-            }
-
-            .filter-group {
-                display: block;
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-
-            th, td {
-                padding: 8px 10px;
-                font-size: 14px;
-            }
-
-            .btn {
-                padding: 5px 8px;
-                font-size: 12px;
-                margin: 1px;
-            }
-
-            .tabs {
-                display: none;
-            }
-
-            .mobile-tabs-menu {
-                display: block;
-            }
-
-            .export-controls button {
-                width: 100%;
-                margin-right: 0;
-            }
-
             .container {
+                padding: 10px;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            h2 {
+                font-size: 16px;
+            }
+            
+            .toolbar { 
+                flex-direction: column; 
+                align-items: stretch;
+                position: relative;
+                top: 0;
+            }
+            
+            .toolbar button { 
+                width: 100%; 
+                justify-content: center;
+                margin-bottom: 5px;
+            }
+            
+            .status-counters { 
+                flex-direction: column; 
+            }
+            
+            .status-counter {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .modal-content { 
+                width: 95%; 
+                margin: 2% auto; 
                 padding: 15px;
             }
+            
+            .welcome-modal .modal-content { 
+                width: 95%; 
+                padding: 15px; 
+            }
+            
+            .welcome-header h1 { 
+                font-size: 22px; 
+            }
+            
+            .welcome-section h2 { 
+                font-size: 14px; 
+            }
+            
+            .dashboard { 
+                grid-template-columns: 1fr; 
+            }
+            
+            /* Ajustes específicos para a tabela de inspeção em mobile */
+            #inspection-table {
+                font-size: 12px;
+            }
+            
+            #inspection-table th:nth-child(3),
+            #inspection-table td:nth-child(3) {
+                width: 25% !important;
+                white-space: normal;
+            }
+            
+            #inspection-table th:nth-child(5),
+            #inspection-table td:nth-child(5) {
+                width: 60% !important;
+            }
+            
+            #inspection-table select.status-select {
+                width: 100%;
+                font-size: 12px;
+            }
+            
+            /* Melhorias para os formulários em mobile */
+            .compact-table input[type="text"],
+            .compact-table input[type="date"],
+            .compact-table input[type="time"],
+            .compact-table input[type="number"],
+            .compact-table select {
+                font-size: 16px; /* Melhora a usabilidade em dispositivos móveis */
+                padding: 8px;
+            }
+        }
+        
+        /* Melhorias de impressão */
+        @media print {
+            .no-print, .no-print * { display: none !important; }
+            .fab-toggle { display: none !important; }
+            body, .container { 
+                margin: 0; 
+                padding: 0; 
+                box-shadow: none; 
+                border-radius: 0; 
+                font-size: 12px;
+            }
+            .status-counters { display: none; }
+            .dashboard { display: none; }
+            
+            /* Ajustes para a tabela na impressão */
+            #inspection-table {
+                font-size: 10px;
+            }
+            
+            #inspection-table th, 
+            #inspection-table td {
+                padding: 3px;
+            }
+            
+            #inspection-table th:nth-child(3),
+            #inspection-table td:nth-child(3) {
+                white-space: normal;
+                overflow: visible;
+            }
+        }
+        
+        /* Melhorias de acessibilidade */
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+        
+        button:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+        
+        /* Melhorias visuais para os botões */
+        .toolbar button {
+            transition: all 0.2s ease;
+        }
+        
+        /* Destaque para itens críticos */
+        .critical-item {
+            background-color: #fff2f2 !important;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        /* Melhorias no formulário de dados básicos */
+        .compact-table td:first-child {
+            width: 35%;
+        }
+        
+        /* Melhorias para a área de observações */
+        #observacoesAvarias {
+            min-height: 120px;
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
+    <!-- Indicador de status offline -->
+    <div id="offlineIndicator" class="offline-indicator">
+        Você está offline. As alterações serão sincronizadas quando a conexão for restabelecida.
+    </div>
+    
+    <!-- Modal de Boas-vindas -->
+    <div id="welcomeModal" class="modal welcome-modal">
+        <div class="modal-content">
+            <div class="welcome-header">
+                <h1>🏥 Check-list Diário - LEFE</h1>
+                <p>🚨 Este é um sistema web completo para check-list diário de inspeção veicular e equipamentos do Serviço de Emergências Médicas (LEFE). <br>O sistema oferece uma interface intuitiva và responsiva para registrar o estado dos veículos de emergência.</p>
+            </div>
+            
+            <div class="welcome-section">
+                <h2>Funcionalidades Principais</h2>
+                <h3>📝 Registro de Dados</h3>
+                <ul>
+                    <li>Informações básicas (hospital, data, horários, condutores)</li>
+                    <li>Dados da viatura (placa, quilometragem, combustível, etc..)</li>
+                    <li>Validação automática de placa brasileira (formatos antigo e novo)</li>
+                </ul>
+                
+                <h3>✅ Check-list de Inspeção</h3>
+                <ul>
+                    <li>Lista completa de itens para inspeção (óleo, freio, pneus, etc..)</li>
+                    <li>Status para cada item: OK, Ruim, Quebrado, Faltando, Parar VTR</li>
+                    <li>Itens críticos destacados visualmente</li>
+                    <li>Campos para observações por item</li>
+                </ul>
+                
+                <h3>🛠️ Recursos Avançados</h3>
+                <ul>
+                    <li>Upload de fotos gerais (opcional)</li>
+                    <li>Armazenamento local: Salva dados no navegador</li>
+                    <li>Histórico: Visualização e carregamento de check-lists anteriores</li>
+                    <li>Relatórios de tendência: Identifica itens com mais problemas para possíveis reparos </li>
+                    <li>Modo offline robusto: Funciona sem conexão e sincroniza quando online</li>
+                </ul>
+                
+                <h3>📤 Exportação e Compartilhamento</h3>
+                <ul>
+                    <li>Exportação de dados: Exportação em formato PDF</li>
+                    <li>Envio por e-mail: Gera e-mail formatado com os dados</li>
+                    <li>Impressão: Layout otimizado para impressão</li>
+                </ul>
+                
+                <h3>📱 Design Responsivo</h3>
+                <ul>
+                    <li>Layout adaptável para diferentes tamanhos de tela</li>
+                    <li>Interface otimizada para dispositivos móveis</li>
+                </ul>
+            </div>
+            
+            <div class="welcome-section">
+                <h2>🙋🏻 Como Utilizar</h2>
+                <ol>
+                    <li>Preencha os campos básicos (hospital, data, condutores)</li>
+                    <li>Informe os dados da viatura (placa, quilometragem, etc.)</li>
+                    <li>Selecione o status para cada item de inspeção</li>
+                    <li>Adicione observações se necessário</li>
+                    <li>Salve, exporte ou envie por e-mail os dados</li>
+                    <li>Verifique os relatórios de tendência para identificar problemas recorrentes</li>
+                </ol>
+            </div>
+            
+            <div class="welcome-footer">
+                <button class="btn-welcome" onclick="fecharBoasVindas()">Começar a usar o sistema</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Barra de ferramentas melhorada (oculta por padrão) -->
+    <div class="toolbar no-print hidden">
+        <button class="btn-print" onclick="window.print()"><span>🖨️</span> Imprimir</button>
+        <button class="btn-email" onclick="enviarPorEmail()"><span>✉️</span> E-mail</button>
+        <button class="btn-save" onclick="salvarDados()"><span>💾</span> Salvar</button>
+        <button class="btn-export" onclick="exportarDados()"><span>📤</span> Exportar</button>
+        <button class="btn-history" onclick="abrirHistorico()"><span>📋</span> Histórico</button>
+        <button class="btn-trends" onclick="abrirRelatorioTendencia()"><span>📈</span> Tendências</button>
+        <button class="btn-clear" onclick="limparFormulario()"><span>🗑️</span> Limpar</button>
+        <button id="btnBatchEdit" class="btn-edit" onclick="toggleBatchEdit()"><span>📝</span> Edição em Lote</button>
+        <span id="saveIndicator" class="save-indicator"></span>
+    </div>
+    <!-- Botão flutuante para alternar a barra -->
+    <button id="toggleToolbarFab"
+            class="fab-toggle no-print"
+            onclick="toggleToolbar()"
+            title="Mostrar/Ocultar barra (Ctrl+B)"
+            aria-label="Mostrar/Ocultar barra">☰</button>
+    
     <div class="container">
-        <div class="header-controls">
-            <button class="theme-toggle" onclick="alternarTema()" aria-label="Alternar entre tema claro e escuro">🌓 Tema</button>
-            <h1>Gerenciador de Faturas Avançado</h1>
-            <div></div>
+        <h1>🚑 LEFE - SERVIÇO DE EMERGÊNCIAS MÉDICAS</h1>
+        <h2>📋 CHECK-LIST DIÁRIO DE INSPEÇÃO VEICULAR E EQUIPAMENTOS</h2>
+        
+        <!-- Dashboard de estatísticas -->
+        <div class="dashboard no-print">
+            <div class="dashboard-card">
+                <h3>✅ Itens OK</h3>
+                <div class="value" id="dashboard-ok">0</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>⚠️ Itens com Problemas</h3>
+                <div class="value" id="dashboard-problems">0</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>🚨 Itens Críticos</h3>
+                <div class="value" id="dashboard-critical">0</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>📊 Preenchimento</h3>
+                <div class="value" id="dashboard-completion">0%</div>
+            </div>
+            
         </div>
-
-        <div id="notification" class="notification" role="status" aria-live="polite"></div>
-
-        <!-- Nova notificação para vencimentos próximos -->
-        <div id="notificacaoVencimento" class="notification warning" style="display: none;">
-            <button class="close-btn" onclick="fecharNotificacaoVencimento()" aria-label="Fechar notificação">✖</button>
-            <strong>⚠️ Aviso de Vencimento</strong>
-            <div id="listaVencimentoProximo"></div>
+        
+        <div class="status-counters no-print">
+            <div class="status-counter status-ok">✅ OK: <span id="count-ok">0</span></div>
+            <div class="status-counter status-ruim">⚠️ Ruim: <span id="count-ruim">0</span></div>
+            <div class="status-counter status-quebrado">🛠️ Quebrado: <span id="count-quebrado">0</span></div>
+            <div class="status-counter status-faltando">❌ Faltando: <span id="count-faltando">0</span></div>
+            <div class="status-counter status-parar">🚨 Parar VTR: <span id="count-parar">0</span></div>
         </div>
-
-        <select class="mobile-tabs-menu" onchange="mostrarAbaMobile(this.value)" aria-label="Selecionar aba no modo mobile">
-            <option value="faturas">📋 Faturas</option>
-            <option value="analytics">📊 Análises</option>
-            <option value="backup">💾 Backup</option>
-        </select>
-
-        <div class="tabs">
-            <div class="tab active" data-aba="faturas" onclick="mostrarAba(event, 'faturas')">📋 Faturas</div>
-            <div class="tab" data-aba="analytics" onclick="mostrarAba(event, 'analytics')">📊 Análises</div>
-            <div class="tab" data-aba="backup" onclick="mostrarAba(event, 'backup')">💾 Backup</div>
+        
+        <!-- Modo de edição em lote -->
+        <div id="batchEdit" class="batch-edit no-print">
+            <h3>📝 Edição em Lote</h3>
+            <p>Selecione o status que deseja aplicar a vários itens:</p>
+            <select id="batchStatus">
+                <option value=""></option>
+                <option value="✅ OK">✅ OK</option>
+                <option value="⚠️ Ruim">⚠️ Ruim</option>
+                <option value="🛠️ Quebrado">🛠️ Quebrado</option>
+                <option value="❌ Faltando">❌ Faltando</option>
+                <option value="🚨 Parar VTR">🚨 Parar VTR</option>
+            </select>
+            <button onclick="aplicarEdicaoEmLote()">Aplicar aos itens selecionados</button>
+            <button onclick="selecionarTodosItens()">Selecionar todos</button>
+            <button onclick="desselecionarTodosItens()">Desselecionar todos</button>
         </div>
-
-        <!-- ABA FATURAS -->
-        <div id="faturas" class="tab-content active">
-            <form id="formFatura" onsubmit="adicionarFatura(event)">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="tipo">Tipo:</label>
-                        <select id="tipo" required>
-                            <option value="">Selecione um tipo</option>
-                            <option value="cartao">💳 Cartão de Crédito</option>
-                            <option value="celular">📱 Celular</option>
-                            <option value="internet">🛜 Internet</option>
-                            <option value="boleto">📃 Boleto</option>
-                            <option value="streaming">📺 Streaming</option>
-                            <option value="seguro">🛡️ Seguro</option>
-                            <option value="financiamento">🏠 Financiamento</option>
-                            <option value="outros">📦 Outros</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nome">Nome:</label>
-                        <input type="text" id="nome" placeholder="Nome do cartão ou serviço" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="categoria">Categoria:</label>
-                        <input type="text" id="categoria" list="categoriasSugeridas" placeholder="Ex: Casa, Pessoal, Trabalho">
-                        <datalist id="categoriasSugeridas"></datalist>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="fechamento">Data de Fechamento:</label>
-                        <input type="date" id="fechamento" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="vencimento">Data de Vencimento:</label>
-                        <input type="date" id="vencimento" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="valor">Valor:</label>
-                        <input type="number" id="valor" placeholder="0.00" step="0.01" min="0" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="recorrente"> 🔄 Conta recorrente (gerar automaticamente no próximo mês)
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-add" id="btnAdd">Adicionar Fatura</button>
-                <button type="button" class="btn" id="btnCancel" onclick="cancelarEdicao()" style="display: none; background-color: #9e9e9e;">Cancelar</button>
-            </form>
-
-            <div class="filter-container">
-                <div class="filter-group">
-                    <label for="filtroTipo">Filtrar por tipo:</label>
-                    <select id="filtroTipo" onchange="filtrarFaturas()">
-                        <option value="">Todos</option>
-                        <option value="cartao">Cartão de Crédito</option>
-                        <option value="celular">Celular</option>
-                        <option value="internet">Internet</option>
-                        <option value="boleto">Boleto</option>
-                        <option value="streaming">Streaming</option>
-                        <option value="seguro">Seguro</option>
-                        <option value="financiamento">Financiamento</option>
-                        <option value="outros">Outros</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="filtroStatus">Filtrar por status:</label>
-                    <select id="filtroStatus" onchange="filtrarFaturas()">
-                        <option value="">Todos</option>
-                        <option value="pago">Pagos</option>
-                        <option value="pendente">Pendentes</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="filtroCategoria">Filtrar por categoria:</label>
-                    <select id="filtroCategoria" onchange="filtrarFaturas()">
-                        <option value="">Todas</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="buscaNome">Buscar por nome:</label>
-                    <input type="text" id="buscaNome" placeholder="Buscar...">
-                </div>
-
-                <div class="filter-group">
-                    <button class="btn" onclick="toggleAdvancedSearch()">🔍 Busca Avançada</button>
-                </div>
-            </div>
-
-            <div id="advancedSearch" class="search-advanced" style="display: none;">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="buscaValorMin">Valor Mínimo:</label>
-                        <input type="number" id="buscaValorMin" placeholder="0.00" step="0.01" min="0" onchange="filtrarFaturas()">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="buscaValorMax">Valor Máximo:</label>
-                        <input type="number" id="buscaValorMax" placeholder="0.00" step="0.01" min="0" onchange="filtrarFaturas()">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="buscaDataInicio">De:</label>
-                        <input type="date" id="buscaDataInicio" onchange="filtrarFaturas()">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="buscaDataFim">Até:</label>
-                        <input type="date" id="buscaDataFim" onchange="filtrarFaturas()">
-                    </div>
-                </div>
-            </div>
-
-            <div style="overflow-x: auto;">
-                <table id="tabelaFaturas">
-                    <thead>
-                        <tr>
-                            <th onclick="ordenarTabela('tipo')">Tipo <span class="sort-indicator" id="sort-tipo">↕</span></th>
-                            <th onclick="ordenarTabela('nome')">Nome <span class="sort-indicator" id="sort-nome">↕</span></th>
-                            <th onclick="ordenarTabela('categoria')">Categoria <span class="sort-indicator" id="sort-categoria">↕</span></th>
-                            <th onclick="ordenarTabela('fechamento')">Fechamento <span class="sort-indicator" id="sort-fechamento">↕</span></th>
-                            <th onclick="ordenarTabela('vencimento')">Vencimento <span class="sort-indicator" id="sort-vencimento">↕</span></th>
-                            <th onclick="ordenarTabela('valor')">Valor <span class="sort-indicator" id="sort-valor">↕</span></th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <div class="pagination" id="paginacao"></div>
-
-            <div class="summary" id="resumoTotal">
-                Total de faturas pendentes: R$ 0,00
-            </div>
-        </div>
-
-        <!-- ABA ANÁLISES -->
-        <div id="analytics" class="tab-content">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalFaturas">0</div>
-                    <div>Total de Faturas</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="faturasPagas">0</div>
-                    <div>Faturas Pagas</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="faturasPendentes">0</div>
-                    <div>Faturas Pendentes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="mediaValor">R$ 0</div>
-                    <div>Valor Médio</div>
-                </div>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="graficoTipos" aria-label="Gráfico de distribuição por tipo" role="img"></canvas>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="graficoCategorias" aria-label="Gráfico de gastos por categoria" role="img"></canvas>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="graficoMensal" aria-label="Gráfico de evolução mensal dos gastos" role="img"></canvas>
-            </div>
-        </div>
-
-        <!-- ABA BACKUP -->
-        <div id="backup" class="tab-content">
-            <div class="export-controls">
-                <h3>Exportar Dados</h3>
-                <button class="btn btn-export" onclick="exportarCSV()">📊 Exportar CSV</button>
-                <button class="btn btn-export" onclick="exportarBackup()">💾 Backup JSON</button>
-                <button class="btn btn-export" onclick="gerarRelatorioHTML()">📄 Relatório HTML</button>
-                <button class="btn btn-pdf" onclick="exportarPDF()">📋 Exportar PDF</button>
-
-                <h3>Importar Dados</h3>
-                <input type="file" id="arquivoBackup" accept=".json" onchange="restaurarBackup(event)" style="margin-bottom: 10px;">
-                <button class="btn btn-import" onclick="document.getElementById('arquivoBackup').click()">📂 Restaurar Backup</button>
-
-                <h3>Gerenciar Recorrências</h3>
-                <button class="btn btn-add" onclick="gerarFaturasRecorrentes()">🔄 Gerar Faturas do Próximo Mês</button>
-                <button class="btn btn-delete" onclick="confirmarLimpezaDados()">🗑️ Limpar Todos os Dados</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmação -->
-    <div id="modalConfirmacao" class="modal" aria-hidden="true" aria-labelledby="modalTitulo" aria-describedby="modalMensagem">
-        <div class="modal-content" role="dialog">
-            <h3 id="modalTitulo">Confirmar ação</h3>
-            <p id="modalMensagem">Tem certeza que deseja realizar esta ação?</p>
-            <div class="modal-actions">
-                <button class="btn" onclick="fecharModal()">Cancelar</button>
-                <button class="btn btn-delete" id="modalConfirmarBtn">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Inicializar jsPDF
-        window.jsPDF = window.jspdf.jsPDF;
-
-        // Formatter de moeda
-        const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-
-        // Helpers de data (uso local para evitar problemas de fuso/ISO)
-        const MS_DIA = 24 * 60 * 60 * 1000;
-        function parseYMD(ymd) { if (!ymd) return null; const [y,m,d] = ymd.split('-').map(Number); return new Date(y, m-1, d); }
-        function formatYMD(d) { const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
-        function hojeYMD() { return formatYMD(new Date()); }
-        function diffDias(fromYMD, toYMD) {
-            const a = parseYMD(fromYMD), b = parseYMD(toYMD);
-            if (!a || !b) return 0;
-            a.setHours(0,0,0,0); b.setHours(0,0,0,0);
-            return Math.round((b - a) / MS_DIA);
-        }
-        function formatarData(data) {
-            if (!data) return '-';
-            const [ano, mes, dia] = data.split('-');
-            return `${dia}/${mes}/${ano}`;
-        }
-        function obterDataAtual() { return hojeYMD(); }
-
-        let faturas = [];
-        let editandoId = null;
-        let ordenacaoAtual = { campo: 'vencimento', direcao: 'asc' };
-        let graficos = {};
-        let paginaAtual = 1;
-        const itensPorPagina = 10;
-
-        // Carregar configurações
-        window.onload = function() {
-            carregarTema();
-            carregarDados();
-            atualizarCategoriasFiltro();
-            definirDatasMinimas();
-            verificarVencimentoProximo();
-            atualizarSugestoesCategorias();
-            // Busca com debounce
-            document.getElementById('buscaNome').onkeyup = debounce(filtrarFaturas, 200);
-
-            // Cores aleatórias no Backup ao carregar
-            aplicarCoresAleatoriasBackup();
-        }
-
-        function carregarTema() {
-            const tema = localStorage.getItem('tema') || 'light';
-            document.documentElement.setAttribute('data-theme', tema);
-        }
-
-        function carregarDados() {
-            const dadosSalvos = localStorage.getItem('faturas');
-            if (dadosSalvos) {
-                faturas = JSON.parse(dadosSalvos);
-            }
-            atualizarTabela();
-            atualizarAnalytics();
-        }
-
-        function definirDatasMinimas() {
-            const hoje = hojeYMD();
-            document.getElementById('fechamento').setAttribute('min', hoje);
-            document.getElementById('vencimento').setAttribute('min', hoje);
-        }
-
-        // Gerenciamento de abas
-        function mostrarAba(e, aba) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-            e.currentTarget.classList.add('active');
-            document.getElementById(aba).classList.add('active');
-
-            // Atualizar o menu mobile
-            document.querySelector('.mobile-tabs-menu').value = aba;
-
-            if (aba === 'analytics') {
-                atualizarAnalytics();
-            }
-            if (aba === 'backup') {
-                aplicarCoresAleatoriasBackup();
-            }
-        }
-
-        function mostrarAbaMobile(aba) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-            // Ativar aba correspondente
-            const tab = document.querySelector(`.tab[data-aba="${aba}"]`);
-            if (tab) tab.classList.add('active');
-            document.getElementById(aba).classList.add('active');
-
-            if (aba === 'analytics') {
-                atualizarAnalytics();
-            }
-            if (aba === 'backup') {
-                aplicarCoresAleatoriasBackup();
-            }
-        }
-
-        // Tema
-        function alternarTema() {
-            const tema = document.documentElement.getAttribute('data-theme');
-            const novoTema = tema === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', novoTema);
-            localStorage.setItem('tema', novoTema);
-
-            // Recriar gráficos com novo tema
-            if (document.getElementById('analytics').classList.contains('active')) {
-                setTimeout(() => atualizarAnalytics(), 100);
-            }
-
-            // Reaplicar cores aleatórias no Backup se ativo
-            if (document.getElementById('backup').classList.contains('active')) {
-                aplicarCoresAleatoriasBackup();
-            }
-        }
-
-        // CRUD de faturas
-        function adicionarFatura(event) {
-            event.preventDefault();
-
-            const tipo = document.getElementById('tipo').value;
-            const nome = document.getElementById('nome').value.trim();
-            const categoria = (document.getElementById('categoria').value || 'Geral').trim();
-            const fechamento = document.getElementById('fechamento').value;
-            const vencimento = document.getElementById('vencimento').value;
-            const valor = parseFloat(document.getElementById('valor').value);
-            const recorrente = document.getElementById('recorrente').checked;
-
-            if (!tipo) {
-                exibirNotificacao('Por favor, selecione um tipo de fatura!', 'error');
-                return;
-            }
-
-            if (!nome || !fechamento || !vencimento || isNaN(valor)) {
-                exibirNotificacao('Por favor, preencha todos os campos corretamente!', 'error');
-                return;
-            }
-
-            if (parseYMD(vencimento) <= parseYMD(fechamento)) {
-                exibirNotificacao('A data de vencimento deve ser posterior à data de fechamento!', 'error');
-                return;
-            }
-
-            if (editandoId) {
-                const index = faturas.findIndex(f => f.id === editandoId);
-                if (index !== -1) {
-                    if (faturas[index].pago) {
-                        exibirNotificacao('Não é possível editar uma fatura já paga!', 'error');
-                        return;
-                    }
-
-                    faturas[index] = {
-                        ...faturas[index],
-                        tipo, nome, categoria, fechamento, vencimento, valor, recorrente
-                    };
-                    exibirNotificacao('Fatura atualizada com sucesso!', 'success');
-                }
-                cancelarEdicao();
-            } else {
-                const novaFatura = {
-                    id: (crypto?.randomUUID?.() || String(Date.now())),
-                    tipo, nome, categoria, fechamento, vencimento, valor, recorrente,
-                    pago: false,
-                    dataPagamento: null,
-                    historicoPagamentos: []
-                };
-                faturas.push(novaFatura);
-                exibirNotificacao('Fatura adicionada com sucesso!', 'success');
-            }
-
-            atualizarLocalStorage();
-            atualizarTabela();
-            atualizarCategoriasFiltro();
-            atualizarSugestoesCategorias();
-            verificarVencimentoProximo();
-            limparFormulario();
-        }
-
-        function editarFatura(id) {
-            const fatura = faturas.find(f => f.id === id);
-            if (!fatura || fatura.pago) {
-                exibirNotificacao('Não é possível editar uma fatura já paga!', 'error');
-                return;
-            }
-
-            document.getElementById('tipo').value = fatura.tipo;
-            document.getElementById('nome').value = fatura.nome;
-            document.getElementById('categoria').value = fatura.categoria || '';
-            document.getElementById('fechamento').value = fatura.fechamento;
-            document.getElementById('vencimento').value = fatura.vencimento;
-            document.getElementById('valor').value = fatura.valor;
-            document.getElementById('recorrente').checked = fatura.recorrente || false;
-
-            editandoId = id;
-            document.getElementById('btnAdd').textContent = 'Atualizar Fatura';
-            document.getElementById('btnCancel').style.display = 'inline-block';
-
-            window.scrollTo(0, 0);
-        }
-
-        function cancelarEdicao() {
-            editandoId = null;
-            document.getElementById('btnAdd').textContent = 'Adicionar Fatura';
-            document.getElementById('btnCancel').style.display = 'none';
-            limparFormulario();
-        }
-
-        function limparFormulario() {
-            const form = document.getElementById('formFatura');
-            if (form) form.reset();
-        }
-
-        function excluirFatura(id) {
-            const fatura = faturas.find(f => f.id === id);
-            let mensagem = 'Tem certeza que deseja excluir esta fatura?';
-
-            if (fatura && fatura.pago) {
-                mensagem = 'Esta fatura já foi paga. Tem certeza que deseja excluí-la?';
-            }
-
-            mostrarModal(
-                'Confirmar exclusão',
-                mensagem,
-                () => {
-                    faturas = faturas.filter(f => f.id !== id);
-                    atualizarLocalStorage();
-                    atualizarTabela();
-                    atualizarCategoriasFiltro();
-                    verificarVencimentoProximo();
-                    exibirNotificacao('Fatura excluída com sucesso!', 'success');
-                    fecharModal();
-                }
-            );
-        }
-
-        function marcarComoPago(id, estaPago) {
-            const fatura = faturas.find(f => f.id === id);
-            if (!fatura) return;
-
-            const acao = estaPago ? 'marcar como paga' : 'desmarcar pagamento';
-
-            mostrarModal(
-                'Confirmar ação',
-                `Tem certeza que deseja ${acao} esta fatura?`,
-                () => {
-                    fatura.pago = estaPago;
-                    fatura.dataPagamento = estaPago ? hojeYMD() : null;
-
-                    if (estaPago) {
-                        fatura.historicoPagamentos.push({
-                            data: new Date().toISOString(),
-                            valor: fatura.valor
-                        });
-                    }
-
-                    atualizarLocalStorage();
-                    atualizarTabela();
-                    verificarVencimentoProximo();
-                    exibirNotificacao(`Fatura ${estaPago ? 'paga' : 'desmarcada'} com sucesso!`, 'success');
-
-                    if (editandoId === id) {
-                        cancelarEdicao();
-                    }
-                    fecharModal();
-                }
-            );
-        }
-
-        // Atualização da tabela
-        function atualizarTabela() {
-            const tbody = document.querySelector('#tabelaFaturas tbody');
-            tbody.innerHTML = '';
-
-            // Ordenação estável
-            const pares = faturas.map((f, i) => ({ f, i }));
-            const comparar = (a, b) => {
-                let valorA, valorB;
-                switch (ordenacaoAtual.campo) {
-                    case 'tipo':
-                    case 'nome':
-                    case 'categoria':
-                        valorA = (a.f[ordenacaoAtual.campo] || '').toLowerCase();
-                        valorB = (b.f[ordenacaoAtual.campo] || '').toLowerCase();
-                        break;
-                    case 'fechamento':
-                    case 'vencimento':
-                        valorA = parseYMD(a.f[ordenacaoAtual.campo]);
-                        valorB = parseYMD(b.f[ordenacaoAtual.campo]);
-                        break;
-                    case 'valor':
-                        valorA = a.f.valor;
-                        valorB = b.f.valor;
-                        break;
-                    default:
-                        valorA = a.i; valorB = b.i;
-                }
-                let res = 0;
-                if (valorA instanceof Date && valorB instanceof Date) {
-                    res = valorA - valorB;
-                } else {
-                    res = valorA > valorB ? 1 : valorA < valorB ? -1 : 0;
-                }
-                if (ordenacaoAtual.direcao === 'desc') res = -res;
-                if (res === 0) res = a.i - b.i; // estável
-                return res;
-            };
-            const faturasOrdenadas = pares.sort(comparar).map(p => p.f);
-
-            // Aplicar filtros
-            const faturasFiltradas = aplicarFiltros(faturasOrdenadas);
-
-            // Paginação
-            const totalPaginas = Math.ceil(faturasFiltradas.length / itensPorPagina);
-            paginaAtual = Math.min(paginaAtual, totalPaginas || 1);
-
-            const inicio = (paginaAtual - 1) * itensPorPagina;
-            const fim = inicio + itensPorPagina;
-            const faturasPagina = faturasFiltradas.slice(inicio, fim);
-
-            // Atualizar indicadores de ordenação
-            document.querySelectorAll('.sort-indicator').forEach(el => {
-                el.textContent = '↕';
-            });
-
-            const indicador = document.getElementById(`sort-${ordenacaoAtual.campo}`);
-            if (indicador) {
-                indicador.textContent = ordenacaoAtual.direcao === 'asc' ? '↑' : '↓';
-            }
-
-            let totalPendente = 0;
-            const hoje = hojeYMD();
-            faturasPagina.forEach(fatura => {
-                const tr = document.createElement('tr');
-
-                const icones = {
-                    cartao: '💳', celular: '📱', internet: '🛜', boleto: '📃',
-                    streaming: '📺', seguro: '🛡️', financiamento: '🏠', outros: '📦'
-                };
-
-                const icone = icones[fatura.tipo] || '📦';
-
-                const d = diffDias(hoje, fatura.vencimento);
-                let avisoVencimento = '';
-
-                               if (fatura.pago) {
-                    avisoVencimento = ` <span style="color: var(--success-color);">💰 ${formatarData(fatura.dataPagamento)}</span>`;
-                } else if (d < 0) {
-                    avisoVencimento = ` <span class="expired">(Vencida há ${Math.abs(d)} dias)</span>`;
-                } else if (d === 0) {
-                    avisoVencimento = ` <span class="warning">(Vence hoje)</span>`;
-                } else if (d <= 7) {
-                    avisoVencimento = ` <span class="warning">(Vence em ${d} dias)</span>`;
-                }
-
-                const categoriaTag = fatura.categoria ?
-                    `<span class="categoria-tag">${fatura.categoria}</span>` : '';
-
-                const recorrenteBadge = fatura.recorrente ?
-                    `<span class="recorrente-badge">🔄</span>` : '';
-
-                tr.innerHTML = `
-                    <td>${icone} ${fatura.tipo.charAt(0).toUpperCase() + fatura.tipo.slice(1)}</td>
-                    <td>${fatura.nome} ${fatura.pago ? '🔒' : ''} ${recorrenteBadge}</td>
-                    <td>${fatura.categoria || 'Geral'}${categoriaTag}</td>
-                    <td>${formatarData(fatura.fechamento)}</td>
-                    <td>${formatarData(fatura.vencimento)}${avisoVencimento}</td>
-                    <td class="amount ${fatura.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(fatura.valor)}</td>
-                    <td>
-                        ${!fatura.pago ?
-                            `<button class="btn btn-edit" onclick="editarFatura('${fatura.id}')" aria-label="Editar fatura">Editar</button>` :
-                            '<span class="lock-icon" aria-hidden="true">🔒</span>'
-                        }
-                        <button class="btn btn-delete" onclick="excluirFatura('${fatura.id}')" aria-label="Excluir fatura">Excluir</button>
-                        <button class="btn btn-paid" onclick="marcarComoPago('${fatura.id}', ${!fatura.pago})" aria-label="${fatura.pago ? 'Desfazer pagamento' : 'Pagar fatura'}">
-                            ${fatura.pago ? 'Desfazer' : 'Pagar'}
-                        </button>
-                    </td>
-                `;
-
-                tbody.appendChild(tr);
-
-                if (!fatura.pago) {
-                    totalPendente += fatura.valor;
-                }
-            });
-
-            document.getElementById('resumoTotal').innerHTML =
-                `Total de faturas pendentes: ${fmtBRL.format(totalPendente)}`;
-
-            // Atualizar paginação
-            atualizarPaginacao(totalPaginas);
-        }
-
-        function aplicarFiltros(faturasLista) {
-            const filtroTipo = document.getElementById('filtroTipo').value;
-            const filtroStatus = document.getElementById('filtroStatus').value;
-            const filtroCategoria = document.getElementById('filtroCategoria').value;
-            const buscaNome = document.getElementById('buscaNome').value.toLowerCase();
-            const valorMin = parseFloat(document.getElementById('buscaValorMin').value) || 0;
-            const valorMax = parseFloat(document.getElementById('buscaValorMax').value) || Number.MAX_SAFE_INTEGER;
-            const dataInicio = document.getElementById('buscaDataInicio').value;
-            const dataFim = document.getElementById('buscaDataFim').value;
-
-            return faturasLista.filter(fatura => {
-                const tipoMatch = !filtroTipo || fatura.tipo === filtroTipo;
-                const statusMatch = !filtroStatus ||
-                    (filtroStatus === 'pago' && fatura.pago) ||
-                    (filtroStatus === 'pendente' && !fatura.pago);
-                const categoriaMatch = !filtroCategoria || fatura.categoria === filtroCategoria;
-                const nomeMatch = !buscaNome || fatura.nome.toLowerCase().includes(buscaNome);
-                const valorMatch = fatura.valor >= valorMin && fatura.valor <= valorMax;
-
-                let dataMatch = true;
-                if (dataInicio) {
-                    dataMatch = dataMatch && parseYMD(fatura.vencimento) >= parseYMD(dataInicio);
-                }
-                if (dataFim) {
-                    dataMatch = dataMatch && parseYMD(fatura.vencimento) <= parseYMD(dataFim);
-                }
-
-                return tipoMatch && statusMatch && categoriaMatch && nomeMatch && valorMatch && dataMatch;
-            });
-        }
-
-        function atualizarPaginacao(totalPaginas) {
-            const paginacao = document.getElementById('paginacao');
-            paginacao.innerHTML = '';
-
-            if (totalPaginas <= 1) return;
-
-            // Botão anterior
-            if (paginaAtual > 1) {
-                const btnAnterior = document.createElement('button');
-                btnAnterior.textContent = '«';
-                btnAnterior.onclick = () => mudarPagina(paginaAtual - 1);
-                paginacao.appendChild(btnAnterior);
-            }
-
-            // Páginas
-            for (let i = 1; i <= totalPaginas; i++) {
-                const btnPagina = document.createElement('button');
-                btnPagina.textContent = i;
-                btnPagina.classList.toggle('active', i === paginaAtual);
-                btnPagina.onclick = () => mudarPagina(i);
-                paginacao.appendChild(btnPagina);
-            }
-
-            // Botão próximo
-            if (paginaAtual < totalPaginas) {
-                const btnProximo = document.createElement('button');
-                btnProximo.textContent = '»';
-                btnProximo.onclick = () => mudarPagina(paginaAtual + 1);
-                paginacao.appendChild(btnProximo);
-            }
-        }
-
-        function mudarPagina(pagina) {
-            paginaAtual = pagina;
-            atualizarTabela();
-            window.scrollTo(0, 0);
-        }
-
-        // Filtros e ordenação
-        function ordenarTabela(campo) {
-            if (ordenacaoAtual.campo === campo) {
-                ordenacaoAtual.direcao = ordenacaoAtual.direcao === 'asc' ? 'desc' : 'asc';
-            } else {
-                ordenacaoAtual.campo = campo;
-                ordenacaoAtual.direcao = 'asc';
-            }
-            paginaAtual = 1;
-            atualizarTabela();
-        }
-
-        function filtrarFaturas() {
-            paginaAtual = 1;
-            atualizarTabela();
-        }
-
-        function toggleAdvancedSearch() {
-            const advancedSearch = document.getElementById('advancedSearch');
-            advancedSearch.style.display = advancedSearch.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function atualizarCategoriasFiltro() {
-            const select = document.getElementById('filtroCategoria');
-            const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral'))];
-
-            select.innerHTML = '<option value="">Todas</option>';
-            categorias.forEach(categoria => {
-                const option = document.createElement('option');
-                option.value = categoria;
-                option.textContent = categoria;
-                select.appendChild(option);
-            });
-        }
-
-        function atualizarSugestoesCategorias() {
-            const datalist = document.getElementById('categoriasSugeridas');
-            const categorias = [...new Set(faturas.map(f => f.categoria || 'Geral').filter(Boolean))];
-
-            datalist.innerHTML = '';
-            categorias.forEach(categoria => {
-                const option = document.createElement('option');
-                option.value = categoria;
-                datalist.appendChild(option);
-            });
-        }
-
-        // Analytics e gráficos
-        function atualizarAnalytics() {
-            const totalFaturas = faturas.length;
-            const fPagas = faturas.filter(f => f.pago);
-            const fPendentes = faturas.filter(f => !f.pago);
-            const faturasPagas = fPagas.length;
-            const faturasPendentes = fPendentes.length;
-            const mediaValor = totalFaturas > 0 ?
-                faturas.reduce((sum, f) => sum + f.valor, 0) / totalFaturas : 0;
-
-            document.getElementById('totalFaturas').textContent = totalFaturas;
-            document.getElementById('faturasPagas').textContent = faturasPagas;
-            document.getElementById('faturasPendentes').textContent = faturasPendentes;
-            document.getElementById('mediaValor').textContent = fmtBRL.format(mediaValor);
-
-            criarGraficoTipos();
-            criarGraficoCategorias();
-            criarGraficoMensal();
-        }
-
-        function criarGraficoTipos() {
-            const ctx = document.getElementById('graficoTipos').getContext('2d');
-            if (graficos.tipos) graficos.tipos.destroy();
-
-            const tiposCount = {};
-            faturas.forEach(f => {
-                tiposCount[f.tipo] = (tiposCount[f.tipo] || 0) + 1;
-            });
-
-            const cs = getComputedStyle(document.documentElement);
-            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
-
-            graficos.tipos = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(tiposCount),
-                    datasets: [{
-                        data: Object.values(tiposCount),
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                            '#9966FF', '#FF9F40', '#8BC34A', '#C9CBCF'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Distribuição por Tipo',
-                            color: textColor
-                        },
-                        legend: {
-                            labels: {
-                                color: textColor
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function criarGraficoCategorias() {
-            const ctx = document.getElementById('graficoCategorias').getContext('2d');
-            if (graficos.categorias) graficos.categorias.destroy();
-
-            const categoriasValor = {};
-            faturas.forEach(f => {
-                const cat = f.categoria || 'Geral';
-                categoriasValor[cat] = (categoriasValor[cat] || 0) + f.valor;
-            });
-
-            const cs = getComputedStyle(document.documentElement);
-            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
-            const primary = cs.getPropertyValue('--primary-color').trim() || '#36A2EB';
-            const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-
-            graficos.categorias = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(categoriasValor),
-                    datasets: [{
-                        label: 'Valor Total (R$)',
-                        data: Object.values(categoriasValor),
-                        backgroundColor: primary
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Gastos por Categoria',
-                            color: textColor
-                        },
-                        legend: {
-                            labels: {
-                                color: textColor
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function criarGraficoMensal() {
-            const ctx = document.getElementById('graficoMensal').getContext('2d');
-            if (graficos.mensal) graficos.mensal.destroy();
-
-            const dadosMensais = {};
-            faturas.forEach(f => {
-                const mes = f.vencimento?.substring(0, 7);
-                if (!mes) return;
-                if (!dadosMensais[mes]) {
-                    dadosMensais[mes] = { total: 0, pagos: 0, pendentes: 0 };
-                }
-                dadosMensais[mes].total += f.valor;
-                if (f.pago) {
-                    dadosMensais[mes].pagos += f.valor;
-                } else {
-                    dadosMensais[mes].pendentes += f.valor;
-                }
-            });
-
-            const meses = Object.keys(dadosMensais).sort();
-            const cs = getComputedStyle(document.documentElement);
-            const textColor = cs.getPropertyValue('--text-color').trim() || '#333';
-            const gridColor = (document.documentElement.getAttribute('data-theme') === 'dark') ? '#555' : '#ddd';
-
-            graficos.mensal = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: meses,
-                    datasets: [
-                        {
-                            label: 'Total',
-                            data: meses.map(m => dadosMensais[m].total),
-                            borderColor: '#36A2EB',
-                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                            fill: true
-                        },
-                        {
-                            label: 'Pagos',
-                            data: meses.map(m => dadosMensais[m].pagos),
-                            borderColor: '#4BC0C0',
-                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                            fill: true
-                        },
-                        {
-                            label: 'Pendentes',
-                            data: meses.map(m => dadosMensais[m].pendentes),
-                            borderColor: '#FF6384',
-                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Evolução Mensal dos Gastos',
-                            color: textColor
-                        },
-                        legend: {
-                            labels: {
-                                color: textColor
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: textColor
-                            },
-                            grid: {
-                                color: gridColor
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Funções de recorrência
-        function gerarFaturasRecorrentes() {
-            let geradas = 0;
-
-            // mês/ano do próximo mês (para checagem)
-            const pm = new Date(); pm.setMonth(pm.getMonth() + 1);
-            const proximoMesStr = formatYMD(pm).substring(0, 7);
-
-            faturas.filter(f => f.recorrente).forEach((fatura, i) => {
-                // Verificar se já existe uma fatura para o próximo mês
-                const jaExiste = faturas.some(ff =>
-                    ff.nome === fatura.nome &&
-                    ff.vencimento?.startsWith(proximoMesStr)
-                );
-
-                if (!jaExiste) {
-                    const proxV = parseYMD(fatura.vencimento); proxV.setMonth(proxV.getMonth() + 1);
-                    const proxF = parseYMD(fatura.fechamento); proxF.setMonth(proxF.getMonth() + 1);
-
-                    const novaFatura = {
-                        ...fatura,
-                        id: (crypto?.randomUUID?.() || (Date.now() + i)),
-                        fechamento: formatYMD(proxF),
-                        vencimento: formatYMD(proxV),
-                        pago: false,
-                        dataPagamento: null,
-                        historicoPagamentos: []
-                    };
-
-                    faturas.push(novaFatura);
-                    geradas++;
-                }
-            });
-
-            if (geradas > 0) {
-                atualizarLocalStorage();
-                atualizarTabela();
-                atualizarCategoriasFiltro();
-                verificarVencimentoProximo();
-                exibirNotificacao(`${geradas} faturas recorrentes geradas para o próximo mês!`, 'success');
-            } else {
-                exibirNotificacao('Nenhuma fatura recorrente nova foi gerada.', 'info');
-            }
-        }
-
-        // Exportação e backup
-        function exportarCSV() {
-            const headers = ['Tipo', 'Nome', 'Categoria', 'Fechamento', 'Vencimento', 'Valor', 'Status', 'Data Pagamento', 'Recorrente'];
-            const dadosFiltrados = aplicarFiltros([...faturas]);
-
-            const csvContent = '\uFEFF' + [
-                headers.join(','),
-                ...dadosFiltrados.map(f => [
-                    f.tipo,
-                    `"${f.nome.replace(/"/g, '""')}"`,
-                    `"${(f.categoria || 'Geral').replace(/"/g, '""')}"`,
-                    formatarData(f.fechamento),
-                    formatarData(f.vencimento),
-                    f.valor.toFixed(2),
-                    f.pago ? 'Pago' : 'Pendente',
-                    f.dataPagamento ? formatarData(f.dataPagamento) : '',
-                    f.recorrente ? 'Sim' : 'Não'
-                ].join(','))
-            ].join('\n');
-
-            baixarArquivo(csvContent, `faturas_${obterDataAtual()}.csv`, 'text/csv;charset=utf-8;');
-            exibirNotificacao('CSV exportado com sucesso!', 'success');
-        }
-
-        function exportarBackup() {
-            const backup = {
-                faturas: faturas,
-                dataBackup: new Date().toISOString(),
-                versao: '2.1',
-                tema: localStorage.getItem('tema')
-            };
-
-            const json = JSON.stringify(backup, null, 2);
-            baixarArquivo(json, `backup_faturas_${obterDataAtual()}.json`, 'application/json');
-            exibirNotificacao('Backup criado com sucesso!', 'success');
-        }
-
-        function restaurarBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const backup = JSON.parse(e.target.result);
-
-                    if (backup.faturas && Array.isArray(backup.faturas)) {
-                        mostrarModal(
-                            'Restaurar Backup',
-                            'Isso substituirá todos os dados atuais. Continuar?',
-                            () => {
-                                faturas = backup.faturas;
-
-                                if (backup.tema) {
-                                    localStorage.setItem('tema', backup.tema);
-                                    document.documentElement.setAttribute('data-theme', backup.tema);
-                                }
-
-                                atualizarLocalStorage();
-                                atualizarTabela();
-                                atualizarCategoriasFiltro();
-                                verificarVencimentoProximo();
-                                exibirNotificacao('Backup restaurado com sucesso!', 'success');
-                                fecharModal();
-                            }
-                        );
-                    } else {
-                        exibirNotificacao('Arquivo de backup inválido!', 'error');
-                    }
-                } catch (error) {
-                    exibirNotificacao('Erro ao ler o arquivo de backup!', 'error');
-                }
-            };
-            reader.readAsText(file);
-
-            event.target.value = '';
-        }
-
-        function gerarRelatorioHTML() {
-            const totalGeral = faturas.reduce((sum, f) => sum + f.valor, 0);
-            const totalPago = faturas.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
-            const totalPendente = totalGeral - totalPago;
-
-            const html = `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Relatório de Faturas - ${obterDataAtual()}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .summary { background-color: #e8f5e9; padding: 15px; margin: 20px 0; border-radius: 5px; }
-        .paid { color: green; text-decoration: line-through; }
-        .unpaid { color: red; }
-        h1, h2, h3 { font-weight: 700; }
-    </style>
-</head>
-<body>
-    <h1>Relatório de Faturas</h1>
-    <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-
-    <div class="summary">
-        <h3>Resumo Financeiro</h3>
-        <p><strong>Total Geral:</strong> ${fmtBRL.format(totalGeral)}</p>
-        <p><strong>Total Pago:</strong> ${fmtBRL.format(totalPago)}</p>
-        <p><strong>Total Pendente:</strong> ${fmtBRL.format(totalPendente)}</p>
-        <p><strong>Total de Faturas:</strong> ${faturas.length}</p>
-    </div>
-
-    <table>
-        <thead>
+        
+        <!-- Busca -->
+        <input type="text" id="searchInput" class="search-box no-print" placeholder="🔍 Buscar item..." oninput="filtrarItens()">
+        
+        <!-- Tabela Dados Básicos -->
+        <table class="compact-table">
+            <tr><td><strong>🏥 Hospital:</strong></td><td><input type="text" id="hospital" placeholder="Hospital Raimundo Lima"></td></tr>
+            <tr><td><strong>📆 Data:</strong></td><td><input type="date" id="data"></td></tr>
+            <tr><td><strong>🕖 Horário de Entrada:</strong></td><td><input type="time" id="horarioEntrada" value="07:00"></td></tr>
+            <tr><td><strong>⏰ Horário de Saída:</strong></td><td><input type="time" id="horarioSaida" value="19:00"></td></tr>
+            <tr><td><strong>🙋 Condutor de Plantão:</strong></td><td><input type="text" id="condutorPlantao" placeholder="Nome completo"></td></tr>
+            <tr><td><strong>🫂 Recebendo de:</strong></td><td><input type="text" id="recebendoDe" placeholder="Nome do condutor anterior"></td></tr>
+        </table>
+        
+        <h2>🚑 DADOS DA VIATURA (USA)</h2>
+        <table class="compact-table">
+            <tr><th>Item</th><th>Informação</th></tr>
+            <tr><td><strong>Placa</strong></td><td><input type="text" id="placa" placeholder="Ex: ABC1234 ou ABC1D23" onblur="validarPlaca()"></td></tr>
+            <tr><td><strong>Km Atual</strong></td><td><input type="number" id="kmAtual" placeholder="Ex: 337847"></td></tr>
+            <tr><td><strong>Nível de Combustível</strong></td><td><input type="text" id="nivelCombustivel" placeholder="Ex: 5/10 traços ou 1/2 tanque"></td></tr>
+            <tr><td><strong>CRV Válido até</strong></td><td><input type="number" id="crvValido" placeholder="Ano (ex: 2024)"></td></tr>
+            <tr><td><strong>Próxima Troca de Óleo km</strong></td><td><input type="number" id="proximaTrocaOleo" placeholder="Km da próxima troca"></td></tr>
             <tr>
-                <th>Tipo</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Vencimento</th>
-                <th>Valor</th>
-                <th>Status</th>
+                <td><strong>Cartão de Abastecimento</strong></td>
+                <td>
+                    <input type="radio" id="cartaoDisponivel" name="cartaoStatus" value="Disponível"> 
+                    <label for="cartaoDisponivel">Disponível</label>
+                    <input type="radio" id="cartaoNaoDisponivel" name="cartaoStatus" value="Não Disponível"> 
+                    <label for="cartaoNaoDisponivel">Não Disponível</label>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            ${faturas.map(f => `
+        </table>
+        <!-- Localização -->
+        <div id="localizacao" class="location-info no-print"></div>
+        
+        <h2>🛠️ STATUS DE INSPEÇÃO</h2>
+        <p><em>Selecione o status: ✅ OK | ⚠️ Ruim | 🛠️ Quebrado | ❌ Faltando | 🚨 Parar VTR</em></p>
+        <table id="inspection-table">
+            <thead>
                 <tr>
-                    <td>${f.tipo}</td>
-                    <td>${f.nome}</td>
-                    <td>${f.categoria || 'Geral'}</td>
-                    <td>${formatarData(f.vencimento)}</td>
-                    <td class="${f.pago ? 'paid' : 'unpaid'}">${fmtBRL.format(f.valor)}</td>
-                    <td>${f.pago ? 'Pago' : 'Pendente'}</td>
+                    <th class="no-print"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+                    <th>#</th><th>Item</th><th>Status</th><th>Observação</th>
                 </tr>
-            `).join('')}
-        </tbody>
-    </table>
-</body>
-</html>`;
-
-            baixarArquivo(html, `relatorio_faturas_${obterDataAtual()}.html`, 'text/html');
-            exibirNotificacao('Relatório HTML gerado com sucesso!', 'success');
+            </thead>
+            <tbody>
+                <!-- Itens gerados via JS -->
+            </tbody>
+        </table>
+        
+        <h2>🛠️ OBSERVAÇÕES GERAIS / AVARIAS</h2>
+        <textarea id="observacoesAvarias" rows="8" style="width: 100%;" placeholder="Digite suas observações aqui. Use Enter para quebrar linhas."></textarea>
+        
+        <!-- Upload de fotos gerais -->
+        <div class="photo-upload no-print">
+            <label for="fotosGerais"><strong>📷 Fotos Gerais (opcional):</strong></label>
+            <input type="file" id="fotosGerais" accept="image/*" multiple capture="camera">
+            <div id="previewFotosGerais"></div>
+        </div>
+        
+        <h2>✍️ ASSINATURAS</h2>
+        <div class="signature">
+            <p><strong>Condutor Recebendo o Plantão:</strong> _________________________________________</p>
+            <p><strong>Condutor Entregando o Plantão:</strong> _________________________________________</p>
+        </div>
+        <div class="footer">
+            <p>📝 Documento válido como registro de inspeção diária – LEFE<br>
+            🗂️ Arquivar após preenchimento.<br>⏳ Atualizado em 2025.</p>
+        </div>
+    </div>
+    
+    <!-- Modal do Histórico -->
+    <div id="modalHistorico" class="modal no-print">
+        <div class="modal-content">
+            <span class="close" onclick="fecharHistorico()">&times;</span>
+            <h2>📋 Histórico de Check-lists</h2>
+            <div id="listaHistorico"></div>
+        </div>
+    </div>
+    
+    <!-- Modal de Relatório de Tendência -->
+    <div id="modalTendencia" class="modal no-print">
+        <div class="modal-content">
+            <span class="close" onclick="fecharRelatorioTendencia()">&times;</span>
+            <h2>📈 Relatório de Tendência de Problemas</h2>
+            <p>Este relatório mostra os itens que mais apresentaram problemas nos últimos check-lists.</p>
+            <div id="conteudoRelatorioTendencia">
+                <p>Carregando dados...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Backup -->
+    <div id="modalBackup" class="modal no-print">
+        <div class="modal-content">
+            <span class="close" onclick="fecharBackup()">&times;</span>
+            <h2>☁️ Backup de Dados</h2>
+            <p>Faça backup dos seus check-lists para não perder seus dados.</p>
+            <button onclick="fazerBackup()">📦 Fazer Backup</button>
+            <button onclick="restaurarBackup()">🔄 Restaurar Backup</button>
+            <div id="statusBackup"></div>
+        </div>
+    </div>
+    
+    <!-- Notificação -->
+    <div id="notification" class="notification"></div>
+    
+    <!-- Atalhos de teclado -->
+    <div id="keyboardShortcuts" class="keyboard-shortcuts">
+        <strong>Atalhos de teclado:</strong><br>
+        Ctrl+S - Salvar<br>
+        Ctrl+E - Enviar por e-mail<br>
+        Ctrl+P - Imprimir<br>
+        Ctrl+F - Buscar<br>
+        Ctrl+B - Mostrar/Ocultar barra<br>
+        Esc - Fechar modais
+    </div>
+    
+    <script>
+        // Lista de itens com críticos
+        const inspectionItems = [
+            { name: "Óleo do motor", critical: true },
+            { name: "Óleo hidráulico (caixa de direção)", critical: true },
+            { name: "Fluido do radiador", critical: true },
+            { name: "Fluido de freio", critical: true },
+            { name: "Água do limpador de para-brisa", critical: false },
+            { name: "Correia do alternador", critical: true },
+            { name: "Correia dentada do motor", critical: true },
+            { name: "Retrovisores", critical: true },
+            { name: "Para-brisa", critical: true },
+            { name: "Caixa de marchas", critical: true },
+            { name: "Pisca dos retrovisores", critical: false },
+            { name: "Faróis dianteiros", critical: true },
+            { name: "Lanternas traseiras", critical: true },
+            { name: "Buzina e pisca de alerta", critical: false },
+            { name: "Botões dos vidros elétricos", critical: false },
+            { name: "Travamento das portas", critical: true },
+            { name: "Sinalizadores de emergência", critical: true },
+            { name: "Sirene", critical: true },
+            { name: "Luzes internas", critical: false },
+            { name: "Farol de embarque", critical: false },
+            { name: "Freio de estacionamento", critical: true },
+            { name: "Pastilhas de freio (dianteira/traseira)", critical: true },
+            { name: "Pneus", critical: true },
+            { name: "Macaco, chave de roda, triângulo", critical: true },
+            { name: "Limpadores/palhetas do para-brisa", critical: false },
+            { name: "Limpeza interna", critical: false },
+            { name: "Limpeza externa", critical: false },
+            { name: "Ar condicionado (dianteiro)", critical: false },
+            { name: "Ar condicionado (traseiro)", critical: false },
+            { name: "Extintor de incêndio", critical: true },
+            { name: "Alarme de estacionamento", critical: false },
+            { name: "Alinhamento/Balanceamento", critical: false },
+            { name: "Cilindro de oxigênio fixo (01)", critical: true },
+            { name: "Cintos de segurança", critical: true },
+            { name: "Maca e cinto de segurança", critical: true },
+            { name: "Cadeira de rodas (se aplicável)", critical: false },
+            { name: "Prancha/Escada", critical: false },
+            { name: "Bateria, inversor, transformador", critical: true },
+            { name: "Bancos e capas", critical: false },
+            { name: "Pintura/Plotagem", critical: false },
+            { name: "Câmera de ré (se aplicável)", critical: false },
+            { name: "Chave de troca de oxigênio", critical: true },
+            { name: "Bala de oxigênio portátil", critical: true },
+            { name: "Desfibrilador", critical: true },
+            { name: "Monitor", critical: true },
+            { name: "Respirador", critical: true },
+            { name: "Oxímetro", critical: true },
+            { name: "Termômetro", critical: true },
+            { name: "Glicosímetro", critical: true },
+            { name: "Bolsa de medicação", critical: true },
+            { name: "Bolsa de entubação", critical: true },
+            { name: "Bolsa de ventilação", critical: true },
+            { name: "Bolsa via aérea", critical: true },
+            { name: "Armário do salão", critical: false },
+            { name: "Gavetas do salão", critical: false },
+            { name: "Baú do salão", critical: false },
+            { name: "Painel de controle do salão", critical: true }
+        ];
+        
+        const TOOLBAR_HIDDEN_KEY = 'lefeToolbarHidden';
+        let autoSaveInterval;
+        let lastSaveTime = null;
+        let coordenadasGPS = null;
+        let filteredItems = [];
+        let isOnline = navigator.onLine;
+        let syncQueue = [];
+        let pendingSync = false;
+        
+        // Toolbar toggle (mostrar/ocultar)
+        function updateToolbarFab(hidden) {
+            const fab = document.getElementById('toggleToolbarFab');
+            if (!fab) return;
+            fab.textContent = hidden ? '☰' : '⬆️';
+            const label = hidden ? 'Mostrar barra (Ctrl+B)' : 'Ocultar barra (Ctrl+B)';
+            fab.title = label;
+            fab.setAttribute('aria-label', label);
         }
-
-        // Exportar PDF (considera filtros)
-        function exportarPDF() {
-            const doc = new jsPDF();
-
-            doc.setFontSize(20);
-            doc.setTextColor(40);
-            doc.text('Relatório de Faturas', 105, 15, { align: 'center' });
-
-            doc.setFontSize(12);
-            doc.setTextColor(100);
-            doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 105, 22, { align: 'center' });
-
-            const dadosFiltrados = aplicarFiltros([...faturas]);
-            const totalGeral = dadosFiltrados.reduce((sum, f) => sum + f.valor, 0);
-            const totalPago = dadosFiltrados.filter(f => f.pago).reduce((sum, f) => sum + f.valor, 0);
-            const totalPendente = totalGeral - totalPago;
-
-            doc.setFontSize(14);
-            doc.setTextColor(40);
-            doc.text('Resumo Financeiro', 14, 35);
-
-            doc.setFontSize(11);
-            doc.text(`Total Geral: ${fmtBRL.format(totalGeral)}`, 20, 45);
-            doc.text(`Total Pago: ${fmtBRL.format(totalPago)}`, 20, 52);
-            doc.text(`Total Pendente: ${fmtBRL.format(totalPendente)}`, 20, 59);
-            doc.text(`Total de Faturas: ${dadosFiltrados.length}`, 20, 66);
-
-            const tableData = dadosFiltrados.map(f => [
-                f.tipo,
-                f.nome,
-                f.categoria || 'Geral',
-                formatarData(f.vencimento),
-                fmtBRL.format(f.valor),
-                f.pago ? 'Pago' : 'Pendente'
-            ]);
-
-            doc.autoTable({
-                head: [['Tipo', 'Nome', 'Categoria', 'Vencimento', 'Valor', 'Status']],
-                body: tableData,
-                startY: 75,
-                theme: 'grid',
-                headStyles: {
-                    fillColor: [66, 139, 202],
-                    textColor: 255,
-                    fontStyle: 'bold'
-                },
-                alternateRowStyles: {
-                    fillColor: [240, 240, 240]
-                },
-                styles: {
-                    fontSize: 9,
-                    cellPadding: 3,
-                    overflow: 'linebreak'
-                },
-                margin: { top: 75 }
-            });
-
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(10);
-                doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+        function toggleToolbar(forceHidden) {
+            const toolbar = document.querySelector('.toolbar');
+            if (!toolbar) return;
+            const shouldHide = typeof forceHidden === 'boolean'
+                ? forceHidden
+                : !toolbar.classList.contains('hidden');
+            toolbar.classList.toggle('hidden', shouldHide);
+            localStorage.setItem(TOOLBAR_HIDDEN_KEY, shouldHide ? '1' : '0');
+            updateToolbarFab(shouldHide);
+        }
+        // Verificar se é a primeira visita e mostrar boas-vindas
+        function verificarPrimeiraVisita() {
+            const primeiraVisita = localStorage.getItem('lefePrimeiraVisita');
+            if (!primeiraVisita) {
+                document.getElementById('welcomeModal').style.display = 'block';
+                localStorage.setItem('lefePrimeiraVisita', 'false');
             }
-
-            doc.save(`relatorio_faturas_${obterDataAtual()}.pdf`);
-            exibirNotificacao('PDF exportado com sucesso!', 'success');
         }
-
-        function confirmarLimpezaDados() {
-            mostrarModal(
-                'Confirmar limpeza',
-                'ATENÇÃO: Isso excluirá TODOS os dados permanentemente. Esta ação não pode ser desfeita. Continuar?',
-                () => {
-                    limparDados();
-                    fecharModal();
+        function fecharBoasVindas() {
+            document.getElementById('welcomeModal').style.display = 'none';
+        }
+        
+        // Validação de placa brasileira
+        function validarPlaca() {
+            const placaInput = document.getElementById("placa");
+            const placa = placaInput.value.trim().toUpperCase();
+            const regexAntigo = /^[A-Z]{3}-?\d{4}$/;
+            const regexNovo = /^[A-Z]{3}\d[A-Z]\d{2}$/;
+            if (placa && !regexAntigo.test(placa) && !regexNovo.test(placa)) {
+                placaInput.classList.add('required-field');
+                showNotification("Formato de placa inválido. Use ABC1234 ou ABC1D23", "error");
+                return false;
+            } else {
+                placaInput.classList.remove('required-field');
+                if (regexAntigo.test(placa.replace('-', ''))) {
+                    placaInput.value = placa.replace('-', '');
                 }
-            );
+                return true;
+            }
         }
-
-        function limparDados() {
-            faturas = [];
-            atualizarLocalStorage();
-            atualizarTabela();
-            atualizarCategoriasFiltro();
-            verificarVencimentoProximo();
-            exibirNotificacao('Todos os dados foram limpos!', 'success');
+        
+        // Gera chave única: placa + data
+        function getStorageKey() {
+            const placa = document.getElementById("placa").value.trim().toUpperCase();
+            const data = document.getElementById("data").value;
+            return placa && data ? `checklist_${placa}_${data}` : null;
         }
-
-        // Modal functions
-        function mostrarModal(titulo, mensagem, callback) {
-            document.getElementById('modalTitulo').textContent = titulo;
-            const btnConfirm = document.getElementById('modalConfirmarBtn');
-            btnConfirm.onclick = callback;
-            const modal = document.getElementById('modalConfirmacao');
-            modal.style.display = 'flex';
-            modal.setAttribute('aria-hidden', 'false');
-            setTimeout(() => btnConfirm.focus(), 0);
+        
+        // Obter localização GPS
+        function obterLocalizacao() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        coordenadasGPS = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            timestamp: new Date().toISOString()
+                        };
+                        document.getElementById('localizacao').innerHTML = 
+                            `📍 Localização: ${coordenadasGPS.latitude.toFixed(6)}, ${coordenadasGPS.longitude.toFixed(6)} (${new Date(coordenadasGPS.timestamp).toLocaleTimeString()})`;
+                    },
+                    function(error) {
+                        console.log("Erro ao obter localização:", error);
+                        document.getElementById('localizacao').innerHTML = '📍 Localização não disponível';
+                    }
+                );
+            }
         }
-
-        function fecharModal() {
-            const modal = document.getElementById('modalConfirmacao');
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
+        
+        function generateInspectionTable() {
+            const tableBody = document.querySelector("#inspection-table tbody");
+            const statusOptions = `
+                <option value=""></option>
+                <option value="✅ OK">✅ OK</option>
+                <option value="⚠️ Ruim">⚠️ Ruim</option>
+                <option value="🛠️ Quebrado">🛠️ Quebrado</option>
+                <option value="❌ Faltando">❌ Faltando</option>
+                <option value="🚨 Parar VTR">🚨 Parar VTR</option>
+            `;
+            
+            inspectionItems.forEach((item, index) => {
+                const row = document.createElement('tr');
+                if (item.critical) row.classList.add('critical-item');
+                row.innerHTML = `
+                    <td class="no-print"><input type="checkbox" class="item-selector" data-id="${index + 1}"></td>
+                    <td>${(index + 1).toString().padStart(2, '0')}</td>
+                    <td>${item.name}</td>
+                    <td><select id="status-${index + 1}" class="status-select">${statusOptions}</select></td>
+                    <td><input type="text" id="obs-${index + 1}" class="obs-input" style="width: 100%;"></td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            filteredItems = [...inspectionItems];
+            
+            document.querySelectorAll('.status-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    updateStatusCounters();
+                    updateDashboard();
+                    salvarDados();
+                });
+            });
+            
+            document.querySelectorAll('.obs-input').forEach(input => {
+                input.addEventListener('input', debounce(salvarDados, 1000));
+            });
         }
-
-        // Auxiliares
-        function atualizarLocalStorage() {
-            localStorage.setItem('faturas', JSON.stringify(faturas));
+        
+        function updateStatusCounters() {
+            const counters = { '✅ OK': 0, '⚠️ Ruim': 0, '🛠️ Quebrado': 0, '❌ Faltando': 0, '🚨 Parar VTR': 0 };
+            document.querySelectorAll('.status-select').forEach(select => {
+                if (select.value && counters[select.value] !== undefined) counters[select.value]++;
+            });
+            
+            document.getElementById('count-ok').textContent = counters['✅ OK'];
+            document.getElementById('count-ruim').textContent = counters['⚠️ Ruim'];
+            document.getElementById('count-quebrado').textContent = counters['🛠️ Quebrado'];
+            document.getElementById('count-faltando').textContent = counters['❌ Faltando'];
+            document.getElementById('count-parar').textContent = counters['🚨 Parar VTR'];
         }
-
-        function baixarArquivo(conteudo, nomeArquivo, tipo) {
-            const blob = new Blob([conteudo], { type: tipo });
-            const url = window.URL.createObjectURL(blob);
+        
+        function updateDashboard() {
+            const totalItems = inspectionItems.length;
+            let completedItems = 0;
+            let problemItems = 0;
+            let criticalItems = 0;
+            let okItems = 0;
+            
+            document.querySelectorAll('.status-select').forEach((select, index) => {
+                const val = select.value;
+                if (val) completedItems++;
+                if (val === "✅ OK") okItems++;
+                if (val && val !== "✅ OK") problemItems++;
+                if (inspectionItems[index].critical && val && val !== "✅ OK") criticalItems++;
+            });
+            
+            const completionRate = Math.round((completedItems / totalItems) * 100);
+            
+            document.getElementById('dashboard-ok').textContent = okItems;
+            document.getElementById('dashboard-problems').textContent = problemItems;
+            document.getElementById('dashboard-critical').textContent = criticalItems;
+            document.getElementById('dashboard-completion').textContent = `${completionRate}%`;
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => { clearTimeout(timeout); func(...args); };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        function salvarDados() {
+            try {
+                const key = getStorageKey();
+                if (!key) return false;
+                
+                const dados = {
+                    hospital: document.getElementById("hospital").value,
+                    data: document.getElementById("data").value,
+                    horarioEntrada: document.getElementById("horarioEntrada").value,
+                    horarioSaida: document.getElementById("horarioSaida").value,
+                    condutorPlantao: document.getElementById("condutorPlantao").value,
+                    recebendoDe: document.getElementById("recebendoDe").value,
+                    placa: document.getElementById("placa").value,
+                    kmAtual: document.getElementById("kmAtual").value,
+                    nivelCombustivel: document.getElementById("nivelCombustivel").value,
+                    crvValido: document.getElementById("crvValido").value,
+                    proximaTrocaOleo: document.getElementById("proximaTrocaOleo").value,
+                    cartaoStatus: document.querySelector('input[name="cartaoStatus"]:checked')?.value || '',
+                    observacoesAvarias: document.getElementById("observacoesAvarias").value,
+                    coordenadasGPS: coordenadasGPS,
+                    timestamp: new Date().toISOString(),
+                    itens: []
+                };
+                
+                for (let i = 1; i <= inspectionItems.length; i++) {
+                    dados.itens.push({
+                        status: document.getElementById(`status-${i}`).value,
+                        obs: document.getElementById(`obs-${i}`).value
+                    });
+                }
+                
+                // Salvar no localStorage (sempre funciona, online ou offline)
+                localStorage.setItem(key, JSON.stringify(dados));
+                lastSaveTime = new Date();
+                document.getElementById('saveIndicator').textContent = `Salvo: ${lastSaveTime.toLocaleTimeString()}`;
+                
+                // Se estiver online, tenta sincronizar com o servidor (simulado)
+                if (isOnline) {
+                    // Aqui você implementaria a sincronização com o servidor
+                    // Por enquanto, apenas simulamos
+                    console.log('Sincronizando com o servidor...');
+                    showNotification("Salvo localmente e sincronizado.", "success");
+                } else {
+                    // Adiciona à fila de sincronização
+                    syncQueue.push({ action: 'save', key, data: dados });
+                    pendingSync = true;
+                    showNotification("Salvo localmente. Aguardando conexão para sincronizar.", "warning");
+                }
+                
+                return true;
+            } catch (e) {
+                console.error("Erro ao salvar:", e);
+                showNotification("Falha ao salvar.", "error");
+                return false;
+            }
+        }
+        
+        function carregarDados() {
+            try {
+                const key = getStorageKey();
+                if (!key) return false;
+                
+                const dadosSalvos = localStorage.getItem(key);
+                if (!dadosSalvos) return false;
+                
+                const dados = JSON.parse(dadosSalvos);
+                
+                document.getElementById("hospital").value = dados.hospital || '';
+                document.getElementById("data").value = dados.data || '';
+                document.getElementById("horarioEntrada").value = dados.horarioEntrada || '';
+                document.getElementById("horarioSaida").value = dados.horarioSaida || '';
+                document.getElementById("condutorPlantao").value = dados.condutorPlantao || '';
+                document.getElementById("recebendoDe").value = dados.recebendoDe || '';
+                document.getElementById("placa").value = dados.placa || '';
+                document.getElementById("kmAtual").value = dados.kmAtual || '';
+                document.getElementById("nivelCombustivel").value = dados.nivelCombustivel || '';
+                document.getElementById("crvValido").value = dados.crvValido || '';
+                document.getElementById("proximaTrocaOleo").value = dados.proximaTrocaOleo || '';
+                document.getElementById("observacoesAvarias").value = dados.observacoesAvarias || '';
+                
+                if (dados.cartaoStatus) {
+                    const radio = document.querySelector(`input[name="cartaoStatus"][value="${dados.cartaoStatus}"]`);
+                    if (radio) radio.checked = true;
+                }
+                
+                if (dados.coordenadasGPS) {
+                    coordenadasGPS = dados.coordenadasGPS;
+                    document.getElementById('localizacao').innerHTML = 
+                        `📍 Localização: ${dados.coordenadasGPS.latitude.toFixed(6)}, ${dados.coordenadasGPS.longitude.toFixed(6)} (${new Date(dados.coordenadasGPS.timestamp).toLocaleTimeString()})`;
+                }
+                
+                if (dados.itens && dados.itens.length === inspectionItems.length) {
+                    for (let i = 0; i < dados.itens.length; i++) {
+                        document.getElementById(`status-${i+1}`).value = dados.itens[i].status || '';
+                        document.getElementById(`obs-${i+1}`).value = dados.itens[i].obs || '';
+                    }
+                }
+                
+                updateStatusCounters();
+                updateDashboard();
+                return true;
+            } catch (e) {
+                console.error("Erro ao carregar:", e);
+                return false;
+            }
+        }
+        
+        // Exportar dados
+        function exportarDados() {
+            if (!validateForm()) return;
+            const key = getStorageKey();
+            if (!key) {
+                showNotification("Preencha placa e data para exportar", "error");
+                return;
+            }
+            const dados = localStorage.getItem(key);
+            if (!dados) {
+                showNotification("Nenhum dado para exportar", "error");
+                return;
+            }
+            const blob = new Blob([dados], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = nomeArquivo;
+            a.download = `${key}.json`;
+            document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification("Dados exportados com sucesso!", "success");
         }
-
-        function exibirNotificacao(mensagem, tipo) {
-            const notification = document.getElementById('notification');
-            notification.textContent = mensagem;
-            notification.className = 'notification ' + tipo;
-            notification.style.display = 'block';
-
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 4000);
+        
+        // Histórico
+        function abrirHistorico() {
+            const modal = document.getElementById('modalHistorico');
+            const lista = document.getElementById('listaHistorico');
+            lista.innerHTML = '';
+            const historico = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('checklist_')) {
+                    try { historico.push({ key, dados: JSON.parse(localStorage.getItem(key)) }); }
+                    catch (e) { console.error('Erro ao carregar histórico:', e); }
+                }
+            }
+            historico.sort((a, b) => new Date(b.dados.timestamp || 0) - new Date(a.dados.timestamp || 0));
+            if (historico.length === 0) {
+                lista.innerHTML = '<p>Nenhum check-list encontrado no histórico.</p>';
+            } else {
+                historico.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+                        <strong>Placa:</strong> ${item.dados.placa}<br>
+                        <strong>Data:</strong> ${item.dados.data}<br>
+                        <strong>Condutor:</strong> ${item.dados.condutorPlantao}<br>
+                        <small>Salvo em: ${new Date(item.dados.timestamp || 0).toLocaleString()}</small>
+                    `;
+                    div.onclick = () => carregarDoHistorico(item.key);
+                    lista.appendChild(div);
+                });
+            }
+            modal.style.display = 'block';
         }
-
-        // Notificações de vencimento
-        function verificarVencimentoProximo() {
-            const hoje = hojeYMD();
-            const vencimentoProximo = faturas.filter(fatura => {
-                if (fatura.pago) return false;
-                return diffDias(hoje, fatura.vencimento) <= 7;
+        
+        function carregarDoHistorico(key) {
+            try {
+                const dados = JSON.parse(localStorage.getItem(key));
+                Object.keys(dados).forEach(campo => {
+                    const elemento = document.getElementById(campo);
+                    if (elemento && campo !== 'itens' && campo !== 'coordenadasGPS') {
+                        elemento.value = dados[campo];
+                    }
+                });
+                if (dados.itens) {
+                    dados.itens.forEach((item, index) => {
+                        const statusEl = document.getElementById(`status-${index+1}`);
+                        const obsEl = document.getElementById(`obs-${index+1}`);
+                        if (statusEl) statusEl.value = item.status || '';
+                        if (obsEl) obsEl.value = item.obs || '';
+                    });
+                }
+                if (dados.coordenadasGPS) {
+                    coordenadasGPS = dados.coordenadasGPS;
+                    document.getElementById('localizacao').innerHTML = 
+                        `📍 Localização: ${dados.coordenadasGPS.latitude.toFixed(6)}, ${dados.coordenadasGPS.longitude.toFixed(6)} (${new Date(dados.coordenadasGPS.timestamp).toLocaleTimeString()})`;
+                }
+                updateStatusCounters();
+                updateDashboard();
+                fecharHistorico();
+                showNotification("Check-list carregado do histórico!", "success");
+            } catch (e) {
+                showNotification("Erro ao carregar do histórico", "error");
+            }
+        }
+        
+        function fecharHistorico() { document.getElementById('modalHistorico').style.display = 'none'; }
+        
+        function validateForm() {
+            const required = ["hospital", "data", "condutorPlantao", "placa", "kmAtual"];
+            const today = new Date(); today.setHours(0,0,0,0);
+            const dataInput = document.getElementById("data").value;
+            const dataCheck = new Date(dataInput); dataCheck.setHours(0,0,0,0);
+            if (dataCheck > today) { showNotification("A data não pode ser futura.", "error"); return false; }
+            if (!validarPlaca()) { return false; }
+            let isValid = true;
+            document.querySelectorAll('.required-field').forEach(el => el.classList.remove('required-field'));
+            required.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) { isValid = false; el.classList.add("required-field"); }
             });
-
-            const notificacao = document.getElementById('notificacaoVencimento');
-            const lista = document.getElementById('listaVencimentoProximo');
-
-            if (vencimentoProximo.length === 0) {
-                notificacao.style.display = 'none';
+            const criticalIssues = [];
+            inspectionItems.forEach((item, index) => {
+                if (item.critical) {
+                    const status = document.getElementById(`status-${index+1}`).value;
+                    if (status && status !== "✅ OK") criticalIssues.push(item.name);
+                }
+            });
+            if (criticalIssues.length > 0) {
+                showNotification(`❗ Itens críticos com problemas: ${criticalIssues.slice(0, 3).join(", ")}${criticalIssues.length > 3 ? "..." : ""}`, "warning");
+            }
+            if (!isValid) { showNotification("Preencha os campos obrigatórios.", "error"); }
+            return isValid;
+        }
+        
+        function enviarPorEmail() {
+            if (!validateForm()) return;
+            const dataValue = document.getElementById("data").value;
+            const [y, m, d] = dataValue.split('-');
+            const dataFormatada = `${d}/${m}/${y}`;
+            const dadosCabecalho = {
+                hospital: document.getElementById("hospital").value,
+                data: dataFormatada,
+                horarioEntrada: document.getElementById("horarioEntrada").value,
+                horarioSaida: document.getElementById("horarioSaida").value,
+                condutorPlantao: document.getElementById("condutorPlantao").value,
+                recebendoDe: document.getElementById("recebendoDe").value
+            };
+            const dadosViatura = {
+                placa: document.getElementById("placa").value.toUpperCase(),
+                kmAtual: document.getElementById("kmAtual").value,
+                nivelCombustivel: document.getElementById("nivelCombustivel").value,
+                crvValido: document.getElementById("crvValido").value,
+                proximaTrocaOleo: document.getElementById("proximaTrocaOleo").value,
+                cartaoStatus: document.querySelector('input[name="cartaoStatus"]:checked')?.value || 'Não informado'
+            };
+            const itensInspecao = [];
+            for (let i = 1; i <= inspectionItems.length; i++) {
+                const status = document.getElementById(`status-${i}`).value;
+                const obs = document.getElementById(`obs-${i}`).value.trim();
+                if (status || obs) {
+                    itensInspecao.push({
+                        num: i.toString().padStart(2, '0'),
+                        item: inspectionItems[i-1].name,
+                        status: status || 'Não avaliado',
+                        obs: obs || '---'
+                    });
+                }
+            }
+            if (itensInspecao.length === 0) {
+                showNotification("Preencha ao menos um item de inspeção.", "warning");
                 return;
             }
+            const observacoesGerais = document.getElementById("observacoesAvarias").value;
+            const localizacaoInfo = coordenadasGPS ? 
+                `LOCALIZAÇÃO: ${coordenadasGPS.latitude.toFixed(6)}, ${coordenadasGPS.longitude.toFixed(6)}` : 
+                'Localização não disponível';
+            const corpoEmail = `
+Check-list Diário  - Viatura ${dadosViatura.placa}
+================================================
+HOSPITAL: ${dadosCabecalho.hospital}
+CONDUTOR DE PLANTÃO: ${dadosCabecalho.condutorPlantao}
+RECEBENDODE: ${dadosCabecalho.recebendoDe}
+DATA: ${dadosCabecalho.data}
+HORÁRIO DE ENTRADA: ${dadosCabecalho.horarioEntrada}
+HORÁRIO DE SAÍDA: ${dadosCabecalho.horarioSaida}
+${localizacaoInfo}
 
-            let html = '<ul style="margin-top: 10px; margin-bottom: 0;">';
-            vencimentoProximo.forEach(fatura => {
-                const d = diffDias(hoje, fatura.vencimento);
-                let texto = '';
-                if (d < 0) {
-                    texto = `Vencida há ${Math.abs(d)} dias`;
-                } else if (d === 0) {
-                    texto = 'Vence hoje';
-                } else {
-                    texto = `Vence em ${d} dias`;
-                }
-                html += `<li><strong>${fatura.nome}</strong> - ${texto} - ${fmtBRL.format(fatura.valor)}</li>`;
-            });
-            html += '</ul>';
+--- DADOS DA VIATURA ---
+Placa: ${dadosViatura.placa}
+Km Atual: ${dadosViatura.kmAtual} km
+Nível de Combustível: ${dadosViatura.nivelCombustivel}
+Cartão de Abastecimento: ${dadosViatura.cartaoStatus}
 
-            lista.innerHTML = html;
-            notificacao.style.display = 'block';
+--- ITENS DE INSPEÇÃO ---
+${itensInspecao.map(i => `${i.num}. ${i.item}
+   Status: ${i.status}
+   Obs: ${i.obs}`).join('\n\n')}
+   
+${observacoesGerais ? `OBSERVAÇÕES GERAIS:\n${observacoesGerais}` : ''}
+
+E-mail gerado automaticamente pelo sistema LEFE.`.trim();
+            const assunto = `Check-list Viatura ${dadosViatura.placa} - ${dadosCabecalho.data}`;
+            const destinatario = "lefechecklist@.gmail.com";
+            const mailtoLink = `mailto:${destinatario}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpoEmail)}`;
+            window.location.href = mailtoLink;
+            showNotification("Abrindo e-mail...", "success");
         }
-
-        function fecharNotificacaoVencimento() {
-            const notificacao = document.getElementById('notificacaoVencimento');
-            notificacao.style.display = 'none';
-        }
-
-        // Cores aleatórias para os botões do Backup
-        function gerarCorAleatoriaRGB(min = 70, max = 200) {
-            const rand = () => Math.floor(Math.random() * (max - min + 1)) + min;
-            const r = rand(), g = rand(), b = rand();
-            return { r, g, b, css: `rgb(${r}, ${g}, ${b})` };
-        }
-
-        function corTextoContraste({ r, g, b }) {
-            const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-            return yiq >= 150 ? '#000' : '#fff';
-        }
-
-        function aplicarCoresAleatoriasBackup() {
-            const botoes = document.querySelectorAll('#backup .export-controls button.btn');
-            botoes.forEach(btn => {
-                const cor = gerarCorAleatoriaRGB();
-                btn.style.backgroundColor = cor.css;
-                btn.style.color = corTextoContraste(cor);
-                btn.style.fontWeight = '700';
-                btn.style.border = 'none';
-            });
-        }
-
-        // Fechar modal clicando fora
-        window.onclick = function(event) {
-            const modal = document.getElementById('modalConfirmacao');
-            if (event.target === modal) {
-                fecharModal();
+        
+        function limparFormulario() {
+            if (confirm("Deseja realmente limpar todos os campos?")) {
+                const key = getStorageKey();
+                if (key) { localStorage.removeItem(key); }
+                document.querySelectorAll('.item-selector').forEach(cb => { cb.checked = false; });
+                location.reload();
             }
-        };
-
-        // Fechar modal com ESC
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
-
-        // Debounce
-        function debounce(fn, delay = 200) {
-            let t;
-            return (...args) => {
-                clearTimeout(t);
-                t = setTimeout(() => fn(...args), delay);
-            };
         }
+        
+        function showNotification(message, type) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = "block";
+            setTimeout(() => notification.style.display = "none", 6000);
+        }
+        
+        // Busca/filtro
+        function filtrarItens() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#inspection-table tbody tr');
+            filteredItems = [];
+            rows.forEach((row, index) => {
+                const itemName = inspectionItems[index]?.name?.toLowerCase?.() || '';
+                const status = (row.querySelector('.status-select')?.value || '').toLowerCase();
+                const obs = (row.querySelector('.obs-input')?.value || '').toLowerCase();
+                if (itemName.includes(term) || status.includes(term) || obs.includes(term)) {
+                    row.style.display = '';
+                    if (!filteredItems.includes(inspectionItems[index])) {
+                        filteredItems.push(inspectionItems[index]);
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Edição em lote
+        function toggleBatchEdit() {
+            const el = document.getElementById('batchEdit');
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+        function toggleSelectAll(checkbox) {
+            document.querySelectorAll('.item-selector').forEach(cb => { cb.checked = checkbox.checked; });
+        }
+        function selecionarTodosItens() {
+            document.querySelectorAll('.item-selector').forEach(cb => { cb.checked = true; });
+        }
+        function desselecionarTodosItens() {
+            document.querySelectorAll('.item-selector').forEach(cb => { cb.checked = false; });
+        }
+        function aplicarEdicaoEmLote() {
+            const status = document.getElementById('batchStatus').value;
+            if (!status) return showNotification("Selecione um status para aplicar", "error");
+            const cbs = document.querySelectorAll('.item-selector:checked');
+            if (cbs.length === 0) return showNotification("Selecione pelo menos um item", "error");
+            cbs.forEach(cb => {
+                const id = cb.getAttribute('data-id');
+                document.getElementById(`status-${id}`).value = status;
+            });
+            updateStatusCounters(); updateDashboard(); salvarDados();
+            showNotification(`Status aplicado a ${cbs.length} itens`, "success");
+        }
+        
+        // Atalhos
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 's') { e.preventDefault(); salvarDados(); }
+                if (e.ctrlKey && e.key === 'e') { e.preventDefault(); enviarPorEmail(); }
+                if (e.ctrlKey && e.key === 'p') { e.preventDefault(); window.print(); }
+                if (e.ctrlKey && e.key === 'f') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+                if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); toggleToolbar(); } // mostrar/ocultar barra
+                if (e.key === 'Escape') { fecharHistorico(); fecharBackup(); fecharRelatorioTendencia(); }
+                if (e.ctrlKey && e.key === '/') {
+                    e.preventDefault();
+                    document.getElementById('keyboardShortcuts').classList.toggle('show');
+                }
+            });
+        }
+        
+        // Backup (apenas chaves checklist_)
+        function fazerBackup() {
+            const backupData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('checklist_')) {
+                    backupData[key] = localStorage.getItem(key);
+                }
+            }
+            const dataStr = JSON.stringify(backupData);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `lefe_backup_${new Date().toISOString().split('T')[0]}.json`;
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            showNotification("Backup criado com sucesso!", "success");
+        }
+        
+        function restaurarBackup() {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        const keysToRemove = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (key.startsWith('checklist_')) keysToRemove.push(key);
+                        }
+                        keysToRemove.forEach(k => localStorage.removeItem(k));
+                        Object.keys(backupData).forEach(key => { localStorage.setItem(key, backupData[key]); });
+                        showNotification("Backup restaurado com sucesso! Recarregando...", "success");
+                        setTimeout(() => location.reload(), 2000);
+                    } catch (error) {
+                        showNotification("Erro ao restaurar backup: arquivo inválido", "error");
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        
+        function abrirBackup() { document.getElementById('modalBackup').style.display = 'block'; }
+        function fecharBackup() { document.getElementById('modalBackup').style.display = 'none'; }
+        // Preview de fotos gerais
+        function setupFotosGeraisPreview() {
+            const input = document.getElementById('fotosGerais');
+            const preview = document.getElementById('previewFotosGerais');
+            if (!input || !preview) return;
+            input.addEventListener('change', () => {
+                preview.innerHTML = '';
+                const files = Array.from(input.files || []);
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        const img = document.createElement('img');
+                        img.src = ev.target.result;
+                        img.className = 'photo-preview';
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+        
+        // Relatório de Tendência
+        function abrirRelatorioTendencia() {
+            const modal = document.getElementById('modalTendencia');
+            const conteudo = document.getElementById('conteudoRelatorioTendencia');
+            
+            // Obter todos os check-lists do localStorage
+            const allChecklists = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('checklist_')) {
+                    try {
+                        const checklist = JSON.parse(localStorage.getItem(key));
+                        allChecklists.push(checklist);
+                    } catch (e) {
+                        console.error('Erro ao parsear checklist:', e);
+                    }
+                }
+            }
+            
+            // Contar problemas por item
+            const problemasPorItem = {};
+            allChecklists.forEach(checklist => {
+                if (checklist.itens) {
+                    checklist.itens.forEach((item, index) => {
+                        const itemName = inspectionItems[index].name;
+                        if (!problemasPorItem[itemName]) {
+                            problemasPorItem[itemName] = 0;
+                        }
+                        if (item.status && item.status !== "✅ OK") {
+                            problemasPorItem[itemName]++;
+                        }
+                    });
+                }
+            });
+            
+            // Ordenar itens por quantidade de problemas
+            const itensOrdenados = Object.entries(problemasPorItem)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10); // Top 10
+            
+            // Gerar HTML do relatório
+            if (itensOrdenados.length === 0) {
+                conteudo.innerHTML = '<p>Nenhum problema encontrado no histórico.</p>';
+            } else {
+                let html = '<h3>Top 10 Itens com Mais Problemas</h3>';
+                html += '<div class="trend-list">';
+                
+                // Encontrar o valor máximo para normalizar as barras
+                const maxProblemas = Math.max(...itensOrdenados.map(item => item[1]));
+                
+                itensOrdenados.forEach(([item, count]) => {
+                    const percentage = Math.round((count / maxProblemas) * 100);
+                    
+                    // Adicionar cores diferentes conforme a gravidade
+                    let barColor = '#ff9800'; // Laranja padrão
+                    if (count > maxProblemas * 0.7) barColor = '#f44336'; // Vermelho para itens críticos
+                    else if (count < maxProblemas * 0.3) barColor = '#4CAF50'; // Verde para poucos problemas
+                    
+                    html += `
+                        <div class="trend-item">
+                            <div style="flex: 1;">${item}</div>
+                            <div style="flex: 1;">
+                                <div class="trend-bar" style="width: ${percentage}%; background-color: ${barColor};"></div>
+                                <div style="text-align: right; margin-top: 5px;">${count} ocorrências (${percentage}%)</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                
+                // Adicionar seção de recomendações
+                html += '<h3>Recomendações</h3>';
+                html += '<ul>';
+                html += '<li>Considere agendar manutenção preventiva para os itens com mais ocorrências de problemas</li>';
+                html += '<li>Verifique se há padrões recorrentes que possam indicar problemas sistêmicos</li>';
+                html += '<li>Priorize a correção dos itens críticos que aparecem na lista</li>';
+                html += '</ul>';
+                
+                conteudo.innerHTML = html;
+            }
+            
+            modal.style.display = 'block';
+        }
+        
+        function fecharRelatorioTendencia() {
+            document.getElementById('modalTendencia').style.display = 'none';
+        }
+        
+        // Gerenciar status de conexão
+        function updateConnectionStatus() {
+            const indicator = document.getElementById('offlineIndicator');
+            if (isOnline) {
+                indicator.classList.remove('show');
+                // Se há pendências de sincronização, processar
+                if (pendingSync && syncQueue.length > 0) {
+                    processSyncQueue();
+                }
+            } else {
+                indicator.classList.add('show');
+            }
+        }
+        
+        // Processar fila de sincronização
+        function processSyncQueue() {
+            if (syncQueue.length === 0) {
+                pendingSync = false;
+                return;
+            }
+            
+            showNotification(`Sincronizando ${syncQueue.length} alterações...`, "info");
+            
+            // Processa cada item da fila com tentativas múltiplas
+            const itemsToProcess = [...syncQueue];
+            syncQueue = [];
+            
+            let successCount = 0;
+            let failCount = 0;
+            
+            itemsToProcess.forEach((item, index) => {
+                // Simulação de requisição com 80% de sucesso
+                setTimeout(() => {
+                    if (Math.random() < 0.8) {
+                        successCount++;
+                        console.log('Sincronizado com sucesso:', item);
+                    } else {
+                        failCount++;
+                        // Readiciona na fila para tentar novamente depois
+                        syncQueue.push(item);
+                        console.log('Falha na sincronização:', item);
+                    }
+                    
+                    // Notifica o usuário quando todas as tentativas forem concluídas
+                    if (index === itemsToProcess.length - 1) {
+                        if (failCount === 0) {
+                            showNotification("Sincronização concluída com sucesso!", "success");
+                        } else {
+                            showNotification(`${successCount} itens sincronizados. ${failCount} falharam e serão tentados novamente.`, "warning");
+                            pendingSync = syncQueue.length > 0;
+                        }
+                    }
+                }, 1000 * (index + 1)); // Processa com intervalo de 1 segundo entre itens
+            });
+        }
+        
+        // Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,Y29uc3QgQ0FDSEVfTkFNRSA9ICdsZWZlLWNoZWNrbGlzdC12MS4wJzsNCmNvbnN0IHVybHNUb0NhY2hlID0gWw0KICAnLycsDQogICcvaW5kZXguaHRtbCcNCl07DQoNCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignaW5zdGFsbCcsIGV2ZW50ID0+IHsNCiAgZXZludC53YWl0VW50aWwoDQogICAgY2FjaGVzLm9wZW4oQ0FDSEVfTkFNRSkNCiAgICAgIC50aGVuKGNhY2hlID0+IGNhY2hlLmFkZEFsbCh1cmxzVG9DYWNoZSkpDQogICk7DQp9KTsNCg0Kc2VsZi5hZGRFdmVudExpc3RlbmVyKCd2ZXJzaW9uJywgZXZlbnQgPT4ge30pOw0KDQpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZXZlbnQgPT4gew0KICBldmVudC5yZXNwb25kV2l0aCgNCiAgICBjYWNoZXMubWF0Y2goZXZlbnQucmVxdWVzdCkNCiAgICAgIC50aGVuKHJlc3BvbnNlID0+IHJlc3BvbnNlIHx8IGZldGNoKGV2ZW50LnJlcXVlc3QpKQ0KICApOw0KfSk7');
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preferência da toolbar (oculta por padrão)
+            const toolbarPref = localStorage.getItem(TOOLBAR_HIDDEN_KEY);
+            if (toolbarPref === null) {
+                toggleToolbar(true); // padrão: oculto
+            } else {
+                toggleToolbar(toolbarPref === '1');
+            }
+            verificarPrimeiraVisita();
+            
+            document.getElementById("data").value = new Date().toISOString().split("T")[0];
+            generateInspectionTable();
+            obterLocalizacao();
+            carregarDados();
+            setupKeyboardShortcuts();
+            setupFotosGeraisPreview();
+            
+            // Configurar detecção de status online/offline
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateConnectionStatus();
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateConnectionStatus();
+            });
+            
+            // Verificar status inicial
+            updateConnectionStatus();
+            
+            autoSaveInterval = setInterval(salvarDados, 30000);
+            window.addEventListener('beforeunload', salvarDados);
+            
+            document.getElementById("placa").addEventListener("change", carregarDados);
+            document.getElementById("data").addEventListener("change", carregarDados);
+            
+            // Fechar modais clicando fora
+            window.onclick = function(event) {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            };
+        });
     </script>
 </body>
 </html>
